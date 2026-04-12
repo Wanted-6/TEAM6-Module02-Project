@@ -6,13 +6,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/meat4
     username: root
-    password: meat4
+    password: 3027
 
   jpa:
     show-sql: true
     database: mysql
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
 
     
     properties:
