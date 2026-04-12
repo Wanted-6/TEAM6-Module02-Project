@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>성적 조회</title>
+</head>
+<body>
+
+<h1>내 성적 조회</h1>
+
+<table th:if="${grades != null and !#lists.isEmpty(grades)}" border="1">
+    <thead>
+    <tr>
+        <th>과목명</th>
+        <th>출결 점수</th>
+        <th>과제 점수</th>
+        <th>시험 점수</th>
+        <th>태도 점수</th>
+        <th>총점</th>
+        <th>수료 여부</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="grade : ${grades}">
+        <td th:text="${grade.courseTitle}"></td>
+        <td th:text="${grade.attendanceScore}"></td>
+        <td th:text="${grade.assignmentScore}"></td>
+        <td th:text="${grade.examScore}"></td>
+        <td th:text="${grade.attitudeScore}"></td>
+        <td th:text="${grade.totalScore}"></td>
+        <td th:text="${grade.completionStatus}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<p th:if="${grades == null or #lists.isEmpty(grades)}">조회된 성적 정보가 없습니다.</p>
+
+</body>
+</html>
