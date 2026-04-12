@@ -38,7 +38,15 @@ public class GradeService {
                     .orElse(null);
 
             String courseTitle = (course != null) ? course.getTitle() : "과목명 없음";
-            String completionStatus = Boolean.TRUE.equals(grade.getIsPassed()) ? "수료" : "미수료";
+
+            String completionStatus;
+            if (grade.getIsPassed() == null) {
+                completionStatus = "미채점";
+            } else if (grade.getIsPassed()) {
+                completionStatus = "수료";
+            } else {
+                completionStatus = "미수료";
+            }
 
             GradeDTO gradeDTO = new GradeDTO(
                     grade.getGradeId(),

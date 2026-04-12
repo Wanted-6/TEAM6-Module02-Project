@@ -1,14 +1,8 @@
 package com.wanted.projectmodule2lms.domain.enrollment.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,10 +10,10 @@ import lombok.NoArgsConstructor;
 @Table(name = "Enrollment")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Enrollment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "enrollment_id")
     private Integer enrollmentId;
 
@@ -38,4 +32,12 @@ public class Enrollment {
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
+
+    public Enrollment(Integer memberId, Integer courseId) {
+        this.memberId = memberId;
+        this.courseId = courseId;
+        this.status = EnrollmentStatus.ENROLLED;
+        this.enrolledAt = LocalDateTime.now();
+        this.completedAt = null;
+    }
 }
