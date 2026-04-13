@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 메인</title>
+    <link rel="stylesheet" href="/css/board.css">
+</head>
+<body>
+<div class="container">
+    <div class="hero-box">
+        <span class="badge">Board</span>
+        <div class="page-title">LMS 게시판 허브</div>
+        <div class="page-desc">게시판 종류별 페이지로 이동하고 목록, 상세, 작성 화면을 바로 탐색할 수 있는 시작 화면입니다.</div>
+        <div class="action-row">
+            <a class="btn" href="/main">메인으로</a>
+            <a class="btn gray" href="/board/admin-notices">첫 화면 확인</a>
+        </div>
+    </div>
+
+    <div class="board-grid">
+        <section class="board-card">
+            <div class="card-header">
+                <h2>관리자 공지사항</h2>
+                <span class="badge">Admin</span>
+            </div>
+            <p>플랫폼 운영 공지와 주요 안내를 확인하는 게시판입니다.</p>
+            <div class="card-actions">
+                <a class="btn" href="/board/admin-notices">목록</a>
+                <a class="btn gray" href="/board/admin-notices/detail">상세</a>
+                <a class="btn green" href="/board/admin-notices/form">작성</a>
+            </div>
+        </section>
+
+        <section class="board-card">
+            <div class="card-header">
+                <h2>코스별 공지사항</h2>
+                <span class="badge">Course</span>
+            </div>
+            <p>코스별 운영 일정과 수업 관련 공지를 안내하는 게시판입니다.</p>
+            <div class="card-actions">
+                <a class="btn" href="/board/course-notices">목록</a>
+                <a class="btn gray" href="/board/course-notices/detail">상세</a>
+                <a class="btn green" href="/board/course-notices/form">작성</a>
+            </div>
+        </section>
+
+        <section class="board-card">
+            <div class="card-header">
+                <h2>코스 질문 게시판</h2>
+                <span class="badge">Q&amp;A</span>
+            </div>
+            <p>수강 중 생긴 질문과 답변 상태를 관리하는 게시판입니다.</p>
+            <div class="card-actions">
+                <a class="btn" href="/board/course-questions">목록</a>
+                <a class="btn gray" href="/board/course-questions/detail">상세</a>
+                <a class="btn green" href="/board/course-questions/form">작성</a>
+            </div>
+        </section>
+
+        <section class="board-card">
+            <div class="card-header">
+                <h2>자유게시판</h2>
+                <span class="badge">Free</span>
+            </div>
+            <p>커뮤니티 대화와 자유로운 소통을 위한 게시판입니다.</p>
+            <div class="card-actions">
+                <a class="btn" href="/board/free">목록</a>
+                <a class="btn gray" href="/board/free/detail">상세</a>
+                <a class="btn green" href="/board/free/form">작성</a>
+            </div>
+        </section>
+
+        <section class="board-card">
+            <div class="card-header">
+                <h2>섹션별 Q&amp;A</h2>
+                <span class="badge">Section</span>
+            </div>
+            <p>학습 섹션 단위로 질문과 답변을 정리하는 게시판입니다.</p>
+            <div class="card-actions">
+                <a class="btn" href="/board/section-qna">목록</a>
+                <a class="btn gray" href="/board/section-qna/detail">상세</a>
+                <a class="btn green" href="/board/section-qna/form">작성</a>
+            </div>
+        </section>
+    </div>
+
+    <div class="info-panel">
+        <h3>현재 연결된 흐름</h3>
+        <p>1. 메인 화면에서 게시판 허브로 이동</p>
+        <p>2. 허브 화면에서 게시판 종류 선택</p>
+        <p>3. 각 게시판에서 목록, 상세, 작성 화면 이동</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>코스 질문 게시판 목록</title>
+    <link rel="stylesheet" href="/css/board.css">
+</head>
+<body>
+<div class="container">
+    <div class="hero-box">
+        <div class="breadcrumb"><a href="/main">메인</a> / <a href="/board">게시판</a> / 코스 질문 게시판 / 목록</div>
+        <span class="badge">Course Q&amp;A</span>
+        <div class="page-title">코스 질문 게시판 목록</div>
+        <div class="page-desc">질문 상태와 답변 진행 여부를 확인하는 목록 화면입니다.</div>
+        <div class="action-row">
+            <a class="btn" href="/board/course-questions/detail">샘플 상세 보기</a>
+            <a class="btn green" href="/board/course-questions/form">질문 작성</a>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>상태</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>등록일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><span class="badge">답변대기</span></td>
+                <td><a href="/board/course-questions/detail">JPA 연관관계 매핑 질문입니다.</a></td>
+                <td>수강생 A</td>
+                <td>2026-04-12</td>
+            </tr>
+            <tr>
+                <td><span class="badge">답변완료</span></td>
+                <td><a href="/board/course-questions/detail">REST Docs 설정 오류 해결법</a></td>
+                <td>수강생 B</td>
+                <td>2026-04-11</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
