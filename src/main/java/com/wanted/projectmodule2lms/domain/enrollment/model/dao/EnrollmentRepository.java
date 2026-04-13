@@ -3,9 +3,11 @@ package com.wanted.projectmodule2lms.domain.enrollment.model.dao;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.EnrollmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer> {
 

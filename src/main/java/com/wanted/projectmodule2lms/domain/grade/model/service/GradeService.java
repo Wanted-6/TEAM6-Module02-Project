@@ -8,6 +8,7 @@ import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeUpdateDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GradeService {
-
+    private final MemberRepository memberRepository;
     private final GradeRepository gradeRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
@@ -50,10 +51,13 @@ public class GradeService {
             } else {
                 completionStatus = "미수료";
             }
-
+            String studentName = memberRepository.findById(enrollment.getMemberId())
+                    .map(member -> member.getName())
+                    .orElse("이름 없음");
             GradeDTO gradeDTO = new GradeDTO(
                     grade.getGradeId(),
                     grade.getEnrollmentId(),
+                    studentName,
                     courseTitle,
                     grade.getAttendanceScore(),
                     grade.getAssignmentScore(),
@@ -100,5 +104,54 @@ public class GradeService {
                 totalScore,
                 isPassed
         );
+    }
+
+    public List<GradeDTO> findGradesByInstructorId(Integer instructorId) {
+
+        List<Course> courses = courseRepository.findByInstructorId(instructorId);
+        List<GradeDTO> gradeDTOList = new ArrayList<>();
+
+        for (Course course : courses) {
+            List<Enrollment> enrollments = enrollmentRepository.findByCourseId(course.getCourseId());
+
+            for (Enrollment enrollment : enrollments) {
+                Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                        .orElse(null);
+
+                if (grade == null) {
+                    continue;
+                }
+
+                String studentName = memberRepository.findById(enrollment.getMemberId())
+                        .map(member -> member.getName())
+                        .orElse("이름 없음");
+
+                String completionStatus;
+                if (grade.getIsPassed() == null) {
+                    completionStatus = "미채점";
+                } else if (grade.getIsPassed()) {
+                    completionStatus = "수료";
+                } else {
+                    completionStatus = "미수료";
+                }
+
+                GradeDTO gradeDTO = new GradeDTO(
+                        grade.getGradeId(),
+                        grade.getEnrollmentId(),
+                        studentName,
+                        course.getTitle(),
+                        grade.getAttendanceScore(),
+                        grade.getAssignmentScore(),
+                        grade.getExamScore(),
+                        grade.getAttitudeScore(),
+                        grade.getTotalScore(),
+                        completionStatus
+                );
+
+                gradeDTOList.add(gradeDTO);
+            }
+        }
+
+        return gradeDTOList;
     }
 }
