@@ -1,0 +1,50 @@
+name: "Feature"
+description: "새로운 기능 구현 이슈 템플릿"
+title: "[FEATURE] "
+labels: ["feature"]
+assignees: []
+
+body:
+  - type: textarea
+    id: feature
+    attributes:
+      label: "📌 구현할 기능"
+      placeholder: |
+        예)
+        - 로그인 기능
+        - 강의 등록 기능
+        - 출결 조회 기능
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "✨ 기능 설명"
+      placeholder: |
+        - 무엇을 만드는지
+        - 왜 필요한지
+        - 어떤 방식으로 동작하는지
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: "✅ 작업 내용"
+      placeholder: |
+        - [ ] 작업 1
+        - [ ] 작업 2
+        - [ ] 작업 3
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "📎 참고 자료"
+      placeholder: |
+        - 참고 링크:
+        - 관련 문서:
+
+  - type: input
+    id: duration
+    attributes:
+      label: "⏰ 예상 소요 시간"
+      placeholder: "예) 2시간, 반나절, 1일, 3일"
