@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>코스 질문 게시판 상세</title>
+    <link rel="stylesheet" href="/css/board.css">
+</head>
+<body>
+<div class="container">
+    <div class="hero-box">
+        <div class="breadcrumb"><a href="/main">메인</a> / <a href="/board">게시판</a> / <a href="/board/course-questions">코스 질문 게시판</a> / 상세</div>
+        <span class="badge">Question Detail</span>
+        <div class="page-title">JPA 연관관계 매핑 질문입니다.</div>
+        <div class="page-desc">질문 본문과 답변 흐름을 확인하는 상세 화면입니다.</div>
+        <div class="action-row">
+            <a class="btn gray" href="/board/course-questions">목록으로</a>
+            <a class="btn green" href="/board/course-questions/form">질문 작성</a>
+        </div>
+    </div>
+
+    <div class="detail-box">
+        <div class="meta">작성자 수강생 A | 등록일 2026-04-12 | 상태 답변대기</div>
+        <div class="content">
+            양방향 연관관계를 설정했는데 저장 시 외래키가 null로 들어갑니다.<br>
+            어느 쪽에서 주인 설정을 확인해야 하는지 궁금합니다.
+        </div>
+    </div>
+
+    <div class="comment-box">
+        <h2 class="page-section-title">답변 예시</h2>
+        <div class="comment-item">
+            <div class="comment-author">튜터</div>
+            <div class="comment-text">연관관계의 주인 필드가 `mappedBy` 없이 실제 외래키를 관리하는지 먼저 확인해 보세요.</div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
