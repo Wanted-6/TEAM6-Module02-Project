@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
+</head>
+<body>
+<div class="page-wrapper">
+    <h1 class="page-title">게시글 수정</h1>
+    <p class="page-desc">작성자가 자신의 게시글을 수정하는 화면입니다.</p>
+
+    <div class="box">
+        <form>
+            <div class="form-row">
+                <label for="postId">게시글 ID</label>
+                <input id="postId" name="postId" type="number" value="4" readonly>
+            </div>
+
+            <div class="form-row">
+                <label for="title">제목</label>
+                <input id="title" name="title" type="text" value="2주차 섹션 질문">
+            </div>
+
+            <div class="form-row">
+                <label for="content">내용</label>
+                <textarea id="content" name="content">이번 섹션 범위가 어디까지인가요?</textarea>
+            </div>
+
+            <div class="form-row">
+                <label for="answerStatus">답변 상태</label>
+                <select id="answerStatus" name="answerStatus">
+                    <option selected>PENDING</option>
+                    <option>ANSWERED</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn">수정</button>
+                <a class="btn gray" href="/board/detail?postId=4">상세로</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

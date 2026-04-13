@@ -2,44 +2,39 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>코스 공지사항 목록</title>
-    <link rel="stylesheet" href="/css/board.css">
+    <title>코스 공지 목록</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
 </head>
 <body>
-<div class="container">
-    <div class="hero-box">
-        <div class="breadcrumb"><a href="/main">메인</a> / <a href="/board">게시판</a> / 코스 공지사항 / 목록</div>
-        <span class="badge">Course Notice</span>
-        <div class="page-title">코스 공지사항 목록</div>
-        <div class="page-desc">코스 운영 일정과 강의별 안내를 보여주는 목록 화면입니다.</div>
-        <div class="action-row">
-            <a class="btn" href="/board/course-notices/detail">샘플 상세 보기</a>
-            <a class="btn green" href="/board/course-notices/form">공지 작성</a>
+<div class="page-wrapper">
+    <h1 class="page-title">코스 공지 목록</h1>
+    <p class="page-desc">강사가 코스 단위로 공지를 작성하고 수강생이 확인하는 게시판입니다.</p>
+
+    <div class="box">
+        <div class="button-group">
+            <a class="btn" href="/board/regist">공지 등록</a>
+            <a class="btn gray" href="/board/list">게시판 메인</a>
         </div>
     </div>
 
-    <div class="table-box">
+    <div class="box">
         <table class="table">
             <thead>
             <tr>
+                <th>번호</th>
                 <th>코스</th>
                 <th>제목</th>
                 <th>작성자</th>
-                <th>등록일</th>
+                <th>조회수</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>백엔드 6기</td>
-                <td><a href="/board/course-notices/detail">3주차 과제 제출 일정 안내</a></td>
-                <td>튜터</td>
-                <td>2026-04-12</td>
-            </tr>
-            <tr>
-                <td>프론트엔드 4기</td>
-                <td><a href="/board/course-notices/detail">실시간 세션 링크 공지</a></td>
-                <td>튜터</td>
-                <td>2026-04-11</td>
+                <td>2</td>
+                <td>Spring Boot</td>
+                <td><a href="/board/detail?postId=2">Spring Boot 공지</a></td>
+                <td>강사 11</td>
+                <td>95</td>
             </tr>
             </tbody>
         </table>

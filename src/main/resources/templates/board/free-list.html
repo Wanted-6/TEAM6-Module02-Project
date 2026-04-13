@@ -3,43 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <title>자유게시판 목록</title>
-    <link rel="stylesheet" href="/css/board.css">
+    <link rel="stylesheet" href="/css/board/crud.css">
 </head>
 <body>
-<div class="container">
-    <div class="hero-box">
-        <div class="breadcrumb"><a href="/main">메인</a> / <a href="/board">게시판</a> / 자유게시판 / 목록</div>
-        <span class="badge">Free Board</span>
-        <div class="page-title">자유게시판 목록</div>
-        <div class="page-desc">커뮤니티 글을 자유롭게 확인하는 목록 화면입니다.</div>
-        <div class="action-row">
-            <a class="btn" href="/board/free/detail">샘플 상세 보기</a>
-            <a class="btn green" href="/board/free/form">글 작성</a>
+<div class="page-wrapper">
+    <h1 class="page-title">자유게시판 목록</h1>
+    <p class="page-desc">학생과 강사가 자유롭게 소통하는 게시판입니다. 댓글과 대댓글 중심으로 운영됩니다.</p>
+
+    <div class="box">
+        <div class="button-group">
+            <a class="btn" href="/board/regist">글쓰기</a>
+            <a class="btn gray" href="/board/list">게시판 메인</a>
         </div>
     </div>
 
-    <div class="table-box">
+    <div class="box">
         <table class="table">
             <thead>
             <tr>
-                <th>카테고리</th>
+                <th>번호</th>
                 <th>제목</th>
                 <th>작성자</th>
-                <th>등록일</th>
+                <th>댓글수</th>
+                <th>조회수</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>잡담</td>
-                <td><a href="/board/free/detail">프로젝트 회고 같이 하실 분?</a></td>
-                <td>수강생 C</td>
-                <td>2026-04-12</td>
-            </tr>
-            <tr>
-                <td>정보공유</td>
-                <td><a href="/board/free/detail">유용한 테스트 자료 공유합니다.</a></td>
-                <td>수강생 D</td>
-                <td>2026-04-10</td>
+                <td>3</td>
+                <td><a href="/board/detail?postId=3">오늘 자유게시판 글</a></td>
+                <td>학생 2</td>
+                <td>1</td>
+                <td>12</td>
             </tr>
             </tbody>
         </table>

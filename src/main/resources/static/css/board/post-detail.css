@@ -1,0 +1,127 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f5f7fb;
+    color: #222;
+    font-family: Arial, sans-serif;
+}
+
+.detail-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.detail-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.post-detail-card {
+    background: #fff;
+    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.post-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.badge-group,
+.action-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.type-badge,
+.status-badge,
+.secret-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.type-badge {
+    background: #e5edff;
+    color: #1d4ed8;
+}
+
+.status-badge {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.secret-badge {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.hidden {
+    display: none;
+}
+
+.action-group button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 10px;
+    background: #111827;
+    color: #fff;
+    cursor: pointer;
+}
+
+.action-group .danger {
+    background: #dc2626;
+}
+
+.post-title {
+    margin: 0 0 12px;
+    font-size: 30px;
+}
+
+.post-meta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+
+.post-scope-info {
+    margin-bottom: 18px;
+    color: #374151;
+    font-size: 14px;
+}
+
+.post-content {
+    min-height: 180px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    font-size: 16px;
+}

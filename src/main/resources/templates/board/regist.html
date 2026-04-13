@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 등록</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
+</head>
+<body>
+<div class="page-wrapper">
+    <h1 class="page-title">게시글 등록</h1>
+    <p class="page-desc">게시판 종류에 따라 공지, 자유게시글, Q&amp;A를 등록하는 화면입니다.</p>
+
+    <div class="box">
+        <form>
+            <div class="form-row">
+                <label for="postType">게시판 종류</label>
+                <select id="postType" name="postType">
+                    <option>ADMIN_NOTICE</option>
+                    <option>COURSE_NOTICE</option>
+                    <option>FREE</option>
+                    <option>SECTION_QNA</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="memberId">작성자 ID</label>
+                <input id="memberId" name="memberId" type="number" value="1">
+            </div>
+
+            <div class="form-row">
+                <label for="courseId">코스 ID</label>
+                <input id="courseId" name="courseId" type="number" placeholder="코스 공지 또는 섹션 Q&A인 경우 입력">
+            </div>
+
+            <div class="form-row">
+                <label for="sectionId">섹션 ID</label>
+                <input id="sectionId" name="sectionId" type="number" placeholder="섹션 Q&A인 경우 입력">
+            </div>
+
+            <div class="form-row">
+                <label for="title">제목</label>
+                <input id="title" name="title" type="text">
+            </div>
+
+            <div class="form-row">
+                <label for="content">내용</label>
+                <textarea id="content" name="content"></textarea>
+            </div>
+
+            <div class="form-row">
+                <label for="isSecret">비밀글 여부</label>
+                <select id="isSecret" name="isSecret">
+                    <option>false</option>
+                    <option>true</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn">등록</button>
+                <a class="btn gray" href="/board/list">취소</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

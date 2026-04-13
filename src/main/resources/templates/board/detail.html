@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
+</head>
+<body>
+<div class="page-wrapper">
+    <h1 class="page-title">게시글 상세</h1>
+    <p class="page-desc">게시글 본문과 댓글, 대댓글, Q&amp;A 답변 상태를 함께 보는 상세 화면입니다.</p>
+
+    <div class="box">
+        <div class="meta">
+            게시글 번호: <span th:text="${board.postId}">4</span><br>
+            게시판 종류: <span th:text="${board.postType}">SECTION_QNA</span><br>
+            작성자 ID: <span th:text="${board.memberId}">1</span><br>
+            비밀글 여부: <span th:text="${board.isSecret} ? 'Y' : 'N'">Y</span><br>
+            답변 상태:
+            <span th:text="${board.answerStatus != null ? board.answerStatus : '-'}">PENDING</span>
+        </div>
+
+        <div class="form-row">
+            <label>제목</label>
+            <div class="content-box" th:text="${board.title}">2주차 섹션 질문</div>
+        </div>
+
+        <div class="form-row">
+            <label>내용</label>
+            <div class="content-box" th:text="${board.content}">이번 섹션 범위가 어디까지인가요?</div>
+        </div>
+
+        <div class="button-group">
+            <a class="btn" th:href="@{/board/modify(postId=${board.postId})}">수정하기</a>
+            <a class="btn red" th:href="@{/board/delete(postId=${board.postId})}">삭제하기</a>
+            <a class="btn gray"
+               th:if="${board.postType.name() == 'ADMIN_NOTICE'}"
+               href="/board/admin-notices">목록으로</a>
+            <a class="btn gray"
+               th:if="${board.postType.name() == 'COURSE_NOTICE'}"
+               href="/board/course-notices">목록으로</a>
+            <a class="btn gray"
+               th:if="${board.postType.name() == 'FREE'}"
+               href="/board/free">목록으로</a>
+            <a class="btn gray"
+               th:if="${board.postType.name() == 'SECTION_QNA'}"
+               href="/board/section-qna">목록으로</a>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2 class="section-title">댓글 / 답변</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>구분</th>
+                <th>작성자</th>
+                <th>내용</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>댓글</td>
+                <td>강사 11</td>
+                <td>이번 섹션 범위는 3장까지입니다.</td>
+            </tr>
+            <tr>
+                <td>대댓글</td>
+                <td>학생 1</td>
+                <td>감사합니다!</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
