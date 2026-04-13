@@ -6,23 +6,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class GradeController {
+@RequestMapping("/instructor/grades")
+public class InstructorGradeController {
 
     private final GradeService gradeService;
 
-    @GetMapping("/grades")
-    public String findMyGrades(Model model) {
-
-        Integer memberId = 1; // 임시 로그인 사용자
-        List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId);
-
+    @GetMapping
+    public String findGradesByInstructor(Model model) {
+        Integer instructorId = 12; // 로그인 가정
+        List<GradeDTO> grades = gradeService.findGradesByInstructorId(instructorId);
         model.addAttribute("grades", grades);
-
-        return "student/grade/gradeview";
+        return "instructor/grade/list";
     }
 }
