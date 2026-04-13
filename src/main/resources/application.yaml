@@ -1,7 +1,6 @@
 spring:
   application:
-    name: projectmodule2lms
-
+    name: project-module2-lms
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
 <<<<<<< HEAD

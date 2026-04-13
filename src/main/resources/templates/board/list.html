@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 메인</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
+</head>
+<body>
+<div class="page-wrapper">
+    <h1 class="page-title">게시판 메인</h1>
+    <p class="page-desc">LMS 게시판 기능의 시작 화면입니다. 게시판 종류별로 이동하고 공통 CRUD 화면으로도 진입할 수 있습니다.</p>
+
+    <div class="box">
+        <h2 class="section-title">게시판 종류</h2>
+        <div class="card-grid">
+            <a class="feature-card" href="/board/admin-notices">
+                <h3>관리자 공지</h3>
+                <p>관리자가 작성하고 전체 사용자가 조회하는 공지 게시판입니다.</p>
+            </a>
+            <a class="feature-card" href="/board/course-notices">
+                <h3>코스 공지</h3>
+                <p>강사가 코스 단위로 공지를 작성하고 수강생이 확인하는 게시판입니다.</p>
+            </a>
+            <a class="feature-card" href="/board/free">
+                <h3>자유게시판</h3>
+                <p>학생과 강사가 자유롭게 글과 댓글을 남길 수 있는 커뮤니티 공간입니다.</p>
+            </a>
+            <a class="feature-card" href="/board/section-qna">
+                <h3>섹션 Q&amp;A</h3>
+                <p>학생 질문과 강사 답변, 비밀글, 답변 상태를 관리하는 게시판입니다.</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="box">
+        <h2 class="section-title">공통 기능 바로가기</h2>
+        <div class="button-group">
+            <a class="btn" href="/board/regist">게시글 등록</a>
+            <a class="btn" href="/board/detail?postId=4">게시글 상세</a>
+            <a class="btn" href="/board/modify?postId=4">게시글 수정</a>
+            <a class="btn red" href="/board/delete?postId=4">게시글 삭제</a>
+            <a class="btn gray" href="/main">메인으로</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

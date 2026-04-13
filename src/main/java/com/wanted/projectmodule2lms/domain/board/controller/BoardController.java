@@ -1,88 +1,93 @@
 package com.wanted.projectmodule2lms.domain.board.controller;
 
+import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
+import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
+import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
+@RequestMapping("/board")
 public class BoardController {
 
-    @GetMapping({"/board", "/board/", "/board.html"})
-    public String boardPage() {
-        return "board/board";
+    private final BoardService boardService;
+
+    @GetMapping({"", "/"})
+    public String boardHomePage() {
+        return "board/list";
     }
 
-    @GetMapping({"/board/admin-notices", "/board/admin-notices/list"})
-    public String adminNoticeListPage() {
-        return "board/admin-notice-list";
+    @GetMapping("/list")
+    public String boardListPage() {
+        return "board/list";
     }
 
-    @GetMapping("/board/admin-notices/detail")
-    public String adminNoticeDetailPage() {
-        return "board/admin-notice-detail";
-    }
 
-    @GetMapping("/board/admin-notices/form")
-    public String adminNoticeFormPage() {
-        return "board/admin-notice-form";
-    }
-
-    @GetMapping({"/board/course-notices", "/board/course-notices/list"})
+    @GetMapping("/course-notices")
     public String courseNoticeListPage() {
         return "board/course-notice-list";
     }
 
-    @GetMapping("/board/course-notices/detail")
-    public String courseNoticeDetailPage() {
-        return "board/course-notice-detail";
-    }
-
-    @GetMapping("/board/course-notices/form")
-    public String courseNoticeFormPage() {
-        return "board/course-notice-form";
-    }
-
-    @GetMapping({"/board/course-questions", "/board/course-questions/list"})
-    public String courseQuestionListPage() {
-        return "board/course-question-list";
-    }
-
-    @GetMapping("/board/course-questions/detail")
-    public String courseQuestionDetailPage() {
-        return "board/course-question-detail";
-    }
-
-    @GetMapping("/board/course-questions/form")
-    public String courseQuestionFormPage() {
-        return "board/course-question-form";
-    }
-
-    @GetMapping({"/board/free", "/board/free/list"})
+    @GetMapping("/free")
     public String freeListPage() {
         return "board/free-list";
     }
 
-    @GetMapping("/board/free/detail")
-    public String freeDetailPage() {
-        return "board/free-detail";
-    }
-
-    @GetMapping("/board/free/form")
-    public String freeFormPage() {
-        return "board/free-form";
-    }
-
-    @GetMapping({"/board/section-qna", "/board/section-qna/list"})
+    @GetMapping("/section-qna")
     public String sectionQnaListPage() {
         return "board/section-qna-list";
     }
 
-    @GetMapping("/board/section-qna/detail")
-    public String sectionQnaDetailPage() {
-        return "board/section-qna-detail";
+    @GetMapping("/detail")
+    public String boardDetailPage(@RequestParam Integer postId, Model model) {
+        BoardDTO board = boardService.findBoardById(postId);
+        model.addAttribute("board", board);
+        return "board/detail";
     }
 
-    @GetMapping("/board/section-qna/form")
-    public String sectionQnaFormPage() {
-        return "board/section-qna-form";
+
+    @GetMapping("/regist")
+    public String boardRegistPage() {
+        return "board/regist";
+    }
+
+    @GetMapping("/modify")
+    public String boardModifyPage(@RequestParam(required = false) Integer postId) {
+        return "board/modify";
+    }
+
+    @GetMapping("/delete")
+    public String boardDeletePage(@RequestParam(required = false) Integer postId) {
+        return "board/delete";
+    }
+
+    // 이전 경로 호환
+    @GetMapping({"/posts", "/post-list.html"})
+    public String postListCompatPage() {
+        return "redirect:/board/list";
+    }
+
+    @GetMapping({"/posts/detail", "/post-detail.html"})
+    public String postDetailCompatPage(@RequestParam(required = false) Integer postId) {
+        return "redirect:/board/detail";
+    }
+
+    @GetMapping({"/posts/write", "/posts/form", "/post-form.html"})
+    public String postWriteCompatPage() {
+        return "redirect:/board/regist";
+    }
+
+    @GetMapping("/admin-notices")
+    public String adminNoticeListPage(Model model) {
+        List<BoardDTO> boardList = boardService.findBoardByPostType(BoardType.ADMIN_NOTICE);
+        model.addAttribute("boardList", boardList);
+        return "board/admin-notice-list";
     }
 }

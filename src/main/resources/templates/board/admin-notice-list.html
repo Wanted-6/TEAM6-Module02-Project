@@ -2,71 +2,46 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>관리자 공지사항 목록</title>
-    <link rel="stylesheet" href="/css/board.css">
+    <title>관리자 공지 목록</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
 </head>
 <body>
-<div class="container">
-    <div class="hero-box">
-        <div class="breadcrumb"><a href="/main">메인</a> / <a href="/board">게시판</a> / 관리자 공지사항 / 목록</div>
-        <span class="badge">Admin Notice</span>
-        <div class="page-title">관리자 공지사항 목록</div>
-        <div class="page-desc">플랫폼 운영 공지와 필수 안내를 확인하는 목록 화면입니다.</div>
-        <div class="action-row">
-            <a class="btn" href="/board/admin-notices/detail">샘플 상세 보기</a>
-            <a class="btn green" href="/board/admin-notices/form">공지 작성</a>
+<div class="page-wrapper">
+    <h1 class="page-title">관리자 공지 목록</h1>
+    <p class="page-desc">관리자가 작성하고 전체 사용자가 조회 가능한 공지 게시판입니다.</p>
+
+    <div class="box">
+        <div class="button-group">
+            <a class="btn" href="/board/regist">공지 등록</a>
+            <a class="btn gray" href="/board/list">게시판 메인</a>
         </div>
     </div>
 
-    <div class="section-grid">
-        <div class="table-box">
-            <div class="top-box">
-                <h2 class="page-section-title">공지 목록</h2>
-                <span class="badge">3건</span>
-            </div>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>번호</th>
-                    <th>제목</th>
-                    <th>작성자</th>
-                    <th>등록일</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>3</td>
-                    <td><a href="/board/admin-notices/detail">[필독] 플랫폼 점검 안내</a></td>
-                    <td>관리자</td>
-                    <td>2026-04-12</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td><a href="/board/admin-notices/detail">출석 반영 기준 공지</a></td>
-                    <td>관리자</td>
-                    <td>2026-04-10</td>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td><a href="/board/admin-notices/detail">과제 제출 정책 변경</a></td>
-                    <td>관리자</td>
-                    <td>2026-04-08</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="filter-box">
-            <h2 class="page-section-title">화면 포인트</h2>
-            <div class="mini-card">
-                <strong>목표</strong>
-                <p class="section-text">관리자 공지를 최신순으로 확인하고 상세 화면으로 자연스럽게 이동합니다.</p>
-            </div>
-            <div class="mini-card">
-                <strong>다음 흐름</strong>
-                <p class="section-text">상세에서 수정 또는 목록 복귀, 작성 화면 이동을 연결할 수 있습니다.</p>
-            </div>
-        </div>
+    <div class="box">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>조회수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="board : ${boardList}">
+                <td th:text="${board.postId}">1</td>
+                <td>
+                    <a th:href="@{/board/detail(postId=${board.postId})}"
+                       th:text="${board.title}">공지 제목</a>
+                </td>
+                <td th:text="${board.memberId}">14</td>
+                <td th:text="${board.viewCount}">120</td>
+            </tr>
+            <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
+                <td colspan="4">조회된 공지가 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 </body>

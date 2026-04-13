@@ -1,0 +1,175 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    color: #222;
+}
+
+.page-wrapper {
+    width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+}
+
+.page-title {
+    margin: 0 0 10px;
+    font-size: 30px;
+}
+
+.page-desc {
+    margin: 0 0 24px;
+    color: #666;
+}
+
+.box {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f0f0f0;
+}
+
+.form-row {
+    margin-bottom: 16px;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.form-row textarea {
+    min-height: 180px;
+    resize: vertical;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: #2f5bea;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn.gray {
+    background-color: #666;
+}
+
+.btn.red {
+    background-color: #c0392b;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.search-bar input,
+.search-bar select {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.meta {
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.content-box {
+    min-height: 160px;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+    background-color: #fafafa;
+    border-radius: 6px;
+    line-height: 1.6;
+}
+
+.section-title {
+    margin: 0 0 14px;
+    font-size: 22px;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.feature-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.feature-card h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.feature-card p {
+    margin: 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+.link-list {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
