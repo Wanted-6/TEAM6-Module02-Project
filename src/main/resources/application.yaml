@@ -1,12 +1,12 @@
 spring:
   application:
-    name: projectmodule2lms
+    name: project-module2-lms
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/meat4
-    username: root
-    password: meat4
+    url: jdbc:mysql://localhost:3306/menudb
+    username: wanted
+    password: wanted
 
   jpa:
     show-sql: true
