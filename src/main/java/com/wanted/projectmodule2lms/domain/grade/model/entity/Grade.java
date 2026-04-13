@@ -47,4 +47,20 @@ public class Grade {
         this.totalScore = null;
         this.isPassed = null;
     }
+
+    public void updateScore(
+            BigDecimal attendanceScore,
+            BigDecimal assignmentScore,
+            BigDecimal examScore,
+            BigDecimal attitudeScore,
+            BigDecimal totalScore,
+            Boolean isPassed
+    ) {
+        this.attendanceScore = attendanceScore;
+        this.assignmentScore = assignmentScore;
+        this.examScore = examScore;
+        this.attitudeScore = attitudeScore;
+        this.totalScore = totalScore;
+        this.isPassed = isPassed;
+    }
 }
