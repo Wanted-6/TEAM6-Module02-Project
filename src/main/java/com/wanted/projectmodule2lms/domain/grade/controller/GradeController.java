@@ -23,6 +23,6 @@ public class GradeController {
 
         model.addAttribute("grades", grades);
 
-        return "menu/grade";
+        return "student/grade/gradeview";
     }
 }

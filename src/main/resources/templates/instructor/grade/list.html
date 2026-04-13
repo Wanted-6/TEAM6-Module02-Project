@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>수강생 성적 목록</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h2>수강생 성적 목록</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>학생 이름</th>
+        <th>강의명</th>
+        <th>출석 점수</th>
+        <th>과제 점수</th>
+        <th>시험 점수</th>
+        <th>태도 점수</th>
+        <th>총점</th>
+        <th>이수 여부</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="grade : ${grades}">
+        <td th:text="${grade.studentName}">학생 이름</td>
+        <td th:text="${grade.courseTitle}">강의명</td>
+        <td th:text="${grade.attendanceScore}">출석 점수</td>
+        <td th:text="${grade.assignmentScore}">과제 점수</td>
+        <td th:text="${grade.examScore}">시험 점수</td>
+        <td th:text="${grade.attitudeScore}">태도 점수</td>
+        <td th:text="${grade.totalScore}">총점</td>
+        <td th:text="${grade.completionStatus}">이수 여부</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

@@ -15,13 +15,12 @@ public class GradeDTO {
 
     private Integer gradeId;
     private Integer enrollmentId;
+    private String studentName;
     private String courseTitle;
-
     private BigDecimal attendanceScore;
     private BigDecimal assignmentScore;
     private BigDecimal examScore;
     private BigDecimal attitudeScore;
     private BigDecimal totalScore;
-
     private String completionStatus;
 }
