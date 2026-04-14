@@ -22,13 +22,4 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     // 특정 상태의 수강 목록 조회
     List<Enrollment> findByStatus(EnrollmentStatus status);
-    // 중복 신청 여부 확인
-    boolean existsByMemberIdAndCourseId(Integer memberId, Integer courseId);
-
-    // 학생의 현재 수강 중 강의 수
-    long countByMemberIdAndStatus(Integer memberId, EnrollmentStatus status);
-
-    // 특정 강의의 현재 수강 신청 수
-    long countByCourseIdAndStatus(Integer courseId, EnrollmentStatus status);
 }
-

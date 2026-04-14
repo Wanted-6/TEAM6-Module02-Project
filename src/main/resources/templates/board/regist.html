@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="ko">
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>게시글 등록</title>
@@ -7,60 +7,91 @@
 </head>
 <body>
 <div class="page-wrapper">
-    <h1 class="page-title">게시글 등록</h1>
-    <p class="page-desc">게시판 종류에 따라 공지, 자유게시글, Q&amp;A를 등록하는 화면입니다.</p>
+    <div class="top-utility">
+        <div class="role-panel">
+            <p class="role-label">현재 역할 전환</p>
+            <div class="role-buttons">
+                <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
+                <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
+                <button class="role-btn" data-role="STUDENT" type="button">학생</button>
+            </div>
+            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <p class="permission-note">현재 들어온 게시판 문맥에 맞게 글 종류가 자동으로 고정됩니다.</p>
+        </div>
+        <div class="page-main">
+            <h1 class="page-title">게시글 등록</h1>
+            <p class="page-desc">게시판 종류는 현재 페이지 기준으로 고정되며, 필요한 필드만 입력하면 됩니다.</p>
+        </div>
+    </div>
 
     <div class="box">
-        <form>
+        <form method="post" action="/board/regist">
+            <input type="hidden" name="postType" th:value="${boardType}">
+            <input type="hidden" name="currentRole" data-current-role-input>
+            <input type="hidden" name="currentMemberId" data-current-member-id-input>
+
             <div class="form-row">
-                <label for="postType">게시판 종류</label>
-                <select id="postType" name="postType">
-                    <option>ADMIN_NOTICE</option>
-                    <option>COURSE_NOTICE</option>
-                    <option>FREE</option>
-                    <option>SECTION_QNA</option>
-                </select>
+                <label>게시판 종류</label>
+                <div class="context-badge" th:text="${boardType}">FREE</div>
             </div>
 
             <div class="form-row">
                 <label for="memberId">작성자 ID</label>
-                <input id="memberId" name="memberId" type="number" value="1">
+                <input id="memberId" name="memberId" type="number" value="1" readonly data-sync-current-member>
             </div>
 
-            <div class="form-row">
-                <label for="courseId">코스 ID</label>
-                <input id="courseId" name="courseId" type="number" placeholder="코스 공지 또는 섹션 Q&A인 경우 입력">
+            <div class="form-row" th:if="${boardType.name() == 'COURSE_NOTICE' or boardType.name() == 'SECTION_QNA'}">
+                <label for="courseId">코스</label>
+                <select id="courseId" name="courseId">
+                    <option value="">코스를 선택하세요</option>
+                    <option th:each="course : ${courses}"
+                            th:value="${course.courseId}"
+                            th:text="${course.title}"
+                            th:selected="${selectedCourseId != null and selectedCourseId == course.courseId}">Spring Boot 입문</option>
+                </select>
             </div>
 
-            <div class="form-row">
+            <div class="form-row" th:if="${boardType.name() == 'SECTION_QNA'}">
                 <label for="sectionId">섹션 ID</label>
-                <input id="sectionId" name="sectionId" type="number" placeholder="섹션 Q&A인 경우 입력">
+                <input id="sectionId" name="sectionId" type="number" th:value="${selectedSectionId}" placeholder="섹션 Q&A에 등록할 섹션 ID를 입력하세요">
             </div>
 
             <div class="form-row">
                 <label for="title">제목</label>
-                <input id="title" name="title" type="text">
+                <input id="title" name="title" type="text" required>
             </div>
 
             <div class="form-row">
                 <label for="content">내용</label>
-                <textarea id="content" name="content"></textarea>
+                <textarea id="content" name="content" required></textarea>
             </div>
 
-            <div class="form-row">
+            <div class="form-row" th:if="${boardType.name() == 'SECTION_QNA'}">
                 <label for="isSecret">비밀글 여부</label>
                 <select id="isSecret" name="isSecret">
-                    <option>false</option>
-                    <option>true</option>
+                    <option value="false">공개 질문</option>
+                    <option value="true">비밀 질문</option>
                 </select>
+            </div>
+
+            <div class="box" style="margin-top: 16px;">
+                <p class="meta">입력 기준</p>
+                <p th:if="${boardType.name() == 'ADMIN_NOTICE'}">관리자 공지는 관리자만 등록할 수 있고, 코스/섹션 정보 없이 저장됩니다.</p>
+                <p th:if="${boardType.name() == 'COURSE_NOTICE'}">코스 공지는 코스를 선택해 등록하며 섹션 정보는 사용하지 않습니다.</p>
+                <p th:if="${boardType.name() == 'FREE'}">자유게시판은 제목과 내용만 입력하면 됩니다.</p>
+                <p th:if="${boardType.name() == 'SECTION_QNA'}">섹션 Q&amp;A는 코스, 섹션 ID, 비밀글 여부를 함께 입력하며 답변 상태는 자동으로 PENDING 처리됩니다.</p>
             </div>
 
             <div class="button-group">
                 <button type="submit" class="btn">등록</button>
-                <a class="btn gray" href="/board/list">취소</a>
+                <a class="btn gray" th:href="${listPath}">취소</a>
             </div>
         </form>
     </div>
 </div>
+<script src="/js/board/role-switcher.js"></script>
+<script th:if="${errorMessage != null}" th:inline="javascript">
+    alert([[${errorMessage}]]);
+</script>
 </body>
 </html>
