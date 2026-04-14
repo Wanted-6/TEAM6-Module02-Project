@@ -20,6 +20,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     // 특정 강의 수강생 조회
     List<Enrollment> findByCourseId(Integer courseId);
 
+    List<Enrollment> findByCourseIdOrderByEnrolledAtAsc(Integer courseId);
+
     // 특정 상태의 수강 목록 조회
     List<Enrollment> findByStatus(EnrollmentStatus status);
+
 }
+
+
+

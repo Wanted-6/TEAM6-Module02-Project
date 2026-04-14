@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 코스 상세</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">관리자 코스 상세</h1>
+            <p class="text-slate-500 mt-2">코스 승인 상태를 관리합니다.</p>
+        </div>
+        <a href="/admin/courses" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
+    </div>
+
+    <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+        <div>
+            <p class="text-sm text-slate-500 mb-2" th:text="|코스 ID: ${course.courseId}|"></p>
+            <h2 class="text-2xl font-bold text-slate-900" th:text="${course.title}"></h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">강사 ID</p>
+                <p class="font-medium" th:text="${course.instructorId}"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">승인 상태</p>
+                <p class="font-medium" th:text="${course.approvalStatus}"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">공개 여부</p>
+                <p class="font-medium" th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">검토자 ID</p>
+                <p class="font-medium" th:text="${course.reviewedBy} ?: '-'"></p>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50">
+            <p class="text-slate-500 mb-2">설명</p>
+            <p th:text="${course.description}"></p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50" th:if="${course.rejectReason != null}">
+            <p class="text-slate-500 mb-2">반려 사유</p>
+            <p th:text="${course.rejectReason}"></p>
+        </div>
+
+        <div class="flex flex-col gap-4 pt-2">
+            <form th:action="@{/admin/courses/{courseId}/approve(courseId=${course.courseId})}" method="post" class="flex gap-3 items-center">
+                <input type="number" name="adminId" placeholder="관리자 ID" class="rounded-lg border-slate-300" required>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">승인</button>
+            </form>
+
+            <form th:action="@{/admin/courses/{courseId}/reject(courseId=${course.courseId})}" method="post" class="flex gap-3 items-center flex-wrap">
+                <input type="number" name="adminId" placeholder="관리자 ID" class="rounded-lg border-slate-300" required>
+                <input type="text" name="rejectReason" placeholder="반려 사유 입력" class="rounded-lg border-slate-300 min-w-[260px]" required>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700">반려</button>
+            </form>
+
+            <form th:action="@{/admin/courses/{courseId}/delete(courseId=${course.courseId})}" method="post"
+                  onsubmit="return confirm('정말 삭제 처리하시겠습니까?');"
+                  class="flex gap-3 items-center">
+                <input type="number" name="adminId" placeholder="관리자 ID" class="rounded-lg border-slate-300" required>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">삭제 처리</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
