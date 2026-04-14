@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EnrollmentService {
@@ -58,5 +60,13 @@ public class EnrollmentService {
         // 6. 성적 테이블 초기 생성
         Grade grade = new Grade(savedEnrollment.getEnrollmentId());
         gradeRepository.save(grade);
+    }
+
+    public List<Enrollment> findEnrollmentsByMemberId(Integer memberId) {
+        return enrollmentRepository.findByMemberId(memberId);
+    }
+
+    public boolean isAlreadyEnrolled(Integer memberId, Integer courseId) {
+        return enrollmentRepository.existsByMemberIdAndCourseId(memberId, courseId);
     }
 }
