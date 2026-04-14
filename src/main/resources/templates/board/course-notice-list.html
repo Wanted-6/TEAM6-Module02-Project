@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="ko">
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>코스 공지 목록</title>
@@ -7,17 +7,38 @@
 </head>
 <body>
 <div class="page-wrapper">
-    <h1 class="page-title">코스 공지 목록</h1>
-    <p class="page-desc">강사가 코스 단위로 공지를 작성하고 수강생이 확인하는 게시판입니다.</p>
+    <div class="top-utility">
+        <div class="role-panel">
+            <p class="role-label">현재 역할 전환</p>
+            <div class="role-buttons">
+                <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
+                <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
+                <button class="role-btn" data-role="STUDENT" type="button">학생</button>
+            </div>
+            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <p class="permission-note">코스 공지는 강사 본인이 작성한 글만 수정, 삭제할 수 있습니다.</p>
+        </div>
+        <div class="page-main">
+            <h1 class="page-title">코스 공지 목록</h1>
+            <p class="page-desc">강사가 코스 단위로 작성하는 공지 게시판입니다.</p>
+        </div>
+    </div>
 
     <div class="box">
         <div class="button-group">
-            <a class="btn" href="/board/regist">공지 등록</a>
+            <a class="btn" href="/board/regist?type=COURSE_NOTICE" data-role-only="INSTRUCTOR">공지 등록</a>
             <a class="btn gray" href="/board/list">게시판 메인</a>
         </div>
     </div>
 
     <div class="box">
+        <form class="search-bar" method="get" action="/board/course-notices">
+            <input type="text" name="keyword" placeholder="코스 공지 제목 검색" th:value="${keyword}">
+            <button type="submit" class="btn">검색</button>
+            <a class="btn gray" href="/board/course-notices">초기화</a>
+        </form>
+        <p class="meta">검색어: <span th:text="${keyword != null and !keyword.isBlank() ? keyword : '전체'}">전체</span></p>
+
         <table class="table">
             <thead>
             <tr>
@@ -29,16 +50,20 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>2</td>
-                <td>Spring Boot</td>
-                <td><a href="/board/detail?postId=2">Spring Boot 공지</a></td>
-                <td>강사 11</td>
-                <td>95</td>
+            <tr th:each="board, stat : ${boardList}">
+                <td th:text="${stat.count}">1</td>
+                <td th:text="${board.courseTitle != null ? board.courseTitle : '-'}">Spring Boot 입문</td>
+                <td><a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">코스 공지 제목</a></td>
+                <td th:text="${board.memberId}">11</td>
+                <td th:text="${board.viewCount}">95</td>
+            </tr>
+            <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
+                <td colspan="5">조회된 코스 공지가 없습니다.</td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
+<script src="/js/board/role-switcher.js"></script>
 </body>
 </html>
