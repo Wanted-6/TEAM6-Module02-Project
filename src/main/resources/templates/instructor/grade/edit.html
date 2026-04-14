@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>성적 등록</title>
+</head>
+<body>
+
+<h2>성적 등록</h2>
+
+<form th:action="@{/instructor/grades/edit}" method="post">
+  <input type="hidden" name="enrollmentId" th:value="${grade.enrollmentId}" />
+
+  <p>
+    <label>학생 이름:</label>
+    <span th:text="${grade.studentName}"></span>
+  </p>
+
+  <p>
+    <label>강의명:</label>
+    <span th:text="${grade.courseTitle}"></span>
+  </p>
+
+  <p>
+    <label>과제 점수:</label>
+    <input type="number" name="assignmentScore" step="0.01" min="0" max="100" required />
+  </p>
+
+  <p>
+    <label>시험 점수:</label>
+    <input type="number" name="examScore" step="0.01" min="0" max="100" required />
+  </p>
+
+  <p>
+    <label>태도 점수:</label>
+    <input type="number" name="attitudeScore" step="0.01" min="0" max="100" required />
+  </p>
+
+  <button type="submit">저장</button>
+  <a th:href="@{/instructor/grades}">취소</a>
+</form>
+
+</body>
+</html>
