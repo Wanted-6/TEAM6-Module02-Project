@@ -38,6 +38,9 @@ public class EnrollmentService {
         }
 
         // 3. 학생의 현재 수강 중 강의 수 확인 (최대 3개)
+
+
+
         long enrolledCourseCount =
                 enrollmentRepository.countByMemberIdAndStatus(memberId, EnrollmentStatus.ENROLLED);
 
