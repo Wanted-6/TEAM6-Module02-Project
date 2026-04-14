@@ -30,6 +30,7 @@
         <th>태도 점수</th>
         <th>총점</th>
         <th>이수 여부</th>
+        <th>성적 관리</th>
     </tr>
     </thead>
     <tbody>
@@ -42,6 +43,11 @@
         <td th:text="${grade.attitudeScore}">태도 점수</td>
         <td th:text="${grade.totalScore}">총점</td>
         <td th:text="${grade.completionStatus}">이수 여부</td>
+        <td>
+            <a th:href="@{/instructor/grades/edit(enrollmentId=${grade.enrollmentId})}">
+                성적 등록/수정
+            </a>
+        </td>
     </tr>
     </tbody>
 </table>
