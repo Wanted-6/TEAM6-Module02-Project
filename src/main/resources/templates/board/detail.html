@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -7,71 +7,65 @@
 </head>
 <body>
 <div class="page-wrapper">
-    <h1 class="page-title">게시글 상세</h1>
-    <p class="page-desc">게시글 본문과 댓글, 대댓글, Q&amp;A 답변 상태를 함께 보는 상세 화면입니다.</p>
+    <div class="top-utility">
+        <div class="role-panel">
+            <p class="role-label">현재 역할 전환</p>
+            <div class="role-buttons">
+                <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
+                <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
+                <button class="role-btn" data-role="STUDENT" type="button">학생</button>
+            </div>
+            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <p class="permission-note">비밀 Q&amp;A는 강사, 관리자, 작성자 학생만 내용이 그대로 보입니다.</p>
+        </div>
+        <div class="page-main">
+            <h1 class="page-title">게시글 상세</h1>
+            <p class="page-desc">게시글 본문과 기본 정보를 확인하는 화면입니다.</p>
+        </div>
+    </div>
 
     <div class="box">
         <div class="meta">
-            게시글 번호: <span th:text="${board.postId}">4</span><br>
+            게시글 번호: <span th:text="${board.postId}">1</span><br>
             게시판 종류: <span th:text="${board.postType}">SECTION_QNA</span><br>
-            작성자 ID: <span th:text="${board.memberId}">1</span><br>
-            비밀글 여부: <span th:text="${board.isSecret} ? 'Y' : 'N'">Y</span><br>
-            답변 상태:
-            <span th:text="${board.answerStatus != null ? board.answerStatus : '-'}">PENDING</span>
+            작성자 ID: <span th:text="${board.memberId}">11</span><br>
+            코스: <span th:text="${board.courseTitle != null ? board.courseTitle : '-'}">Spring Boot 입문</span><br>
+            섹션 ID: <span th:text="${board.sectionId != null ? board.sectionId : '-'}">2</span><br>
+            비밀글 여부: <span th:text="${board.isSecret} ? 'Y' : 'N'">N</span><br>
+            답변 상태: <span th:text="${board.answerStatus != null ? board.answerStatus : '-'}">PENDING</span><br>
+            조회수: <span th:text="${board.viewCount}">120</span>
         </div>
 
         <div class="form-row">
             <label>제목</label>
-            <div class="content-box" th:text="${board.title}">2주차 섹션 질문</div>
+            <div class="content-box"
+                 th:attr="data-secret-guard=${true},data-post-type=${board.postType},data-author-id=${board.memberId},data-secret=${board.isSecret}"
+                 th:text="${board.title}">제목</div>
         </div>
 
         <div class="form-row">
             <label>내용</label>
-            <div class="content-box" th:text="${board.content}">이번 섹션 범위가 어디까지인가요?</div>
+            <div class="content-box"
+                 th:attr="data-secret-guard=${true},data-post-type=${board.postType},data-author-id=${board.memberId},data-secret=${board.isSecret}"
+                 th:text="${board.content}">내용</div>
         </div>
 
         <div class="button-group">
-            <a class="btn" th:href="@{/board/modify(postId=${board.postId})}">수정하기</a>
-            <a class="btn red" th:href="@{/board/delete(postId=${board.postId})}">삭제하기</a>
-            <a class="btn gray"
-               th:if="${board.postType.name() == 'ADMIN_NOTICE'}"
-               href="/board/admin-notices">목록으로</a>
-            <a class="btn gray"
-               th:if="${board.postType.name() == 'COURSE_NOTICE'}"
-               href="/board/course-notices">목록으로</a>
-            <a class="btn gray"
-               th:if="${board.postType.name() == 'FREE'}"
-               href="/board/free">목록으로</a>
-            <a class="btn gray"
-               th:if="${board.postType.name() == 'SECTION_QNA'}"
-               href="/board/section-qna">목록으로</a>
+            <a class="btn"
+               th:href="@{/board/modify(postId=${board.postId})}"
+               data-board-action="modify"
+               th:attr="data-post-type=${board.postType},data-author-id=${board.memberId}">수정하기</a>
+            <a class="btn red"
+               th:href="@{/board/delete(postId=${board.postId})}"
+               data-board-action="delete"
+               th:attr="data-post-type=${board.postType},data-author-id=${board.memberId}">삭제하기</a>
+            <a class="btn gray" th:href="${listPath}">목록으로</a>
         </div>
     </div>
-
-    <div class="box">
-        <h2 class="section-title">댓글 / 답변</h2>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>구분</th>
-                <th>작성자</th>
-                <th>내용</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>댓글</td>
-                <td>강사 11</td>
-                <td>이번 섹션 범위는 3장까지입니다.</td>
-            </tr>
-            <tr>
-                <td>대댓글</td>
-                <td>학생 1</td>
-                <td>감사합니다!</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
 </div>
+<script src="/js/board/role-switcher.js"></script>
+<script th:if="${errorMessage != null}" th:inline="javascript">
+    alert([[${errorMessage}]]);
+</script>
 </body>
 </html>
