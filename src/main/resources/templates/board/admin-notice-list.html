@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 공지 목록</title>
+    <link rel="stylesheet" href="/css/board/crud.css">
+</head>
+<body>
+<div class="page-wrapper">
+    <h1 class="page-title">관리자 공지 목록</h1>
+    <p class="page-desc">관리자가 작성하고 전체 사용자가 조회 가능한 공지 게시판입니다.</p>
+
+    <div class="box">
+        <div class="button-group">
+            <a class="btn" href="/board/regist">공지 등록</a>
+            <a class="btn gray" href="/board/list">게시판 메인</a>
+        </div>
+    </div>
+
+    <div class="box">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>조회수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="board : ${boardList}">
+                <td th:text="${board.postId}">1</td>
+                <td>
+                    <a th:href="@{/board/detail(postId=${board.postId})}"
+                       th:text="${board.title}">공지 제목</a>
+                </td>
+                <td th:text="${board.memberId}">14</td>
+                <td th:text="${board.viewCount}">120</td>
+            </tr>
+            <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
+                <td colspan="4">조회된 공지가 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
