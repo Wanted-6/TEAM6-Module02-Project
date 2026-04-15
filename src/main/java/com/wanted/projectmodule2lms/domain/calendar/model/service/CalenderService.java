@@ -80,36 +80,52 @@ public class CalenderService {
 
     public List<CalendarEventDTO> findInstructorCalendarEvents(Integer instructorId) {
 
+        List<CalendarEventDTO> result = new java.util.ArrayList<>();
+
         List<Course> courses = courseRepository.findByInstructorId(instructorId);
 
-        if (courses.isEmpty()) {
-            return List.of();
+        if (!courses.isEmpty()) {
+            List<Integer> courseIds = courses.stream()
+                    .map(Course::getCourseId)
+                    .toList();
+
+            Map<Integer, String> courseTitleMap = courses.stream()
+                    .collect(Collectors.toMap(
+                            Course::getCourseId,
+                            Course::getTitle
+                    ));
+
+            List<Section> sections = sectionRepository.findByCourseIdIn(courseIds);
+
+            List<CalendarEventDTO> sectionEvents = sections.stream()
+                    .filter(section -> section.getOpenDate() != null)
+                    .map(section -> {
+                        String courseTitle = courseTitleMap.getOrDefault(section.getCourseId(), "강의");
+                        return new CalendarEventDTO(
+                                "section-" + section.getSectionId(),
+                                courseTitle + " - " + section.getTitle(),
+                                section.getOpenDate().toString(),
+                                "#16a34a"
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            result.addAll(sectionEvents);
         }
 
-        List<Integer> courseIds = courses.stream()
-                .map(Course::getCourseId)
-                .toList();
-
-        Map<Integer, String> courseTitleMap = courses.stream()
-                .collect(Collectors.toMap(
-                        Course::getCourseId,
-                        Course::getTitle
-                ));
-
-        List<Section> sections = sectionRepository.findByCourseIdIn(courseIds);
-
-        return sections.stream()
-                .filter(section -> section.getOpenDate() != null)
-                .map(section -> {
-                    String courseTitle = courseTitleMap.getOrDefault(section.getCourseId(), "강의");
-                    return new CalendarEventDTO(
-                            "section-" + section.getSectionId(),
-                            courseTitle + " - " + section.getTitle(),
-                            section.getOpenDate().toString(),
-                            "#16a34a"
-                    );
-                })
+        List<CalendarEventDTO> memoEvents = calendarMemoRepository.findByMemberId(instructorId)
+                .stream()
+                .map(memo -> new CalendarEventDTO(
+                        "memo-" + memo.getMemoId(),
+                        "[메모] " + memo.getContent(),
+                        memo.getMemoDate().toString(),
+                        "#f59e0b"
+                ))
                 .collect(Collectors.toList());
+
+        result.addAll(memoEvents);
+
+        return result;
     }
 
     public List<CalendarMemoDTO> findMemosByDate(Integer memberId, String date) {
