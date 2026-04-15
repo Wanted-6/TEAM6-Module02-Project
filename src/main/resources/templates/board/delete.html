@@ -51,7 +51,9 @@
             </table>
 
             <div class="button-group">
-                <button type="submit" class="btn red">삭제</button>
+                <button type="submit"
+                        class="btn red"
+                        onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
                 <a class="btn gray" th:href="@{/board/detail(postId=${board.postId})}">취소</a>
             </div>
         </form>
