@@ -65,6 +65,26 @@
         return currentMemberId === authorId;
     }
 
+    function canManageComment(role, currentMemberId, postType, authorId, courseInstructorId) {
+        if (!postType || !authorId) {
+            return false;
+        }
+
+        if (role === "ADMIN") {
+            return true;
+        }
+
+        if (currentMemberId === authorId) {
+            return true;
+        }
+
+        if (role === "INSTRUCTOR" && (postType === "COURSE_NOTICE" || postType === "SECTION_QNA")) {
+            return !!courseInstructorId && currentMemberId === courseInstructorId;
+        }
+
+        return false;
+    }
+
     function applyRole(role) {
         const currentMemberId = getCurrentMemberId(role);
 
@@ -115,6 +135,14 @@
             const visible = canReadSecret(role, currentMemberId, postType, authorId, isSecret);
             element.classList.toggle("blurred-secret", !visible);
             element.classList.toggle("secret-blocked", !visible);
+        });
+
+        document.querySelectorAll("[data-comment-action]").forEach(element => {
+            const postType = element.dataset.postType;
+            const authorId = element.dataset.authorId;
+            const courseInstructorId = element.dataset.courseInstructorId;
+            const visible = canManageComment(role, currentMemberId, postType, authorId, courseInstructorId);
+            element.classList.toggle("is-hidden", !visible);
         });
 
         document.querySelectorAll(".role-btn").forEach(button => {

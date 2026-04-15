@@ -258,15 +258,31 @@ body {
 }
 
 .blurred-secret {
-    filter: blur(6px);
+    filter: blur(8px);
     user-select: none;
+    color: transparent !important;
+    text-shadow: 0 0 10px rgba(34, 34, 34, 0.75);
+    transition: filter 0.15s ease;
 }
 
 .secret-blocked {
     pointer-events: auto;
 }
 
+.secret-blocked::after {
+    content: "비밀글";
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #111827;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
 [data-role-only].is-hidden,
-[data-board-action].is-hidden {
+[data-board-action].is-hidden,
+[data-comment-action].is-hidden {
     display: none !important;
 }
