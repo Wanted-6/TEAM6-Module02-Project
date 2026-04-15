@@ -163,4 +163,7 @@ public class Board {
         this.isDeleted = true;
     }
 
+    public void increasedViewCount() {
+        this.viewCount++;
+    }
 }

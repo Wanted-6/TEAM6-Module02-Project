@@ -40,7 +40,7 @@
         }
 
         if (postType === "FREE") {
-            return currentMemberId === authorId;
+            return role === "ADMIN" || currentMemberId === authorId;
         }
 
         if (postType === "SECTION_QNA") {

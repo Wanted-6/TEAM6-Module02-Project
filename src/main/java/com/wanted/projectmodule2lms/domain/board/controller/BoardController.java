@@ -65,10 +65,15 @@ public class BoardController {
     }
 
     @GetMapping("/section-qna")
-    public String sectionQnaListPage(@RequestParam(required = false) String keyword, Model model) {
-        List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
+    public String sectionQnaListPage(@RequestParam(required = false) String keyword,
+                                     @RequestParam(required = false) Integer currentMemberId,
+                                     @RequestParam(required = false) MemberRole currentRole,
+                                     Model model) {
+        List<BoardDTO> boardList = (currentMemberId != null && currentRole != null)
+                ? boardService.findVisibleSectionQna(currentMemberId, currentRole, keyword)
+                : ((keyword == null || keyword.isBlank())
                 ? boardService.findBoardByPostType(BoardType.SECTION_QNA)
-                : boardService.searchBoardByPostTypeAndTitle(BoardType.SECTION_QNA, keyword);
+                : boardService.searchBoardByPostTypeAndTitle(BoardType.SECTION_QNA, keyword));
         model.addAttribute("boardList", boardList);
         model.addAttribute("keyword", keyword);
         return "board/section-qna-list";
@@ -76,6 +81,7 @@ public class BoardController {
 
     @GetMapping("/detail")
     public String boardDetailPage(@RequestParam Integer postId, Model model) {
+        boardService.increaseViewCount(postId);
         BoardDTO board = boardService.findBoardById(postId);
         model.addAttribute("board", board);
         model.addAttribute("listPath", getListPath(board.getPostType()));
@@ -86,10 +92,17 @@ public class BoardController {
     public String boardRegistPage(@RequestParam(defaultValue = "FREE") BoardType type,
                                   @RequestParam(required = false) Integer courseId,
                                   @RequestParam(required = false) Integer sectionId,
+                                  @RequestParam(required = false) Integer currentMemberId,
+                                  @RequestParam(required = false) MemberRole currentRole,
                                   Model model) {
-        List<Course> courses = boardService.findAllCourses();
+        List<Course> courses = (currentMemberId != null && currentRole != null)
+                ? boardService.findAvailableCourses(type, currentMemberId, currentRole)
+                : boardService.findAllCourses();
         model.addAttribute("boardType", type);
         model.addAttribute("courses", courses);
+        model.addAttribute("sections", (currentMemberId != null && currentRole != null)
+                ? boardService.findAvailableSections(type, currentMemberId, currentRole)
+                : List.of());
         model.addAttribute("selectedCourseId", courseId);
         model.addAttribute("selectedSectionId", sectionId);
         model.addAttribute("listPath", getListPath(type));
@@ -107,6 +120,8 @@ public class BoardController {
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/regist?type=" + boardDTO.getPostType()
+                    + appendNumberQuery("currentMemberId", currentMemberId)
+                    + appendTextQuery("currentRole", currentRole != null ? currentRole.name() : null)
                     + appendNumberQuery("courseId", boardDTO.getCourseId())
                     + appendNumberQuery("sectionId", boardDTO.getSectionId());
         }
@@ -186,5 +201,9 @@ public class BoardController {
 
     private String appendNumberQuery(String key, Integer value) {
         return value == null ? "" : "&" + key + "=" + value;
+    }
+
+    private String appendTextQuery(String key, String value) {
+        return value == null || value.isBlank() ? "" : "&" + key + "=" + value;
     }
 }
