@@ -60,7 +60,7 @@
                 </td>
                 <td th:text="${board.isSecret} ? 'Y' : 'N'">Y</td>
                 <td th:text="${board.answerStatus != null ? board.answerStatus : '-'}">PENDING</td>
-                <td th:text="${board.memberId}">1</td>
+                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">김학생</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
                 <td colspan="5">조회된 섹션 Q&amp;A가 없습니다.</td>

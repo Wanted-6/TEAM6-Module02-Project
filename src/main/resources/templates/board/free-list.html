@@ -52,7 +52,7 @@
             <tr th:each="board, stat : ${boardList}">
                 <td th:text="${stat.count}">1</td>
                 <td><a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">자유글 제목</a></td>
-                <td th:text="${board.memberId}">2</td>
+                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">이학생</td>
                 <td th:text="${board.viewCount}">12</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">

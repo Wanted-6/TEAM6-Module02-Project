@@ -47,6 +47,7 @@
                     <option th:each="course : ${courses}"
                             th:value="${course.courseId}"
                             th:text="${course.title}"
+                            th:attr="data-instructor-id=${course.instructorId}"
                             th:selected="${selectedCourseId != null and selectedCourseId == course.courseId}">Spring Boot 입문</option>
                 </select>
             </div>
@@ -90,6 +91,36 @@
     </div>
 </div>
 <script src="/js/board/role-switcher.js"></script>
+<script th:if="${boardType.name() == 'COURSE_NOTICE'}" th:inline="javascript">
+    (function () {
+        const select = document.getElementById('courseId');
+        if (!select) {
+            return;
+        }
+
+        function filterCourses() {
+            const currentRole = localStorage.getItem('lms_demo_role') || 'STUDENT';
+            const currentMemberId = localStorage.getItem('lms_demo_member_id') || '1';
+
+            Array.from(select.options).forEach(option => {
+                if (!option.value) {
+                    option.hidden = false;
+                    return;
+                }
+
+                const instructorId = option.dataset.instructorId;
+                option.hidden = !(currentRole === 'INSTRUCTOR' && instructorId === currentMemberId);
+            });
+
+            if (select.selectedOptions.length > 0 && select.selectedOptions[0].hidden) {
+                select.value = '';
+            }
+        }
+
+        document.addEventListener('lms-role-change', filterCourses);
+        filterCourses();
+    })();
+</script>
 <script th:if="${errorMessage != null}" th:inline="javascript">
     alert([[${errorMessage}]]);
 </script>

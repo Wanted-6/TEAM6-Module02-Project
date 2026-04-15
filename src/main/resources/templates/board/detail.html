@@ -28,7 +28,7 @@
         <div class="meta">
             게시글 번호: <span th:text="${board.postId}">1</span><br>
             게시판 종류: <span th:text="${board.postType}">SECTION_QNA</span><br>
-            작성자 ID: <span th:text="${board.memberId}">11</span><br>
+            작성자: <span th:text="${board.memberName != null ? board.memberName : board.memberId}">박강사</span><br>
             코스: <span th:text="${board.courseTitle != null ? board.courseTitle : '-'}">Spring Boot 입문</span><br>
             섹션 ID: <span th:text="${board.sectionId != null ? board.sectionId : '-'}">2</span><br>
             비밀글 여부: <span th:text="${board.isSecret} ? 'Y' : 'N'">N</span><br>
