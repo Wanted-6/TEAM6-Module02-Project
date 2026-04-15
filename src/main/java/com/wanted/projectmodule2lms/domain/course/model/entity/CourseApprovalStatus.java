@@ -5,4 +5,4 @@ public enum CourseApprovalStatus {
     APPROVED,
     REJECTED,
     DELETED
-}
+} ()
