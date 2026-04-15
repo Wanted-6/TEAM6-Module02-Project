@@ -45,8 +45,8 @@
                     <td th:text="${board.postType}">SECTION_QNA</td>
                 </tr>
                 <tr>
-                    <th>작성자 ID</th>
-                    <td th:text="${board.memberId}">1</td>
+                    <th>작성자</th>
+                    <td th:text="${board.memberName != null ? board.memberName : board.memberId}">김학생</td>
                 </tr>
             </table>
 

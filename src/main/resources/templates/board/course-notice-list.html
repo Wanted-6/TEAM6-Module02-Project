@@ -54,7 +54,7 @@
                 <td th:text="${stat.count}">1</td>
                 <td th:text="${board.courseTitle != null ? board.courseTitle : '-'}">Spring Boot 입문</td>
                 <td><a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">코스 공지 제목</a></td>
-                <td th:text="${board.memberId}">11</td>
+                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">박강사</td>
                 <td th:text="${board.viewCount}">95</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
