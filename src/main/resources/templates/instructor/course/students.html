@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수강생 목록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-6xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">수강생 목록</h1>
+            <p class="text-slate-500 mt-2">코스를 수강 중인 학생 목록입니다.</p>
+        </div>
+        <a th:href="@{/courses/{courseId}(courseId=${courseId})}"
+           class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">코스 상세</a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-700">
+            <tr>
+                <th class="px-4 py-3 text-left">순번</th>
+                <th class="px-4 py-3 text-left">로그인 ID</th>
+                <th class="px-4 py-3 text-left">로그인 ID</th>
+                <th class="px-4 py-3 text-left">이름</th>
+                <th class="px-4 py-3 text-left">전화번호</th>
+                <th class="px-4 py-3 text-left">이메일</th>
+                <th class="px-4 py-3 text-left">상태</th>
+                <th class="px-4 py-3 text-left">신청일</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student, stat : ${studentList}" class="border-t border-slate-200 hover:bg-slate-50">
+                <td class="px-4 py-3" th:text="${stat.count}"></td>
+                <td class="px-4 py-3" th:text="${student.loginId}"></td>
+                <td class="px-4 py-3" th:text="${student.loginId}"></td>
+                <td class="px-4 py-3" th:text="${student.name}"></td>
+                <td class="px-4 py-3" th:text="${student.phone}"></td>
+                <td class="px-4 py-3" th:text="${student.email}"></td>
+                <td class="px-4 py-3" th:text="${student.enrollmentStatus}"></td>
+                <td class="px-4 py-3" th:text="${student.enrolledAt}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(studentList)}" class="p-8 text-center text-slate-500">
+            등록된 수강생이 없습니다.
+        </div>
+    </div>
+</div>
+</body>
+</html>

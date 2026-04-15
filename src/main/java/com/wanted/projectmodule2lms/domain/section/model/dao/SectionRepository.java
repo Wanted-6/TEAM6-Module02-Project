@@ -9,4 +9,11 @@ import java.util.List;
 public interface SectionRepository extends JpaRepository<Section, Integer> {
 
     List<Section> findByCourseIdInOrderByCourseIdAscSectionOrderAsc(Collection<Integer> courseIds);
+    List<Section> findByCourseIdOrderBySectionOrderAsc(Integer courseId);
+
+    boolean existsByCourseIdAndSectionOrder(Integer courseId, Integer sectionOrder);
+
+    boolean existsByCourseIdAndSectionOrderAndSectionIdNot(Integer courseId,
+                                                           Integer sectionOrder,
+                                                           Integer sectionId);
 }

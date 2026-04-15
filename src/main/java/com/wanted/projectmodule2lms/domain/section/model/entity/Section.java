@@ -8,12 +8,14 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "Section")
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Section {
@@ -39,4 +41,16 @@ public class Section {
 
     @Column(name = "open_date")
     private LocalDate openDate;
+
+    public void changeSectionInfo(String title,
+                                  String videoUrl,
+                                  String materialFile,
+                                  Integer sectionOrder,
+                                  LocalDate openDate) {
+        this.title = title;
+        this.videoUrl = videoUrl;
+        this.materialFile = materialFile;
+        this.sectionOrder = sectionOrder;
+        this.openDate = openDate;
+    }
 }
