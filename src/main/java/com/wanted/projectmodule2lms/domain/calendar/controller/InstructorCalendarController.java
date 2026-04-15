@@ -6,6 +6,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarEventDTO;
+import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreateDTO;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -21,5 +28,26 @@ public class InstructorCalendarController {
         model.addAttribute("events", calendarService.findInstructorCalendarEvents(instructorId));
 
         return "instructor/calendar/view";
+    }
+    @GetMapping("/events")
+    @ResponseBody
+    public List<CalendarEventDTO> getCalendarEvents() {
+        Integer instructorId = 11; // 임시 로그인 강사
+        return calendarService.findInstructorCalendarEvents(instructorId);
+    }
+
+    @GetMapping("/memos")
+    @ResponseBody
+    public List<?> getMemosByDate(@RequestParam String date) {
+        Integer instructorId = 11; // 임시 로그인 강사
+        return calendarService.findMemosByDate(instructorId, date);
+    }
+
+    @PostMapping
+    @ResponseBody
+    public String createMemo(@ModelAttribute CalendarMemoCreateDTO dto) {
+        Integer instructorId = 11; // 임시 로그인 강사
+        calendarService.createMemo(instructorId, dto);
+        return "ok";
     }
 }
