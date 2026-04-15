@@ -56,6 +56,9 @@ public class EnrollmentService {
             throw new IllegalArgumentException("정원이 초과되어 수강신청할 수 없습니다.");
         }
 
+
+
+
         // 5. 수강신청 저장
         Enrollment enrollment = new Enrollment(memberId, courseId);
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
