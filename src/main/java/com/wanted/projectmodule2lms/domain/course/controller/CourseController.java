@@ -18,8 +18,12 @@ public class CourseController {
 
     /* 전체 코스 조회 */
     @GetMapping
-    public ModelAndView findAllCourses(ModelAndView mv) {
-        mv.addObject("courseList", courseService.findAllCourses());
+    public ModelAndView findAllCourses(@RequestParam(required = false) String keyword,
+                                       @RequestParam(required = false) String category,
+                                       ModelAndView mv) {
+        mv.addObject("courseList", courseService.findAllCourses(keyword, category));
+        mv.addObject("keyword", keyword);
+        mv.addObject("category", category);
         mv.setViewName("instructor/course/list");
         return mv;
     }

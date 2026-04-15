@@ -8,12 +8,6 @@ import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Integer> {
 
-    List<Course> findByIsOpenTrue();
-
-    List<Course> findByTitleContaining(String keyword);
-
-    List<Course> findByInstructorId(Integer instructorId);
-
     List<Course> findAllByOrderByCourseIdDesc();
 
     List<Course> findAllByInstructorIdOrderByCourseIdDesc(Integer instructorId);
@@ -21,4 +15,18 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     List<Course> findAllByIsOpenTrueOrderByCourseIdDesc();
 
     List<Course> findByApprovalStatusOrderByCourseIdDesc(CourseApprovalStatus approvalStatus);
+
+    List<Course> findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus approvalStatus);
+
+    List<Course> findByApprovalStatusNotAndTitleContainingOrderByCourseIdDesc(CourseApprovalStatus approvalStatus,
+                                                                              String keyword);
+
+    List<Course> findByApprovalStatusNotAndCategoryContainingOrderByCourseIdDesc(CourseApprovalStatus approvalStatus,
+                                                                                 String category);
+
+    List<Course> findByApprovalStatusNotAndTitleContainingAndCategoryContainingOrderByCourseIdDesc(
+            CourseApprovalStatus approvalStatus,
+            String keyword,
+            String category
+    );
 }
