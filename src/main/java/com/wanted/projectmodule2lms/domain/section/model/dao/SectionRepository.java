@@ -16,4 +16,5 @@ public interface SectionRepository extends JpaRepository<Section, Integer> {
     boolean existsByCourseIdAndSectionOrderAndSectionIdNot(Integer courseId,
                                                            Integer sectionOrder,
                                                            Integer sectionId);
+    List<Section> findByCourseIdIn(List<Integer> courseIds);
 }
