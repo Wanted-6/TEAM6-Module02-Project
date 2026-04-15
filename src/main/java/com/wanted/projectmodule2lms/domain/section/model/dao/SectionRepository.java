@@ -16,11 +16,11 @@ public interface SectionRepository extends JpaRepository<Section, Integer> {
     boolean existsByCourseIdAndSectionOrderAndSectionIdNot(Integer courseId,
                                                            Integer sectionOrder,
                                                            Integer sectionId);
-<<<<<<< HEAD
+
 
     long countByCourseId(Integer courseId);
 
 }
-=======
-}
->>>>>>> e2e9153072af011967b7c7dc2b13480a9a8a3091
+
+
+

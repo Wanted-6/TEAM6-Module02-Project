@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Integer> {
 
-<<<<<<< HEAD
-=======
+
+
 
     List<Course> findByIsOpenTrue();
 
@@ -20,7 +20,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     List<Course> findByInstructorId(Integer instructorId);
 
->>>>>>> e2e9153072af011967b7c7dc2b13480a9a8a3091
     List<Course> findAllByOrderByCourseIdDesc();
 
     List<Course> findAllByInstructorIdOrderByCourseIdDesc(Integer instructorId);
@@ -28,7 +27,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     List<Course> findAllByIsOpenTrueOrderByCourseIdDesc();
 
     List<Course> findByApprovalStatusOrderByCourseIdDesc(CourseApprovalStatus approvalStatus);
-<<<<<<< HEAD
 
     List<Course> findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus approvalStatus);
 
@@ -44,6 +42,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             String category
     );
 }
-=======
-}
->>>>>>> e2e9153072af011967b7c7dc2b13480a9a8a3091
+
+
+

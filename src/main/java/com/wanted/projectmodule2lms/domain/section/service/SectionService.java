@@ -101,7 +101,7 @@ public class SectionService {
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 섹션이 존재하지 않습니다."));
 
         Course course = courseRepository.findById(foundSection.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("부모 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("코스가 존재하지 않습니다."));
 
         if (course.getApprovalStatus() == CourseApprovalStatus.APPROVED) {
             throw new IllegalArgumentException("승인된 코스의 섹션은 삭제할 수 없습니다.");
