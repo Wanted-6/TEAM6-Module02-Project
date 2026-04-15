@@ -25,4 +25,23 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     List<Course> findAllByIsOpenTrueOrderByCourseIdDesc();
 
     List<Course> findByApprovalStatusOrderByCourseIdDesc(CourseApprovalStatus approvalStatus);
+
+    List<Course> findByCourseIdIn(List<Integer> courseIds);
+
+    List<Course> findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus approvalStatus);
+
+    List<Course> findByApprovalStatusNotAndTitleContainingOrderByCourseIdDesc(CourseApprovalStatus approvalStatus,
+                                                                              String keyword);
+
+    List<Course> findByApprovalStatusNotAndCategoryContainingOrderByCourseIdDesc(CourseApprovalStatus approvalStatus,
+                                                                                 String category);
+
+    List<Course> findByApprovalStatusNotAndTitleContainingAndCategoryContainingOrderByCourseIdDesc(
+            CourseApprovalStatus approvalStatus,
+            String keyword,
+            String category
+    );
 }
+
+
+

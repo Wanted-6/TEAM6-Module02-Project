@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>내 섹션 목록</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-6xl mx-auto px-6 py-10">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-slate-900">섹션 목록</h1>
+      <p class="text-slate-500 mt-2">수강 중인 코스의 섹션입니다.</p>
+    </div>
+    <a th:href="@{/student/courses/{courseId}(courseId=${courseId}, memberId=${memberId})}"
+       class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">코스 상세</a>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-100 text-slate-700">
+      <tr>
+        <th class="px-4 py-3 text-left">순서</th>
+        <th class="px-4 py-3 text-left">제목</th>
+        <th class="px-4 py-3 text-left">오픈일</th>
+        <th class="px-4 py-3 text-left">자료</th>
+        <th class="px-4 py-3 text-left">이동</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="section : ${sectionList}" class="border-t border-slate-200 hover:bg-slate-50">
+        <td class="px-4 py-3" th:text="${section.sectionOrder}"></td>
+        <td class="px-4 py-3" th:text="${section.title}"></td>
+        <td class="px-4 py-3" th:text="${section.openDate}"></td>
+        <td class="px-4 py-3" th:text="${section.materialFile} ?: '-'"></td>
+        <td class="px-4 py-3">
+          <a th:href="@{/student/courses/{courseId}/sections/{sectionId}(courseId=${courseId}, sectionId=${section.sectionId}, memberId=${memberId})}"
+             class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">상세</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div th:if="${#lists.isEmpty(sectionList)}" class="p-8 text-center text-slate-500">
+      조회된 섹션이 없습니다.
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -38,14 +38,17 @@
                 <p class="text-slate-500 mb-1">강사 ID</p>
                 <p class="font-medium" th:text="${course.instructorId}"></p>
             </div>
+
             <div class="p-4 rounded-xl bg-slate-50">
                 <p class="text-slate-500 mb-1">카테고리</p>
                 <p class="font-medium" th:text="${course.category}"></p>
             </div>
+
             <div class="p-4 rounded-xl bg-slate-50">
                 <p class="text-slate-500 mb-1">정원</p>
                 <p class="font-medium" th:text="|${course.capacity}명|"></p>
             </div>
+
             <div class="p-4 rounded-xl bg-slate-50">
                 <p class="text-slate-500 mb-1">기간</p>
                 <p class="font-medium">
@@ -54,6 +57,23 @@
                     <span th:text="${course.endDate}"></span>
                 </p>
             </div>
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">승인 상태</p>
+                <p class="font-medium" th:text="${course.approvalStatus} ?: 'PENDING'"></p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">검토 관리자 ID</p>
+                <p class="font-medium" th:text="${course.reviewedBy} ?: '-'"></p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50 md:col-span-2"
+                 th:if="${course.rejectReason != null and !#strings.isEmpty(course.rejectReason)}">
+                <p class="text-slate-500 mb-2">반려 사유</p>
+                <p th:text="${course.rejectReason}"></p>
+            </div>
+
         </div>
 
         <div class="p-4 rounded-xl bg-slate-50">

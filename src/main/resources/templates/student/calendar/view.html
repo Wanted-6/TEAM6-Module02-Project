@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>학생 캘린더</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <style>
+        .calendar-layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .calendar-area {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .side-panel {
+            flex: 0 0 320px;
+            min-width: 320px;
+            border-left: 1px solid #ddd;
+            padding-left: 20px;
+            background-color: #fff8dc;
+        }
+        .panel-box {
+            margin-bottom: 20px;
+        }
+
+        .panel-item {
+            margin-bottom: 8px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            word-break: break-word;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 14px;
+        }
+    </style>
+</head>
+<body>
+<h2>📅 나의 학습 캘린더</h2>
+
+<div class="calendar-layout">
+    <div class="calendar-area">
+        <div id="calendar"></div>
+    </div>
+
+    <div class="side-panel">
+        <h3 id="selectedDate">날짜를 선택하세요</h3>
+
+        <div class="panel-box">
+            <h4>그날 일정</h4>
+            <div id="scheduleList">날짜를 클릭하면 일정이 표시됩니다.</div>
+        </div>
+
+        <div class="panel-box">
+            <h4>메모</h4>
+            <div id="memoList">날짜를 클릭하면 메모가 표시됩니다.</div>
+        </div>
+
+        <div class="panel-box">
+            <h4>메모 추가</h4>
+            <textarea id="memoContent" placeholder="메모를 입력하세요"></textarea>
+            <button type="button" id="saveMemoBtn">추가</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allEvents = [];
+    let selectedDate = null;
+    let calendar = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const calendarEl = document.getElementById('calendar');
+
+        fetch('/student/calendar/events')
+            .then(response => response.json())
+            .then(data => {
+                allEvents = data;
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'ko',
+                    height: 700,
+                    events: allEvents,
+
+                    dateClick: function(info) {
+                        selectedDate = info.dateStr;
+                        document.getElementById('selectedDate').innerText = selectedDate;
+
+                        renderDayEvents(selectedDate);
+                        loadMemos(selectedDate);
+                    }
+                });
+
+                calendar.render();
+            });
+
+        document.getElementById('saveMemoBtn').addEventListener('click', function () {
+            saveMemo();
+        });
+    });
+
+    function renderDayEvents(date) {
+        const scheduleList = document.getElementById('scheduleList');
+        scheduleList.innerHTML = '';
+
+        const dayEvents = allEvents.filter(event => event.start === date);
+
+        if (dayEvents.length === 0) {
+            scheduleList.innerHTML = '<div class="panel-item">일정 없음</div>';
+            return;
+        }
+
+        dayEvents.forEach(event => {
+            scheduleList.innerHTML += `<div class="panel-item">${event.title}</div>`;
+        });
+    }
+
+    function loadMemos(date) {
+        fetch('/student/calendar/memos?date=' + date)
+            .then(response => response.json())
+            .then(data => {
+                const memoList = document.getElementById('memoList');
+                memoList.innerHTML = '';
+
+                if (data.length === 0) {
+                    memoList.innerHTML = '<div class="panel-item">메모 없음</div>';
+                    return;
+                }
+
+                data.forEach(memo => {
+                    memoList.innerHTML += `<div class="panel-item">${memo.content}</div>`;
+                });
+            });
+    }
+
+    function saveMemo() {
+        const content = document.getElementById('memoContent').value.trim();
+
+        if (!selectedDate) {
+            alert('먼저 날짜를 선택하세요.');
+            return;
+        }
+
+        if (!content) {
+            alert('메모 내용을 입력하세요.');
+            return;
+        }
+
+        const formData = new URLSearchParams();
+        formData.append('content', content);
+        formData.append('memoDate', selectedDate);
+
+        fetch('/student/calendar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        })
+            .then(response => response.text())
+            .then(() => {
+                document.getElementById('memoContent').value = '';
+
+                const newMemoEvent = {
+                    id: 'memo-temp-' + Date.now(),
+                    title: '[메모] ' + content,
+                    start: selectedDate,
+                    color: '#f59e0b'
+                };
+
+                allEvents.push(newMemoEvent);
+                calendar.addEvent(newMemoEvent);
+
+                renderDayEvents(selectedDate);
+                loadMemos(selectedDate);
+            });
+    }
+</script>
+</body>
+</html>
