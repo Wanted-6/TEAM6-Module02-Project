@@ -56,4 +56,38 @@ public class CalenderService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public List<CalendarEventDTO> findInstructorCalendarEvents(Integer instructorId) {
+
+        List<Course> courses = courseRepository.findByInstructorId(instructorId);
+
+        if (courses.isEmpty()) {
+            return List.of();
+        }
+
+        List<Integer> courseIds = courses.stream()
+                .map(Course::getCourseId)
+                .toList();
+
+        Map<Integer, String> courseTitleMap = courses.stream()
+                .collect(Collectors.toMap(
+                        Course::getCourseId,
+                        Course::getTitle
+                ));
+
+        List<Section> sections = sectionRepository.findByCourseIdIn(courseIds);
+
+        return sections.stream()
+                .filter(section -> section.getOpenDate() != null)
+                .map(section -> {
+                    String courseTitle = courseTitleMap.getOrDefault(section.getCourseId(), "강의");
+                    return new CalendarEventDTO(
+                            "section-" + section.getSectionId(),
+                            courseTitle + " - " + section.getTitle(),
+                            section.getOpenDate().toString(),
+                            "#16a34a"
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }
