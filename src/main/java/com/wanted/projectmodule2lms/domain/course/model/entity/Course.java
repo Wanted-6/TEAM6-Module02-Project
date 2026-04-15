@@ -67,6 +67,9 @@ public class Course {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "exam_due_date")
+    private LocalDate examDueDate;
+
     public void changeCourseInfo(String title,
                                  String description,
                                  String category,
@@ -120,5 +123,8 @@ public class Course {
         this.reviewedBy = adminId;
         this.reviewedAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
+    }
+    public void changeExamDueDate(LocalDate examDueDate) {
+        this.examDueDate = examDueDate;
     }
 }

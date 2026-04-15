@@ -61,6 +61,18 @@ public class CalenderService {
                     .collect(Collectors.toList());
 
             result.addAll(sectionEvents);
+
+            List<CalendarEventDTO> examEvents = courses.stream()
+                    .filter(course -> course.getExamDueDate() != null)
+                    .map(course -> new CalendarEventDTO(
+                            "exam-" + course.getCourseId(),
+                            course.getTitle() + " - 시험 마감",
+                            course.getExamDueDate().toString(),
+                            "#ef4444"
+                    ))
+                    .collect(Collectors.toList());
+
+            result.addAll(examEvents);
         }
 
         List<CalendarEventDTO> memoEvents = calendarMemoRepository.findByMemberId(memberId)
@@ -75,7 +87,11 @@ public class CalenderService {
 
         result.addAll(memoEvents);
 
+
+
         return result;
+
+
     }
 
     public List<CalendarEventDTO> findInstructorCalendarEvents(Integer instructorId) {
@@ -125,7 +141,22 @@ public class CalenderService {
 
         result.addAll(memoEvents);
 
+        List<CalendarEventDTO> examEvents = courses.stream()
+                .filter(course -> course.getExamDueDate() != null)
+                .map(course -> new CalendarEventDTO(
+                        "exam-" + course.getCourseId(),
+                        course.getTitle() + " - 시험 마감",
+                        course.getExamDueDate().toString(),
+                        "#ef4444"
+                ))
+                .collect(Collectors.toList());
+
+        result.addAll(examEvents);
+
         return result;
+
+
+
     }
 
     public List<CalendarMemoDTO> findMemosByDate(Integer memberId, String date) {
