@@ -360,6 +360,7 @@ public class BoardService {
                 board,
                 loadMemberNameMap(Collections.singletonList(board)),
                 loadCourseTitleMap(Collections.singletonList(board)),
+                loadCourseInstructorMap(Collections.singletonList(board)),
                 loadSectionTitleMap(Collections.singletonList(board))
         );
     }
@@ -367,22 +368,25 @@ public class BoardService {
     private List<BoardDTO> toBoardDTOList(List<Board> boards) {
         Map<Integer, String> memberNameMap = loadMemberNameMap(boards);
         Map<Integer, String> courseTitleMap = loadCourseTitleMap(boards);
+        Map<Integer, Integer> courseInstructorMap = loadCourseInstructorMap(boards);
         Map<Integer, String> sectionTitleMap = loadSectionTitleMap(boards);
 
         return boards.stream()
-                .map(board -> toBoardDTO(board, memberNameMap, courseTitleMap, sectionTitleMap))
+                .map(board -> toBoardDTO(board, memberNameMap, courseTitleMap, courseInstructorMap, sectionTitleMap))
                 .collect(Collectors.toList());
     }
 
     private BoardDTO toBoardDTO(Board board,
                                 Map<Integer, String> memberNameMap,
                                 Map<Integer, String> courseTitleMap,
+                                Map<Integer, Integer> courseInstructorMap,
                                 Map<Integer, String> sectionTitleMap) {
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setMemberName(resolveMemberName(board.getMemberId(), memberNameMap));
 
         if (board.getCourseId() != null) {
             boardDTO.setCourseTitle(resolveCourseTitle(board.getCourseId(), courseTitleMap));
+            boardDTO.setCourseInstructorId(resolveCourseInstructorId(board.getCourseId(), courseInstructorMap));
         }
 
         if (board.getSectionId() != null) {
@@ -419,6 +423,20 @@ public class BoardService {
                 .collect(Collectors.toMap(Course::getCourseId, Course::getTitle));
     }
 
+    private Map<Integer, Integer> loadCourseInstructorMap(List<Board> boards) {
+        Set<Integer> courseIds = boards.stream()
+                .map(Board::getCourseId)
+                .filter(courseId -> courseId != null)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (courseIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return courseRepository.findAllById(courseIds).stream()
+                .collect(Collectors.toMap(Course::getCourseId, Course::getInstructorId));
+    }
+
     private Map<Integer, String> loadSectionTitleMap(List<Board> boards) {
         Set<Integer> sectionIds = boards.stream()
                 .map(Board::getSectionId)
@@ -453,6 +471,15 @@ public class BoardService {
         }
 
         return courseTitle;
+    }
+
+    private Integer resolveCourseInstructorId(Integer courseId, Map<Integer, Integer> courseInstructorMap) {
+        Integer courseInstructorId = courseInstructorMap.get(courseId);
+        if (courseInstructorId == null) {
+            throw new IllegalStateException("게시글 코스 담당 강사 정보를 찾을 수 없습니다. courseId=" + courseId);
+        }
+
+        return courseInstructorId;
     }
 
     private String resolveSectionTitle(Integer sectionId, Map<Integer, String> sectionTitleMap) {

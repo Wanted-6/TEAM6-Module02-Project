@@ -3,6 +3,8 @@ package com.wanted.projectmodule2lms.domain.board.controller;
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
+import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
+import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequestMapping("/board")
 public class BoardController {
 
+    private final CommentService commentService;
     private final BoardService boardService;
 
     @GetMapping({"", "/"})
@@ -83,7 +86,9 @@ public class BoardController {
     public String boardDetailPage(@RequestParam Integer postId, Model model) {
         boardService.increaseViewCount(postId);
         BoardDTO board = boardService.findBoardById(postId);
+        List<CommentDTO> commentList=commentService.findCommentsByPostId(postId);
         model.addAttribute("board", board);
+        model.addAttribute("commentList", commentList);
         model.addAttribute("listPath", getListPath(board.getPostType()));
         return "board/detail";
     }

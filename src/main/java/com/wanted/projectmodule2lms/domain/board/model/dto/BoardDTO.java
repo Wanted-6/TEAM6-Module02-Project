@@ -22,6 +22,7 @@ public class BoardDTO {
     private String memberName;
     private Integer courseId;
     private String courseTitle;
+    private Integer courseInstructorId;
     private Integer sectionId;
     private String sectionTitle;
     private String title;
