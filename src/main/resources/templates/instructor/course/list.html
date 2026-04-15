@@ -19,15 +19,47 @@
         </div>
     </div>
 
+    <form action="/courses" method="get" class="mb-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">검색어</label>
+                <input type="text" name="keyword" th:value="${keyword}"
+                       placeholder="코스명 검색"
+                       class="w-full rounded-lg border-slate-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">카테고리</label>
+                <input type="text" name="category" th:value="${category}"
+                       placeholder="예: Backend, AI"
+                       class="w-full rounded-lg border-slate-300">
+            </div>
+            <div class="flex items-end gap-3">
+                <button type="submit"
+                        class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
+                    검색
+                </button>
+                <a href="/courses"
+                   class="px-5 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                    초기화
+                </a>
+            </div>
+        </div>
+    </form>
+
     <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div th:each="course : ${courseList}" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <div class="flex items-start justify-between mb-4">
                 <span class="text-sm text-slate-500" th:text="|코스 ID: ${course.courseId}|"></span>
-                <span class="px-3 py-1 text-xs rounded-full"
-                      th:classappend="${course.isOpen} ? ' bg-blue-100 text-blue-700' : ' bg-slate-200 text-slate-600'"
-                      th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'"></span>
+                <div class="flex flex-col items-end gap-2">
+        <span class="px-3 py-1 text-xs rounded-full"
+              th:classappend="${course.isOpen} ? ' bg-blue-100 text-blue-700' : ' bg-slate-200 text-slate-600'"
+              th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'"></span>
+
+                    <span class="px-3 py-1 text-xs rounded-full bg-amber-100 text-amber-700"
+                          th:text="${course.approvalStatus} ?: 'PENDING'"></span>
+                </div>
             </div>
 
             <h2 class="text-xl font-semibold text-slate-900 mb-2" th:text="${course.title}">코스명</h2>
