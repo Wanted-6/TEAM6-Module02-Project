@@ -1,9 +1,6 @@
 package com.wanted.projectmodule2lms.domain.section.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +18,7 @@ import java.time.LocalDate;
 public class Section {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "section_id")
     private Integer sectionId;
 

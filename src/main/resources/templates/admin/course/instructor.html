@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강사 정보</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">강사 정보</h1>
+            <p class="text-slate-500 mt-2">해당 코스를 담당하는 강사 정보입니다.</p>
+        </div>
+        <a th:href="@{/admin/courses/{courseId}(courseId=${courseId})}"
+           class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">코스 상세</a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">로그인 ID</p>
+                <p class="font-medium" th:text="${instructor.loginId}"></p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">이름</p>
+                <p class="font-medium" th:text="${instructor.name}"></p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">전화번호</p>
+                <p class="font-medium" th:text="${instructor.phone} ?: '-'"></p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">이메일</p>
+                <p class="font-medium" th:text="${instructor.email}"></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

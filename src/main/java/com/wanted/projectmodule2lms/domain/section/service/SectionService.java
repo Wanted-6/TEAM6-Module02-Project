@@ -11,10 +11,16 @@ import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +31,7 @@ public class SectionService {
     private final CourseRepository courseRepository;
     private final ModelMapper modelMapper;
     private final EnrollmentRepository enrollmentRepository;
+    private final ResourceLoader resourceLoader;
 
     public List<SectionDTO> findSectionsByCourseId(Integer courseId) {
         List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
@@ -42,7 +49,9 @@ public class SectionService {
     }
 
     @Transactional
-    public Integer registSection(Integer courseId, SectionCreateDTO createDTO) {
+    public Integer registSection(Integer courseId,
+                                 SectionCreateDTO createDTO,
+                                 MultipartFile materialUpload) throws IOException {
         if (!courseRepository.existsById(courseId)) {
             throw new IllegalArgumentException("부모 코스가 존재하지 않습니다.");
         }
@@ -55,12 +64,19 @@ public class SectionService {
             throw new IllegalArgumentException("한 코스의 섹션은 8개까지만 등록할 수 있습니다.");
         }
 
+        String materialPath = saveMaterialFile(materialUpload);
+
+        if (materialPath == null || materialPath.isBlank()) {
+            materialPath = createDTO.getMaterialFile();
+        }
+
         Section section = new Section(
                 createDTO.getSectionId(),
                 courseId,
                 createDTO.getTitle(),
                 createDTO.getVideoUrl(),
-                createDTO.getMaterialFile(),
+                materialPath,
+                // createDTO.getMaterialFile(),
                 createDTO.getSectionOrder(),
                 createDTO.getOpenDate()
         );
@@ -71,7 +87,9 @@ public class SectionService {
     }
 
     @Transactional
-    public void modifySection(Integer sectionId, SectionUpdateDTO updateDTO) {
+    public void modifySection(Integer sectionId,
+                              SectionUpdateDTO updateDTO,
+                              MultipartFile materialUpload) throws IOException {
         Section foundSection = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 섹션이 존재하지 않습니다."));
 
@@ -87,10 +105,20 @@ public class SectionService {
             throw new IllegalArgumentException("섹션 순서는 1부터 8까지만 가능합니다.");
         }
 
+        String materialPath = foundSection.getMaterialFile();
+        String newMaterialPath = saveMaterialFile(materialUpload);
+
+        if (newMaterialPath != null && !newMaterialPath.isBlank()) {
+            materialPath = newMaterialPath;
+        } else if (updateDTO.getMaterialFile() != null && !updateDTO.getMaterialFile().isBlank()) {
+            materialPath = updateDTO.getMaterialFile();
+        }
+
         foundSection.changeSectionInfo(
                 updateDTO.getTitle(),
                 updateDTO.getVideoUrl(),
-                updateDTO.getMaterialFile(),
+                materialPath,
+                // updateDTO.getMaterialFile(),
                 updateDTO.getSectionOrder(),
                 updateDTO.getOpenDate()
         );
@@ -149,6 +177,39 @@ public class SectionService {
         return modelMapper.map(foundSection, SectionDTO.class);
     }
 
+    private String saveMaterialFile(MultipartFile materialUpload) throws IOException {
+        if (materialUpload == null || materialUpload.isEmpty()) {
+            return null;
+        }
+
+        Resource resource = resourceLoader.getResource("classpath:static/files/section");
+        String filePath;
+
+        if (!resource.exists()) {
+            String root = "src/main/resources/static/files/section";
+            File file = new File(root);
+            file.mkdirs();
+            filePath = file.getAbsolutePath();
+        } else {
+            filePath = resourceLoader
+                    .getResource("classpath:static/files/section")
+                    .getFile()
+                    .getAbsolutePath();
+        }
+
+        String originFileName = materialUpload.getOriginalFilename();
+        String ext = "";
+
+        if (originFileName != null && originFileName.contains(".")) {
+            ext = originFileName.substring(originFileName.lastIndexOf("."));
+        }
+
+        String savedName = UUID.randomUUID().toString().replace("-", "") + ext;
+
+        materialUpload.transferTo(new File(filePath + "/" + savedName));
+
+        return "static/files/section/" + savedName;
+    }
     private void updateExamDueDate(Integer courseId) {
         Section lastSection = sectionRepository.findByCourseIdAndSectionOrder(courseId, 8)
                 .orElse(null);

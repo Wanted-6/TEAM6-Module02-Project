@@ -6,6 +6,7 @@ import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -44,11 +45,20 @@ public class CourseController {
 
     /* 코스 등록 */
     @PostMapping("/regist")
-    public ModelAndView registCourse(@ModelAttribute CourseCreateDTO createDTO,
-                                     ModelAndView mv) {
-        Integer courseId = courseService.registCourse(createDTO);
-        mv.setViewName("redirect:/courses/" + courseId);
-        return mv;
+    public String registCourse(@ModelAttribute CourseCreateDTO createDTO,
+                               @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
+                               RedirectAttributes rttr) {
+        try {
+            Integer courseId = courseService.registCourse(createDTO, thumbnailFile);
+            rttr.addFlashAttribute("successMessage", "코스가 등록되었습니다.");
+            return "redirect:/courses/" + courseId;
+        } catch (IllegalArgumentException e) {
+            rttr.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/courses/regist";
+        } catch (Exception e) {
+            rttr.addFlashAttribute("errorMessage", "코스 등록 중 오류가 발생했습니다.");
+            return "redirect:/courses/regist";
+        }
     }
 
     /* 코스 수정 페이지 */
@@ -63,10 +73,19 @@ public class CourseController {
     @PostMapping("/{courseId}/modify")
     public String modifyCourse(@PathVariable Integer courseId,
                                @ModelAttribute CourseUpdateDTO updateDTO,
+                               @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                                RedirectAttributes rttr) {
-        courseService.modifyCourse(courseId, updateDTO);
-        rttr.addFlashAttribute("successMessage", "코스가 수정되었습니다.");
-        return "redirect:/courses/" + courseId;
+        try {
+            courseService.modifyCourse(courseId, updateDTO, thumbnailFile);
+            rttr.addFlashAttribute("successMessage", "코스가 수정되었습니다.");
+            return "redirect:/courses/" + courseId;
+        } catch (IllegalArgumentException e) {
+            rttr.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/courses/" + courseId + "/modify";
+        } catch (Exception e) {
+            rttr.addFlashAttribute("errorMessage", "코스 수정 중 오류가 발생했습니다.");
+            return "redirect:/courses/" + courseId + "/modify";
+        }
     }
 
     @GetMapping("/{courseId}/students")

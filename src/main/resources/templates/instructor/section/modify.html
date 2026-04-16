@@ -17,18 +17,11 @@
            class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">상세</a>
     </div>
 
-    <form th:action="@{/sections/{sectionId}/modify(sectionId=${section.sectionId})}" method="post"
+    <form th:action="@{/sections/{sectionId}/modify(sectionId=${section.sectionId})}" method="post" enctype="multipart/form-data"
           class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label class="block text-sm font-medium mb-2">섹션 ID</label>
-                <input type="text" th:value="${section.sectionId}" class="w-full rounded-lg border-slate-300 bg-slate-100" readonly>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-2">코스 ID</label>
-                <input type="text" th:value="${section.courseId}" class="w-full rounded-lg border-slate-300 bg-slate-100" readonly>
-            </div>
+
         </div>
 
         <div>
@@ -43,7 +36,7 @@
 
         <div>
             <label class="block text-sm font-medium mb-2">자료 파일</label>
-            <input type="text" name="materialFile" th:value="${section.materialFile}" class="w-full rounded-lg border-slate-300">
+            <input type="file" name="materialUpload" class="w-full rounded-lg border-slate-300">
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
