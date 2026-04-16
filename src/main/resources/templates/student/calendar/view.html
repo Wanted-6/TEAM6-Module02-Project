@@ -127,6 +127,7 @@
     let allEvents = [];
     let selectedDate = null;
     let calendar = null;
+    let editingMemoId = null;
 
     function getTodayString() {
         const today = new Date();
@@ -272,16 +273,68 @@
         });
     }
 
+    // function loadMemos(date) {
+    //     fetch('/student/calendar/memos?date=' + date)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             renderMemoList(data);
+    //         })
+    //         .catch(error => {
+    //             console.error('메모 조회 오류:', error);
+    //         });
+    // }
     function loadMemos(date) {
         fetch('/student/calendar/memos?date=' + date)
             .then(response => response.json())
             .then(data => {
+                console.log('메모 조회 결과:', data);
                 renderMemoList(data);
             })
             .catch(error => {
                 console.error('메모 조회 오류:', error);
             });
     }
+    // function saveMemo() {
+    //     const content = document.getElementById('memoContent').value.trim();
+    //
+    //     if (!selectedDate) {
+    //         alert('먼저 날짜를 선택하세요.');
+    //         return;
+    //     }
+    //
+    //     if (!content) {
+    //         alert('메모 내용을 입력하세요.');
+    //         return;
+    //     }
+    //
+    //     const formData = new URLSearchParams();
+    //     formData.append('content', content);
+    //     formData.append('memoDate', selectedDate);
+    //
+    //     fetch('/student/calendar', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/x-www-form-urlencoded'
+    //         },
+    //         body: formData
+    //     })
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error('메모 저장 실패');
+    //             }
+    //             return response.text();
+    //         })
+    //         .then(() => {
+    //             document.getElementById('memoContent').value = '';
+    //
+    //             loadMemos(selectedDate);
+    //             refreshCalendarEvents();
+    //         })
+    //         .catch(error => {
+    //             console.error(error);
+    //             alert('메모 저장 중 오류가 발생했습니다.');
+    //         });
+    // }
     function saveMemo() {
         const content = document.getElementById('memoContent').value.trim();
 
@@ -299,8 +352,14 @@
         formData.append('content', content);
         formData.append('memoDate', selectedDate);
 
-        fetch('/student/calendar', {
-            method: 'POST',
+        const isEditMode = editingMemoId !== null;
+        const requestUrl = isEditMode
+            ? `/student/calendar/${editingMemoId}`
+            : '/student/calendar';
+        const requestMethod = isEditMode ? 'PUT' : 'POST';
+
+        fetch(requestUrl, {
+            method: requestMethod,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
@@ -308,19 +367,23 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('메모 저장 실패');
+                    throw new Error(isEditMode ? '메모 수정 실패' : '메모 저장 실패');
                 }
                 return response.text();
             })
             .then(() => {
                 document.getElementById('memoContent').value = '';
+                editingMemoId = null;
+                document.getElementById('saveMemoBtn').innerText = '추가';
 
                 loadMemos(selectedDate);
                 refreshCalendarEvents();
             })
             .catch(error => {
                 console.error(error);
-                alert('메모 저장 중 오류가 발생했습니다.');
+                alert(isEditMode
+                    ? '메모 수정 중 오류가 발생했습니다.'
+                    : '메모 저장 중 오류가 발생했습니다.');
             });
     }
     function refreshCalendarEvents() {
@@ -339,6 +402,23 @@
                 console.error('캘린더 새로고침 오류:', error);
             });
     }
+    // function renderMemoList(memos) {
+    //     const memoList = document.getElementById('memoList');
+    //     memoList.innerHTML = '';
+    //
+    //     if (!memos || memos.length === 0) {
+    //         memoList.innerHTML = '<div class="panel-item">메모 없음</div>';
+    //         return;
+    //     }
+    //
+    //     memos.forEach(memo => {
+    //         memoList.innerHTML += `
+    //         <div class="panel-item">
+    //             ${memo.content}
+    //         </div>
+    //     `;
+    //     });
+    // }
     function renderMemoList(memos) {
         const memoList = document.getElementById('memoList');
         memoList.innerHTML = '';
@@ -349,12 +429,72 @@
         }
 
         memos.forEach(memo => {
-            memoList.innerHTML += `
-            <div class="panel-item">
-                ${memo.content}
-            </div>
-        `;
+            const item = document.createElement('div');
+            item.className = 'panel-item memo-item';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'memo-text';
+            textDiv.textContent = memo.content;
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'memo-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.textContent = '수정';
+            editBtn.addEventListener('click', function () {
+                startEditMemo(memo.memoId, memo.content);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.textContent = '삭제';
+            deleteBtn.addEventListener('click', function () {
+                deleteMemo(memo.memoId);
+            });
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+
+            item.appendChild(textDiv);
+            item.appendChild(actionsDiv);
+
+            memoList.appendChild(item);
         });
+    }
+    function startEditMemo(memoId, content) {
+        editingMemoId = memoId;
+        document.getElementById('memoContent').value = content;
+        document.getElementById('saveMemoBtn').innerText = '수정';
+    }
+    function deleteMemo(memoId) {
+        if (!confirm('메모를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        fetch(`/student/calendar/${memoId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('메모 삭제 실패');
+                }
+                return response.text();
+            })
+            .then(() => {
+                if (editingMemoId === memoId) {
+                    editingMemoId = null;
+                    document.getElementById('memoContent').value = '';
+                    document.getElementById('saveMemoBtn').innerText = '추가';
+                }
+
+                loadMemos(selectedDate);
+                refreshCalendarEvents();
+            })
+            .catch(error => {
+                console.error(error);
+                alert('메모 삭제 중 오류가 발생했습니다.');
+            });
     }
     function isPastDate(dateStr) {
         const todayStr = getTodayString();

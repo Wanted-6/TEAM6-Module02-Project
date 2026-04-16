@@ -11,6 +11,7 @@ import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentReposi
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CalenderService {
     private final CalendarMemoRepository calendarMemoRepository;
     private final CourseRepository courseRepository;
@@ -86,7 +88,6 @@ public class CalenderService {
                 .collect(Collectors.toList());
 
         result.addAll(memoEvents);
-
 
 
         return result;
@@ -156,7 +157,6 @@ public class CalenderService {
         return result;
 
 
-
     }
 
     public List<CalendarMemoDTO> findMemosByDate(Integer memberId, String date) {
@@ -178,5 +178,27 @@ public class CalenderService {
         );
 
         calendarMemoRepository.save(memo);
+    }
+
+    public void updateMemo(Integer memberId, Integer memoId, CalendarMemoCreateDTO dto) {
+        CalendarMemo memo = calendarMemoRepository.findById(memoId)
+                .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다."));
+
+        if (!memo.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("본인 메모만 수정할 수 있습니다.");
+        }
+
+        memo.changeContent(dto.getContent());
+    }
+
+    public void deleteMemo(Integer memberId, Integer memoId) {
+        CalendarMemo memo = calendarMemoRepository.findById(memoId)
+                .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다."));
+
+        if (!memo.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("본인 메모만 삭제할 수 있습니다.");
+        }
+
+        calendarMemoRepository.delete(memo);
     }
 }

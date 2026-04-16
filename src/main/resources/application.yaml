@@ -15,7 +15,9 @@ spring:
 
   mvc:
     static-path-pattern: /static/**
-
+    hiddenmethod:
+      filter:
+        enabled: true
   jpa:
     show-sql: true
     database: mysql
