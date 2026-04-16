@@ -14,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.wanted.projectmodule2lms.global.util.SecurityUtil;
+
 
 @Controller
 @RequestMapping("/student/enrollments")
@@ -27,7 +29,11 @@ public class EnrollmentController {
     public String findOpenCourses(@RequestParam(required = false) String category,
                                   Model model) {
 
-        Integer memberId = 1; // 임시 로그인 사용자
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        if (currentMemberId == null) {
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+        }
+        Integer memberId = currentMemberId.intValue();
 
         List<CourseDTO> courseList = courseService.findOpenCourses();
         if (category != null && !category.isBlank() && !category.equals("전체")) {
@@ -54,7 +60,11 @@ public class EnrollmentController {
     public String findCourseDetail(@PathVariable Integer courseId,
                                    Model model) {
 
-        Integer memberId = 1; // 임시 로그인 사용자
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        if (currentMemberId == null) {
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+        }
+        Integer memberId = currentMemberId.intValue();
 
         CourseDTO course = courseService.findCourseById(courseId);
         boolean enrolled = enrollmentService.isAlreadyEnrolled(memberId, courseId);
@@ -69,7 +79,11 @@ public class EnrollmentController {
     public String enrollCourse(@ModelAttribute EnrollmentCreateDTO request,
                                RedirectAttributes rttr) {
 
-        Integer memberId = 1; // 임시 로그인 사용자
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        if (currentMemberId == null) {
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+        }
+        Integer memberId = currentMemberId.intValue();
 
         try {
             enrollmentService.enrollCourse(memberId, request.getCourseId());
