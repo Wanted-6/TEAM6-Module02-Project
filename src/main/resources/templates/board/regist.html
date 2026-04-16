@@ -52,9 +52,25 @@
                 </select>
             </div>
 
+            <div class="form-row"
+                 th:if="${boardType.name() == 'SECTION_QNA' and selectedCourseId != null}">
+                <label>선택된 코스명</label>
+                <input type="text"
+                       id="selectedCourseTitle"
+                       readonly
+                       th:value="${selectedCourseTitle}">
+            </div>
+
             <div class="form-row" th:if="${boardType.name() == 'SECTION_QNA'}">
-                <label for="sectionId">섹션 ID</label>
-                <input id="sectionId" name="sectionId" type="number" th:value="${selectedSectionId}" placeholder="섹션 Q&A에 등록할 섹션 ID를 입력하세요">
+                <label for="sectionId">섹션</label>
+                <select id="sectionId" name="sectionId">
+                    <option value="">섹션을 선택하세요</option>
+                    <option th:each="section : ${sections}"
+                            th:value="${section.sectionId}"
+                            th:text="|${section.sectionOrder}주차 - ${section.title}|"
+                            th:attr="data-course-id=${section.courseId}"
+                            th:selected="${selectedSectionId != null and selectedSectionId == section.sectionId}">1주차 - Spring Boot 소개</option>
+                </select>
             </div>
 
             <div class="form-row">
@@ -91,6 +107,49 @@
     </div>
 </div>
 <script src="/js/board/role-switcher.js"></script>
+<script th:if="${boardType.name() == 'SECTION_QNA'}">
+    (function () {
+        const courseSelect = document.getElementById('courseId');
+        const sectionSelect = document.getElementById('sectionId');
+        const selectedCourseTitleInput = document.getElementById('selectedCourseTitle');
+
+        if (!courseSelect || !sectionSelect) {
+            return;
+        }
+
+        function syncSelectedCourseTitle() {
+            if (!selectedCourseTitleInput) {
+                return;
+            }
+
+            const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+            selectedCourseTitleInput.value = selectedOption && selectedOption.value ? selectedOption.text : '';
+        }
+
+        function filterSectionsByCourse() {
+            const selectedCourseId = courseSelect.value;
+
+            Array.from(sectionSelect.options).forEach(option => {
+                if (!option.value) {
+                    option.hidden = false;
+                    return;
+                }
+
+                option.hidden = !!selectedCourseId && option.dataset.courseId !== selectedCourseId;
+            });
+
+            const selectedOption = sectionSelect.options[sectionSelect.selectedIndex];
+            if (selectedOption && selectedOption.hidden) {
+                sectionSelect.value = '';
+            }
+
+            syncSelectedCourseTitle();
+        }
+
+        courseSelect.addEventListener('change', filterSectionsByCourse);
+        filterSectionsByCourse();
+    })();
+</script>
 <script th:if="${boardType.name() == 'COURSE_NOTICE'}" th:inline="javascript">
     (function () {
         const select = document.getElementById('courseId');

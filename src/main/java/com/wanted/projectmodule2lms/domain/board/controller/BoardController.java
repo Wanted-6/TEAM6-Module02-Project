@@ -69,6 +69,7 @@ public class BoardController {
 
     @GetMapping("/section-qna")
     public String sectionQnaListPage(@RequestParam(required = false) String keyword,
+                                     @RequestParam(required = false) Integer courseId,
                                      @RequestParam(required = false) Integer currentMemberId,
                                      @RequestParam(required = false) MemberRole currentRole,
                                      Model model) {
@@ -79,17 +80,24 @@ public class BoardController {
                 : boardService.searchBoardByPostTypeAndTitle(BoardType.SECTION_QNA, keyword));
         model.addAttribute("boardList", boardList);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("currentMemberId", currentMemberId);
+        model.addAttribute("currentRole", currentRole);
         return "board/section-qna-list";
     }
 
     @GetMapping("/detail")
-    public String boardDetailPage(@RequestParam Integer postId, Model model) {
+    public String boardDetailPage(@RequestParam Integer postId,
+                                  @RequestParam(required = false) Integer courseId,
+                                  @RequestParam(required = false) Integer currentMemberId,
+                                  @RequestParam(required = false) MemberRole currentRole,
+                                  Model model) {
         boardService.increaseViewCount(postId);
         BoardDTO board = boardService.findBoardById(postId);
         List<CommentDTO> commentList=commentService.findCommentsByPostId(postId);
         model.addAttribute("board", board);
         model.addAttribute("commentList", commentList);
-        model.addAttribute("listPath", getListPath(board.getPostType()));
+        model.addAttribute("listPath", getListPath(board.getPostType(), courseId, currentMemberId, currentRole));
         return "board/detail";
     }
 
@@ -103,12 +111,18 @@ public class BoardController {
         List<Course> courses = (currentMemberId != null && currentRole != null)
                 ? boardService.findAvailableCourses(type, currentMemberId, currentRole)
                 : boardService.findAllCourses();
+        String selectedCourseTitle = courses.stream()
+                .filter(course -> courseId != null && course.getCourseId().equals(courseId))
+                .map(Course::getTitle)
+                .findFirst()
+                .orElse(null);
         model.addAttribute("boardType", type);
         model.addAttribute("courses", courses);
         model.addAttribute("sections", (currentMemberId != null && currentRole != null)
                 ? boardService.findAvailableSections(type, currentMemberId, currentRole)
                 : List.of());
         model.addAttribute("selectedCourseId", courseId);
+        model.addAttribute("selectedCourseTitle", selectedCourseTitle);
         model.addAttribute("selectedSectionId", sectionId);
         model.addAttribute("listPath", getListPath(type));
         return "board/regist";
@@ -133,24 +147,40 @@ public class BoardController {
     }
 
     @GetMapping("/modify")
-    public String boardModifyPage(@RequestParam Integer postId, Model model) {
+    public String boardModifyPage(@RequestParam Integer postId,
+                                  @RequestParam(required = false) Integer courseId,
+                                  @RequestParam(required = false) Integer currentMemberId,
+                                  @RequestParam(required = false) MemberRole currentRole,
+                                  Model model) {
         BoardDTO board = boardService.findBoardById(postId);
         model.addAttribute("board", board);
-        model.addAttribute("listPath", getListPath(board.getPostType()));
+        model.addAttribute("contextCourseId", courseId);
+        model.addAttribute("contextCurrentMemberId", currentMemberId);
+        model.addAttribute("contextCurrentRole", currentRole);
+        model.addAttribute("listPath", getListPath(board.getPostType(), courseId, currentMemberId, currentRole));
         return "board/modify";
     }
 
     @PostMapping("/modify")
     public String modifyBoard(@ModelAttribute BoardDTO boardDTO,
+                              @RequestParam(required = false) Integer contextCourseId,
+                              @RequestParam(required = false) Integer contextCurrentMemberId,
+                              @RequestParam(required = false) MemberRole contextCurrentRole,
                               @RequestParam Integer currentMemberId,
                               @RequestParam MemberRole currentRole,
                               RedirectAttributes redirectAttributes) {
         try {
             boardService.modifyBoard(boardDTO, currentMemberId, currentRole);
-            return "redirect:/board/detail?postId=" + boardDTO.getPostId();
+            return "redirect:/board/detail?postId=" + boardDTO.getPostId()
+                    + appendNumberQuery("courseId", contextCourseId)
+                    + appendNumberQuery("currentMemberId", contextCurrentMemberId)
+                    + appendTextQuery("currentRole", contextCurrentRole != null ? contextCurrentRole.name() : null);
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/board/modify?postId=" + boardDTO.getPostId();
+            return "redirect:/board/modify?postId=" + boardDTO.getPostId()
+                    + appendNumberQuery("courseId", contextCourseId)
+                    + appendNumberQuery("currentMemberId", contextCurrentMemberId)
+                    + appendTextQuery("currentRole", contextCurrentRole != null ? contextCurrentRole.name() : null);
         }
     }
 
@@ -204,11 +234,55 @@ public class BoardController {
         };
     }
 
+    private String getListPath(BoardType boardType,
+                               Integer courseId,
+                               Integer currentMemberId,
+                               MemberRole currentRole) {
+        String basePath = getListPath(boardType);
+
+        if (boardType != BoardType.SECTION_QNA) {
+            return basePath;
+        }
+
+        StringBuilder pathBuilder = new StringBuilder(basePath);
+        boolean hasQuery = false;
+
+        hasQuery = appendQuery(pathBuilder, "courseId", courseId, hasQuery);
+        hasQuery = appendQuery(pathBuilder, "currentMemberId", currentMemberId, hasQuery);
+        appendQuery(pathBuilder, "currentRole", currentRole != null ? currentRole.name() : null, hasQuery);
+
+        return pathBuilder.toString();
+    }
+
     private String appendNumberQuery(String key, Integer value) {
         return value == null ? "" : "&" + key + "=" + value;
     }
 
     private String appendTextQuery(String key, String value) {
         return value == null || value.isBlank() ? "" : "&" + key + "=" + value;
+    }
+
+    private boolean appendQuery(StringBuilder pathBuilder, String key, Integer value, boolean hasQuery) {
+        if (value == null) {
+            return hasQuery;
+        }
+
+        pathBuilder.append(hasQuery ? "&" : "?")
+                .append(key)
+                .append("=")
+                .append(value);
+        return true;
+    }
+
+    private boolean appendQuery(StringBuilder pathBuilder, String key, String value, boolean hasQuery) {
+        if (value == null || value.isBlank()) {
+            return hasQuery;
+        }
+
+        pathBuilder.append(hasQuery ? "&" : "?")
+                .append(key)
+                .append("=")
+                .append(value);
+        return true;
     }
 }
