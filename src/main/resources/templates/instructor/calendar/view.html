@@ -130,7 +130,9 @@
         const scheduleList = document.getElementById('scheduleList');
         scheduleList.innerHTML = '';
 
-        const dayEvents = allEvents.filter(event => event.start === date);
+        const dayEvents = allEvents.filter(event =>
+            event.start === date && !event.title.startsWith('[메모]')
+        );
 
         if (dayEvents.length === 0) {
             scheduleList.innerHTML = '<div class="panel-item">일정 없음</div>';
@@ -184,7 +186,12 @@
             },
             body: formData
         })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('메모 저장 실패');
+                }
+                return response.text();
+            })
             .then(() => {
                 document.getElementById('memoContent').value = '';
 
@@ -192,14 +199,51 @@
                     id: 'memo-temp-' + Date.now(),
                     title: '[메모] ' + content,
                     start: selectedDate,
-                    color: '#f59e0b'
+                    color: '#C8E6C9'
                 };
 
                 allEvents.push(newMemoEvent);
                 calendar.addEvent(newMemoEvent);
 
-                renderDayEvents(selectedDate);
                 loadMemos(selectedDate);
+                renderDayEvents(selectedDate);
+            })
+            .catch(error => {
+                console.error(error);
+                alert('메모 저장 중 오류가 발생했습니다.');
+            });
+    }
+    function renderMemoList(memos) {
+        const memoList = document.getElementById('memoList');
+        memoList.innerHTML = '';
+
+        if (!memos || memos.length === 0) {
+            memoList.innerHTML = '<div class="panel-item">메모 없음</div>';
+            return;
+        }
+
+        memos.forEach(memo => {
+            memoList.innerHTML += `
+            <div class="panel-item">
+                ${memo.content}
+            </div>
+        `;
+        });
+    }
+    function refreshCalendarEvents() {
+        fetch('/instructor/calendar/events')
+            .then(response => response.json())
+            .then(data => {
+                allEvents = applyExamDeadlineColors(data);
+
+                calendar.removeAllEvents();
+                calendar.addEventSource(allEvents);
+
+                renderDayEvents(selectedDate);
+                renderDdayList();
+            })
+            .catch(error => {
+                console.error('캘린더 새로고침 오류:', error);
             });
     }
 </script>

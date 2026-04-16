@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html class="light" lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Intellectual Atelier | 가입하기</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#00236f",
+                        "primary-container": "#1e3a8a",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9fb",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#444651",
+                        "surface-container-low": "#f3f4f6",
+                        "surface-container-highest": "#e1e2e4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dce1ff",
+                        "on-primary-fixed": "#00164e",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#c5c5d3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fb;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+        .editorial-gradient {
+            background: linear-gradient(135deg, #00236f 0%, #1e3a8a 100%);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-on-surface">
+
+<main class="flex-grow flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-[480px] space-y-8">
+
+        <div class="text-center space-y-2">
+            <div class="inline-flex items-center justify-center mb-4">
+                <span class="text-3xl font-extrabold tracking-tight text-primary font-headline">Intellectual Atelier</span>
+            </div>
+            <h1 class="text-3xl font-bold tracking-tight text-on-surface">새로운 여정의 시작</h1>
+            <p class="text-on-surface-variant font-medium">에디토리얼 기반의 고품격 학습 환경에 참여하세요</p>
+        </div>
+
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-xl shadow-sm">
+
+            <div th:if="${message}" class="mb-6 p-4 rounded-lg bg-error-container border border-error/20 flex items-center gap-3">
+                <span class="material-symbols-outlined text-on-error-container text-[20px]">info</span>
+                <p class="text-sm font-semibold text-on-error-container" th:text="${message}">안내 메시지</p>
+            </div>
+
+            <form th:action="@{/member/signup}" method="POST" enctype="multipart/form-data" class="space-y-5" id="signupForm" onsubmit="return validateForm()">
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight">가입 유형</label>
+                    <div class="flex p-1 bg-surface-container-low rounded-lg">
+                        <input type="hidden" id="memberRole" name="memberRole" value="STUDENT">
+
+                        <button type="button" id="btn-student" onclick="selectRole('STUDENT')"
+                                class="flex-1 py-3 text-sm font-semibold rounded-lg transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm">
+                            수강생으로 가입
+                        </button>
+                        <button type="button" id="btn-instructor" onclick="selectRole('INSTRUCTOR')"
+                                class="flex-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all">
+                            강사로 가입
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight flex items-center gap-1" for="memberId">아이디</label>
+                    <div class="flex gap-2">
+                        <input id="memberId" name="memberId" class="flex-grow bg-surface-container-low border-0 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all" placeholder="사용할 아이디 입력" type="text" required/>
+                        <button class="whitespace-nowrap px-4 py-3 bg-surface-container-high text-on-surface text-sm font-semibold rounded-lg hover:bg-surface-container-highest transition-colors" type="button" onclick="checkDuplicateId()">
+                            중복확인
+                        </button>
+                    </div>
+                    <p id="id-msg" class="hidden text-xs mt-1.5 flex items-center gap-1"></p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="memberPassword">비밀번호</label>
+                    <input id="memberPassword" name="memberPassword" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all" placeholder="보안을 위한 비밀번호 설정" type="password" required oninput="validatePasswordComplexity(); checkPasswordMatch();"/>
+                    <p id="pw-complexity-msg" class="text-xs text-on-surface-variant mt-1.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">info</span>
+                        영문 대/소문자, 숫자, 특수문자 중 3가지 이상 포함 (8자 이상)
+                    </p>
+                </div>
+
+                <div class="space-y-1.5 relative">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="passwordConfirm">비밀번호 확인</label>
+                    <input id="passwordConfirm" type="password" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all" placeholder="비밀번호를 다시 입력하세요" required oninput="checkPasswordMatch()"/>
+                    <p id="password-error" class="hidden text-xs text-error mt-1.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">error</span>
+                        비밀번호가 일치하지 않습니다.
+                    </p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="memberName">이름</label>
+                    <input id="memberName" name="memberName" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all" placeholder="실명을 입력하세요" type="text" required/>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="memberEmail">이메일</label>
+                    <input id="memberEmail" name="memberEmail" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all" placeholder="example@atelier.com" type="email" required onblur="checkDuplicateEmail()"/>
+                    <p id="email-msg" class="hidden text-xs text-error mt-1.5 flex items-center gap-1"></p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="memberPhone">휴대폰 번호</label>
+                    <input id="memberPhone" name="memberPhone" class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary/40 outline-none transition-all" placeholder="010-0000-0000" type="tel" required onblur="validatePhoneFormat()"/>
+                    <p id="phone-msg" class="hidden text-xs text-error mt-1.5 flex items-center gap-1"></p>
+                </div>
+
+                <div id="instructor-fields" class="hidden space-y-4 pt-4 mt-2 border-t border-surface-variant border-dashed">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="gradCert">졸업증명서 첨부 (이미지/PDF)</label>
+                        <input id="gradCert" name="gradCert" type="file" accept="image/*,.pdf"
+                               class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-2.5 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-fixed file:text-on-primary-fixed hover:file:bg-primary-fixed-dim cursor-pointer outline-none transition-all"/>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-on-surface-variant tracking-tight" for="careerCert">경력증명서 첨부 (이미지/PDF)</label>
+                        <input id="careerCert" name="careerCert" type="file" accept="image/*,.pdf"
+                               class="w-full bg-surface-container-low border-0 rounded-lg px-4 py-2.5 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-fixed file:text-on-primary-fixed hover:file:bg-primary-fixed-dim cursor-pointer outline-none transition-all"/>
+                    </div>
+                </div>
+
+                <div class="py-2 space-y-1.5">
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <input id="agreeTerms" class="mt-1 rounded border-outline-variant text-primary focus:ring-primary" type="checkbox" onchange="hideTermsError()"/>
+                        <span class="text-xs text-on-surface-variant leading-relaxed">
+                                <span class="text-primary font-semibold underline underline-offset-2">이용약관</span> 및
+                                <span class="text-primary font-semibold underline underline-offset-2">개인정보 처리방침</span>에 동의하며,
+                                아틀리에의 교육 서비스를 이용할 것에 서명합니다.
+                            </span>
+                    </label>
+                    <p id="terms-msg" class="hidden text-xs text-error mt-1.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">error</span>
+                        가입을 위해 이용약관 동의가 필요합니다.
+                    </p>
+                </div>
+
+                <button class="w-full editorial-gradient text-on-primary py-4 rounded-lg font-bold text-lg tracking-tight shadow-lg shadow-primary/10 hover:opacity-95 transition-all transform active:scale-[0.98]" type="submit">
+                    가입하기
+                </button>
+            </form>
+
+            <div class="mt-8 text-center">
+                <p class="text-sm text-on-surface-variant">
+                    이미 계정이 있으신가요?
+                    <a th:href="@{/auth/login}" class="ml-2 text-primary font-bold hover:underline underline-offset-4">로그인하기</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    // 상태 체크용 변수들 (제출 전 검증용)
+    let isIdChecked = false;
+    let isPasswordValid = false;
+    let isEmailValid = false;  // 추가됨
+    let isPhoneValid = false;  // 추가됨
+
+    // 1. 수강생 / 강사 탭 전환
+    function selectRole(role) {
+        const roleInput = document.getElementById('memberRole');
+        const btnStudent = document.getElementById('btn-student');
+        const btnInstructor = document.getElementById('btn-instructor');
+        const instructorFields = document.getElementById('instructor-fields');
+
+        roleInput.value = role;
+
+        if (role === 'STUDENT') {
+            btnStudent.className = 'flex-1 py-3 text-sm font-semibold rounded-lg transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm';
+            btnInstructor.className = 'flex-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all';
+            instructorFields.classList.add('hidden');
+        } else if (role === 'INSTRUCTOR') {
+            btnInstructor.className = 'flex-1 py-3 text-sm font-semibold rounded-lg transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm';
+            btnStudent.className = 'flex-1 py-3 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all';
+            instructorFields.classList.remove('hidden');
+        }
+    }
+
+    // 2. 아이디 중복 확인 (AJAX)
+    async function checkDuplicateId() {
+        const memberId = document.getElementById('memberId').value;
+        const msgEl = document.getElementById('id-msg');
+
+        if(!memberId) {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>아이디를 입력해주세요.';
+            msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+            msgEl.classList.remove('hidden');
+            isIdChecked = false;
+            return;
+        }
+
+        // 아이디 최소 4글자 이상
+        if (memberId.length < 4) {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>아이디는 4글자 이상이어야 합니다.';
+            msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+            msgEl.classList.remove('hidden');
+            isIdChecked = false;
+            return; // 4글자 안 되면 중단 (서버로 안 보냄)
+        }
+
+        try {
+            const response = await fetch(`/api/member/check-id?memberId=${memberId}`);
+            const isDuplicate = await response.json();
+
+            msgEl.classList.remove('hidden');
+            if(isDuplicate) {
+                msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>이미 사용중인 아이디입니다.';
+                msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+                isIdChecked = false;
+            } else {
+                msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span>사용 가능한 아이디입니다.';
+                msgEl.className = 'text-xs text-green-600 mt-1.5 flex items-center gap-1';
+                isIdChecked = true;
+            }
+        } catch (e) {
+            console.error("API Error:", e);
+        }
+    }
+
+    // 아이디 입력 시 상태 초기화
+    document.getElementById('memberId').addEventListener('input', function() {
+        isIdChecked = false;
+        document.getElementById('id-msg').classList.add('hidden');
+    });
+
+    // 3. 비밀번호 복잡도 검사
+    function validatePasswordComplexity() {
+        const pw = document.getElementById('memberPassword').value;
+        const msgEl = document.getElementById('pw-complexity-msg');
+
+        if (!pw) {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">info</span>영문 대/소문자, 숫자, 특수문자 중 3가지 이상 포함 (8자 이상)';
+            msgEl.className = 'text-xs text-on-surface-variant mt-1.5 flex items-center gap-1';
+            isPasswordValid = false;
+            return;
+        }
+
+        let count = 0;
+        if (/[A-Z]/.test(pw)) count++;
+        if (/[a-z]/.test(pw)) count++;
+        if (/\d/.test(pw)) count++;
+        if (/[^A-Za-z0-9]/.test(pw)) count++;
+
+        if (pw.length >= 8 && count >= 3) {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span>사용 가능한 비밀번호입니다.';
+            msgEl.className = 'text-xs text-green-600 mt-1.5 flex items-center gap-1';
+            isPasswordValid = true;
+        } else {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>비밀번호 조건을 다시 확인해주세요.';
+            msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+            isPasswordValid = false;
+        }
+    }
+
+    // 4. 비밀번호 일치 검사
+    function checkPasswordMatch() {
+        const password = document.getElementById('memberPassword').value;
+        const confirm = document.getElementById('passwordConfirm').value;
+        const errorMsg = document.getElementById('password-error');
+        const confirmInput = document.getElementById('passwordConfirm');
+
+        if (confirm === '') {
+            errorMsg.classList.add('hidden');
+            confirmInput.classList.remove('ring-2', 'ring-error', 'border-error');
+            return;
+        }
+
+        if (password !== confirm) {
+            errorMsg.classList.remove('hidden');
+            confirmInput.classList.add('ring-2', 'ring-error', 'border-error');
+        } else {
+            errorMsg.classList.add('hidden');
+            confirmInput.classList.remove('ring-2', 'ring-error', 'border-error');
+        }
+    }
+
+    // 5. 이메일 중복 및 형식 검사
+    async function checkDuplicateEmail() {
+        const email = document.getElementById('memberEmail').value;
+        const msgEl = document.getElementById('email-msg');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if(!email) return;
+
+        if (!emailRegex.test(email)) {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>올바른 이메일 형식을 입력해주세요.';
+            msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+            msgEl.classList.remove('hidden');
+            isEmailValid = false;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/member/check-email?email=${email}`);
+            const isDuplicate = await response.json();
+
+            msgEl.classList.remove('hidden');
+            if(isDuplicate) {
+                msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>이미 사용중인 이메일입니다.';
+                msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+                isEmailValid = false;
+            } else {
+                msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span>사용 가능한 이메일입니다.';
+                msgEl.className = 'text-xs text-green-600 mt-1.5 flex items-center gap-1';
+                isEmailValid = true;
+            }
+        } catch(e) {}
+    }
+
+    // 이메일 입력 시 상태 초기화
+    document.getElementById('memberEmail').addEventListener('input', function() {
+        isEmailValid = false;
+        document.getElementById('email-msg').classList.add('hidden');
+    });
+
+    // 6. 전화번호 형식 및 중복 검사
+    async function validatePhoneFormat() {
+        const phone = document.getElementById('memberPhone').value;
+        const msgEl = document.getElementById('phone-msg');
+        const phoneRegex = /^010-\d{4}-\d{4}$/;
+
+        if(!phone) return;
+
+        if (!phoneRegex.test(phone)) {
+            msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>010-0000-0000 형식으로 입력해주세요.';
+            msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+            msgEl.classList.remove('hidden');
+            isPhoneValid = false;
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/member/check-phone?phone=${phone}`);
+            const isDuplicate = await response.json();
+
+            msgEl.classList.remove('hidden');
+            if(isDuplicate) {
+                msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">error</span>이미 사용중인 전화번호입니다.';
+                msgEl.className = 'text-xs text-error mt-1.5 flex items-center gap-1';
+                isPhoneValid = false;
+            } else {
+                msgEl.innerHTML = '<span class="material-symbols-outlined text-[14px]">check_circle</span>사용 가능한 전화번호입니다.';
+                msgEl.className = 'text-xs text-green-600 mt-1.5 flex items-center gap-1';
+                isPhoneValid = true;
+            }
+        } catch(e) {}
+    }
+
+    // 전화번호 입력 시 상태 초기화
+    document.getElementById('memberPhone').addEventListener('input', function() {
+        isPhoneValid = false;
+        document.getElementById('phone-msg').classList.add('hidden');
+    });
+
+    // 약관 동의 체크 시 에러메시지 숨김
+    function hideTermsError() {
+        document.getElementById('terms-msg').classList.add('hidden');
+    }
+
+    // ⭐ 7. 폼 전송 전 최종 확인 (여기서 Alert 띄우고 막음!)
+    function validateForm() {
+        const password = document.getElementById('memberPassword').value;
+        const confirm = document.getElementById('passwordConfirm').value;
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+
+        if (!isIdChecked) {
+            alert("아이디 중복확인을 진행해주세요.");
+            document.getElementById('memberId').focus();
+            return false;
+        }
+
+        if (!isPasswordValid) {
+            alert("비밀번호 조건을 충족하지 않았습니다.");
+            document.getElementById('memberPassword').focus();
+            return false;
+        }
+
+        if (password !== confirm) {
+            alert("비밀번호가 일치하지 않습니다. 다시 확인해 주세요.");
+            document.getElementById('passwordConfirm').focus();
+            return false;
+        }
+
+        if (!isEmailValid) {
+            alert("이메일 형식이 틀리거나 중복된 이메일입니다.");
+            document.getElementById('memberEmail').focus();
+            return false;
+        }
+
+        if (!isPhoneValid) {
+            alert("전화번호 형식이 틀리거나 중복된 전화번호입니다.");
+            document.getElementById('memberPhone').focus();
+            return false;
+        }
+
+        if (!agreeTerms) {
+            document.getElementById('terms-msg').classList.remove('hidden');
+            alert("가입을 위해 이용약관 동의가 필요합니다.");
+            document.getElementById('agreeTerms').focus();
+            return false;
+        }
+
+        return true;
+    }
+</script>
+</body>
+</html>

@@ -251,7 +251,10 @@
         const scheduleList = document.getElementById('scheduleList');
         scheduleList.innerHTML = '';
 
-        const dayEvents = allEvents.filter(event => event.start === date);
+        // 메모를 제외한 일정만 필터링
+        const dayEvents = allEvents.filter(event =>
+            event.start === date && !event.title.startsWith('[메모]')
+        );
 
         if (dayEvents.length === 0) {
             scheduleList.innerHTML = '<div class="panel-item">일정 없음</div>';
@@ -267,20 +270,12 @@
         fetch('/student/calendar/memos?date=' + date)
             .then(response => response.json())
             .then(data => {
-                const memoList = document.getElementById('memoList');
-                memoList.innerHTML = '';
-
-                if (data.length === 0) {
-                    memoList.innerHTML = '<div class="panel-item">메모 없음</div>';
-                    return;
-                }
-
-                data.forEach(memo => {
-                    memoList.innerHTML += `<div class="panel-item">${memo.content}</div>`;
-                });
+                renderMemoList(data);
+            })
+            .catch(error => {
+                console.error('메모 조회 오류:', error);
             });
     }
-
     function saveMemo() {
         const content = document.getElementById('memoContent').value.trim();
 
@@ -305,23 +300,55 @@
             },
             body: formData
         })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('메모 저장 실패');
+                }
+                return response.text();
+            })
             .then(() => {
                 document.getElementById('memoContent').value = '';
 
-                const newMemoEvent = {
-                    id: 'memo-temp-' + Date.now(),
-                    title: '[메모] ' + content,
-                    start: selectedDate,
-                    color: '#f59e0b'
-                };
+                loadMemos(selectedDate);
+                refreshCalendarEvents();
+            })
+            .catch(error => {
+                console.error(error);
+                alert('메모 저장 중 오류가 발생했습니다.');
+            });
+    }
+    function refreshCalendarEvents() {
+        fetch('/student/calendar/events')
+            .then(response => response.json())
+            .then(data => {
+                allEvents = applyExamDeadlineColors(data);
 
-                allEvents.push(newMemoEvent);
-                calendar.addEvent(newMemoEvent);
+                calendar.removeAllEvents();
+                calendar.addEventSource(allEvents);
 
                 renderDayEvents(selectedDate);
-                loadMemos(selectedDate);
+                renderDdayList();
+            })
+            .catch(error => {
+                console.error('캘린더 새로고침 오류:', error);
             });
+    }
+    function renderMemoList(memos) {
+        const memoList = document.getElementById('memoList');
+        memoList.innerHTML = '';
+
+        if (!memos || memos.length === 0) {
+            memoList.innerHTML = '<div class="panel-item">메모 없음</div>';
+            return;
+        }
+
+        memos.forEach(memo => {
+            memoList.innerHTML += `
+            <div class="panel-item">
+                ${memo.content}
+            </div>
+        `;
+        });
     }
 </script>
 </body>
