@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="ko">
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>게시글 삭제</title>
@@ -7,34 +7,61 @@
 </head>
 <body>
 <div class="page-wrapper">
-    <h1 class="page-title">게시글 삭제</h1>
-    <p class="page-desc">게시글 삭제 전 확인 화면입니다.</p>
+    <div class="top-utility">
+        <div class="role-panel">
+            <p class="role-label">현재 역할 전환</p>
+            <div class="role-buttons">
+                <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
+                <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
+                <button class="role-btn" data-role="STUDENT" type="button">학생</button>
+            </div>
+            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <p class="permission-note">삭제는 논리 삭제 방식으로 처리되어 목록에서만 숨겨집니다.</p>
+        </div>
 
-    <div class="box">
-        <table class="table">
-            <tr>
-                <th>게시글 ID</th>
-                <td>4</td>
-            </tr>
-            <tr>
-                <th>제목</th>
-                <td>2주차 섹션 질문</td>
-            </tr>
-            <tr>
-                <th>게시판 종류</th>
-                <td>SECTION_QNA</td>
-            </tr>
-            <tr>
-                <th>작성자</th>
-                <td>학생 1</td>
-            </tr>
-        </table>
-
-        <div class="button-group">
-            <button type="button" class="btn red">삭제</button>
-            <a class="btn gray" href="/board/detail?postId=4">취소</a>
+        <div class="page-main">
+            <h1 class="page-title">게시글 삭제</h1>
+            <p class="page-desc">삭제할 게시글 정보를 확인한 뒤 삭제를 진행합니다.</p>
         </div>
     </div>
+
+    <div class="box">
+        <form method="post" action="/board/delete">
+            <input type="hidden" name="postId" th:value="${board.postId}">
+            <input type="hidden" name="currentRole" data-current-role-input>
+            <input type="hidden" name="currentMemberId" data-current-member-id-input>
+
+            <table class="table">
+                <tr>
+                    <th>게시글 ID</th>
+                    <td th:text="${board.postId}">4</td>
+                </tr>
+                <tr>
+                    <th>제목</th>
+                    <td th:text="${board.title}">2주차 섹션 질문</td>
+                </tr>
+                <tr>
+                    <th>게시판 종류</th>
+                    <td th:text="${board.postType}">SECTION_QNA</td>
+                </tr>
+                <tr>
+                    <th>작성자</th>
+                    <td th:text="${board.memberName != null ? board.memberName : board.memberId}">김학생</td>
+                </tr>
+            </table>
+
+            <div class="button-group">
+                <button type="submit"
+                        class="btn red"
+                        onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+                <a class="btn gray" th:href="@{/board/detail(postId=${board.postId})}">취소</a>
+            </div>
+        </form>
+    </div>
 </div>
+<script src="/js/board/role-switcher.js"></script>
+<script th:if="${errorMessage != null}" th:inline="javascript">
+    alert([[${errorMessage}]]);
+</script>
 </body>
 </html>

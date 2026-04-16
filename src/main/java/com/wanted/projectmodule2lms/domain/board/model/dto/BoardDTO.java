@@ -19,8 +19,12 @@ public class BoardDTO {
 
     private Integer postId;
     private Integer memberId;
+    private String memberName;
     private Integer courseId;
+    private String courseTitle;
+    private Integer courseInstructorId;
     private Integer sectionId;
+    private String sectionTitle;
     private String title;
     private String content;
     private BoardType postType;

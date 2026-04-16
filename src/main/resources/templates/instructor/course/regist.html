@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코스 등록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">코스 등록</h1>
+            <p class="text-slate-500 mt-2">새로운 코스를 등록합니다.</p>
+        </div>
+        <a href="/courses" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
+    </div>
+
+    <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
+
+    <form action="/courses/regist" method="post" enctype="multipart/form-data"
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium mb-2">강사 로그인 ID</label>
+                <input type="text" name="instructorLoginId" class="w-full rounded-lg border-slate-300" required>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-2">코스명</label>
+            <input type="text" name="title" class="w-full rounded-lg border-slate-300" required>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium mb-2">설명</label>
+            <textarea name="description" rows="4" class="w-full rounded-lg border-slate-300"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium mb-2">카테고리</label>
+                <select name="category" class="w-full rounded-lg border-slate-300" required>
+                    <option value="">카테고리를 선택하세요</option>
+                    <option value="인문">인문</option>
+                    <option value="사회">사회</option>
+                    <option value="교육">교육</option>
+                    <option value="공학">공학</option>
+                    <option value="자연">자연</option>
+                    <option value="예체능">예체능</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">코스 썸네일</label>
+                <input type="file" name="thumbnailFile" accept="image/*" class="w-full rounded-lg border-slate-300">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-sm font-medium mb-2">정원</label>
+                <input type="number" name="capacity" class="w-full rounded-lg border-slate-300" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">시작일</label>
+                <input type="date" name="startDate" class="w-full rounded-lg border-slate-300" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">종료일</label>
+                <input type="date" name="endDate" class="w-full rounded-lg border-slate-300" required>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <a href="/courses" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">취소</a>
+            <button type="submit" class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">등록</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

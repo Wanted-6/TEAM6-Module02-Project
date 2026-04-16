@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코스 목록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">코스 목록</h1>
+            <p class="text-slate-500 mt-2">등록된 전체 코스를 확인합니다.</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="/main" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">메인</a>
+            <a href="/courses/regist" class="px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">코스 등록</a>
+        </div>
+    </div>
+
+    <form action="/courses" method="get" class="mb-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium mb-2">검색어</label>
+                <input type="text" name="keyword" th:value="${keyword}"
+                       placeholder="코스명 검색"
+                       class="w-full rounded-lg border-slate-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-2">카테고리</label>
+                <select name="category" class="w-full rounded-lg border-slate-300">
+                    <option value="">전체</option>
+                    <option value="인문" th:selected="${category == '인문'}">인문</option>
+                    <option value="사회" th:selected="${category == '사회'}">사회</option>
+                    <option value="교육" th:selected="${category == '교육'}">교육</option>
+                    <option value="공학" th:selected="${category == '공학'}">공학</option>
+                    <option value="자연" th:selected="${category == '자연'}">자연</option>
+                    <option value="예체능" th:selected="${category == '예체능'}">예체능</option>
+                    <option value="기타" th:selected="${category == '기타'}">기타</option>
+                </select>
+            </div>
+            <div class="flex items-end gap-3">
+                <button type="submit"
+                        class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
+                    검색
+                </button>
+                <a href="/courses"
+                   class="px-5 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                    초기화
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div th:each="course : ${courseList}" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-start justify-end mb-4">
+                <div class="flex flex-col items-end gap-2">
+                    <span class="px-3 py-1 text-xs rounded-full"
+                          th:classappend="${course.isOpen} ? ' bg-blue-100 text-blue-700' : ' bg-slate-200 text-slate-600'"
+                          th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'"></span>
+
+                    <span class="px-3 py-1 text-xs rounded-full bg-amber-100 text-amber-700"
+                          th:text="${course.approvalStatus} ?: 'PENDING'"></span>
+                </div>
+            </div>
+
+            <div class="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                <img th:if="${course.thumbnailImage != null and !#strings.isEmpty(course.thumbnailImage)}"
+                     th:src="@{|/${course.thumbnailImage}|}"
+                     alt="코스 썸네일"
+                     class="w-full h-48 object-cover">
+
+                <div th:unless="${course.thumbnailImage != null and !#strings.isEmpty(course.thumbnailImage)}"
+                     class="w-full h-48 flex items-center justify-center text-slate-400 text-sm">
+                    등록된 썸네일이 없습니다.
+                </div>
+            </div>
+
+            <h2 class="text-xl font-semibold text-slate-900 mb-2" th:text="${course.title}">코스명</h2>
+            <p class="text-sm text-slate-500 mb-4" th:text="${course.category}">카테고리</p>
+            <p class="text-sm text-slate-700 min-h-[48px]" th:text="${course.description}">설명</p>
+
+            <div class="mt-5 space-y-1 text-sm text-slate-600">
+                <p th:text="|정원: ${course.capacity}명|"></p>
+                <p th:text="|시작일: ${course.startDate}|"></p>
+                <p th:text="|종료일: ${course.endDate}|"></p>
+            </div>
+
+            <div class="mt-6 flex flex-wrap gap-2">
+                <a th:href="@{/courses/{courseId}(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-700 text-sm">상세보기</a>
+                <a th:href="@{/courses/{courseId}/modify(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-sm">수정</a>
+                <a th:href="@{/courses/{courseId}/sections(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm">섹션 관리</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(courseList)}" class="mt-8 rounded-xl bg-white border border-slate-200 p-8 text-center text-slate-500">
+        조회된 코스가 없습니다.
+    </div>
+</div>
+</body>
+</html>

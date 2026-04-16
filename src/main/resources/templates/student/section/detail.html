@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 섹션 상세</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-5xl mx-auto px-6 py-10">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">섹션 상세</h1>
+            <p class="text-slate-500 mt-2">수강 중인 섹션의 상세 정보입니다.</p>
+        </div>
+        <a th:href="@{/student/courses/{courseId}/sections(courseId=${courseId}, memberId=${memberId})}"
+           class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900" th:text="${section.title}"></h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">섹션 순서</p>
+                <p class="font-medium" th:text="${section.sectionOrder}"></p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-50">
+                <p class="text-slate-500 mb-1">오픈일</p>
+                <p class="font-medium" th:text="${section.openDate}"></p>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50">
+            <p class="text-slate-500 mb-2">영상 URL</p>
+            <p th:text="${section.videoUrl} ?: '등록된 영상이 없습니다.'"></p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50">
+            <p class="text-slate-500 mb-2">자료 파일</p>
+            <p th:text="${section.materialFile} ?: '등록된 자료가 없습니다.'"></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
