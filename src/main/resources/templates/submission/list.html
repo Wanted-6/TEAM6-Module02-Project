@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제출 목록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-6xl mx-auto px-6 py-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">제출 목록</h1>
+            <p class="text-slate-500 mt-2">과제 제출 내역을 확인합니다.</p>
+        </div>
+        <a th:href="@{/assignments/{assignmentId}(assignmentId=${assignmentId})}"
+           class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+            과제 상세
+        </a>
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+         th:text="${errorMessage}"></div>
+
+    <div th:if="${successMessage}"
+         class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700"
+         th:text="${successMessage}"></div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-slate-100 text-slate-700">
+            <tr>
+                <th class="px-6 py-4">제출 ID</th>
+                <th class="px-6 py-4">수강 ID</th>
+                <th class="px-6 py-4">제출일</th>
+                <th class="px-6 py-4">점수</th>
+                <th class="px-6 py-4">관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(submissionList)}">
+                <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+                    제출된 과제가 없습니다.
+                </td>
+            </tr>
+
+            <tr th:each="submission : ${submissionList}" class="border-t border-slate-200">
+                <td class="px-6 py-4" th:text="${submission.submissionId}">1</td>
+                <td class="px-6 py-4" th:text="${submission.enrollmentId}">10</td>
+                <td class="px-6 py-4" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-04-20 10:00</td>
+                <td class="px-6 py-4">
+                    <span th:if="${submission.score == null}">미채점</span>
+                    <span th:unless="${submission.score == null}" th:text="${submission.score}">95</span>
+                </td>
+                <td class="px-6 py-4">
+                    <a th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId})}"
+                       class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                        상세
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

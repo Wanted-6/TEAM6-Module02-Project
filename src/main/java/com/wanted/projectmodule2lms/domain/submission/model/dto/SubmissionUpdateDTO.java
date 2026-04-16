@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubmissionCreateDTO {
+public class SubmissionUpdateDTO {
 
-    private Integer enrollmentId;
     private String content;
     private String attachmentFile;
 }

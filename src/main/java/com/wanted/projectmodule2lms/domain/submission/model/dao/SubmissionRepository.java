@@ -10,5 +10,5 @@ public interface SubmissionRepository extends JpaRepository<Submission, Integer>
 
     List<Submission> findByAssignmentIdOrderBySubmittedAtDesc(Integer assignmentId);
 
-    Optional<Submission> findByAssignmentIdAndMemberId(Integer assignmentId, Integer memberId);
+    Optional<Submission> findByAssignmentIdAndEnrollmentId(Integer assignmentId, Integer enrollmentId);
 }

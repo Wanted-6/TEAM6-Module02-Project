@@ -3,6 +3,7 @@ package com.wanted.projectmodule2lms.domain.course.controller;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,7 @@ public class CourseController {
 
     /* 코스 등록 */
     @PostMapping("/regist")
+    @AuditLog
     public String registCourse(@ModelAttribute CourseCreateDTO createDTO,
                                @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                                RedirectAttributes rttr) {

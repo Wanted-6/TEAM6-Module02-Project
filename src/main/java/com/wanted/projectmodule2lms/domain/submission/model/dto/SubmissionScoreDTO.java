@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SubmissionScoreDTO {
 
-    private Integer score;
+    private Double score;
     private String feedback;
 }

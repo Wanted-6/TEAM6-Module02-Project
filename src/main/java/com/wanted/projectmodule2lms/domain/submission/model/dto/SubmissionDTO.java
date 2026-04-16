@@ -1,6 +1,5 @@
 package com.wanted.projectmodule2lms.domain.submission.model.dto;
 
-import com.wanted.projectmodule2lms.domain.submission.model.entity.SubmissionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,11 +11,10 @@ public class SubmissionDTO {
 
     private Integer submissionId;
     private Integer assignmentId;
-    private Integer memberId;
+    private Integer enrollmentId;
     private String content;
-    private String submissionFile;
+    private String attachmentFile;
     private LocalDateTime submittedAt;
-    private SubmissionStatus status;
-    private Integer score;
+    private Double score;
     private String feedback;
 }

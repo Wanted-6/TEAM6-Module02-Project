@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제출 상세</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-8">
+
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">제출 상세</h1>
+            <p class="text-slate-500 mt-2">제출한 과제와 채점 결과를 확인합니다.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="text-sm text-slate-500 mb-2">제출 ID</p>
+                <p th:text="${submission.submissionId}">1</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-500 mb-2">수강 ID</p>
+                <p th:text="${submission.enrollmentId}">10</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-500 mb-2">제출일</p>
+                <p th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-04-20 12:00</p>
+            </div>
+            <div>
+                <p class="text-sm text-slate-500 mb-2">점수</p>
+                <p>
+                    <span th:if="${submission.score == null}">미채점</span>
+                    <span th:unless="${submission.score == null}" th:text="${submission.score}">95</span>
+                </p>
+            </div>
+        </div>
+
+        <div>
+            <p class="text-sm text-slate-500 mb-2">제출 내용</p>
+            <p class="whitespace-pre-line" th:text="${submission.content}">제출 내용</p>
+        </div>
+
+        <div>
+            <p class="text-sm text-slate-500 mb-2">첨부 파일</p>
+            <span th:if="${submission.attachmentFile == null or submission.attachmentFile == ''}">-</span>
+            <a th:if="${submission.attachmentFile != null and submission.attachmentFile != ''}"
+               th:href="@{/{path}(path=${submission.attachmentFile})}"
+               class="text-blue-600 hover:underline">
+                파일 다운로드
+            </a>
+        </div>
+
+        <div>
+            <p class="text-sm text-slate-500 mb-2">피드백</p>
+            <p class="whitespace-pre-line">
+                <span th:if="${submission.feedback == null or submission.feedback == ''}">아직 피드백이 없습니다.</span>
+                <span th:unless="${submission.feedback == null or submission.feedback == ''}"
+                      th:text="${submission.feedback}">피드백 내용</span>
+            </p>
+        </div>
+
+        <div class="border-t border-slate-200 pt-6">
+            <h2 class="text-xl font-semibold mb-4">채점 / 피드백</h2>
+
+            <form th:action="@{/submissions/{submissionId}/score(submissionId=${submission.submissionId})}"
+                  method="post"
+                  class="space-y-4">
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">점수</label>
+                    <input type="number" step="0.01" name="score"
+                           th:value="${submission.score}"
+                           class="w-full rounded-lg border-slate-300">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">피드백</label>
+                    <textarea name="feedback" rows="5" class="w-full rounded-lg border-slate-300"
+                              th:text="${submission.feedback}"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <a th:href="@{/assignments/{assignmentId}/submissions(assignmentId=${submission.assignmentId})}"
+                       class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
+                    <a th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId})}"
+                       class="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100">제출 수정</a>
+                    <button type="submit" class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">채점 저장</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

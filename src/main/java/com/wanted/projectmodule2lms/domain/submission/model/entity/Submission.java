@@ -1,7 +1,6 @@
 package com.wanted.projectmodule2lms.domain.submission.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +10,6 @@ import java.time.LocalDateTime;
 @Table(name = "Submission")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Submission {
 
     @Id
@@ -22,45 +20,44 @@ public class Submission {
     @Column(name = "assignment_id", nullable = false)
     private Integer assignmentId;
 
-    @Column(name = "member_id", nullable = false)
-    private Integer memberId;
+    @Column(name = "enrollment_id", nullable = false)
+    private Integer enrollmentId;
 
-    @Column(name = "content", length = 2000)
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "submission_file", length = 255)
-    private String submissionFile;
+    @Column(name = "attachment_file", length = 255)
+    private String attachmentFile;
 
     @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private SubmissionStatus status;
-
     @Column(name = "score")
-    private Integer score;
+    private Double score;
 
-    @Column(name = "feedback", length = 2000)
+    @Column(name = "feedback", columnDefinition = "TEXT")
     private String feedback;
 
     public Submission(Integer assignmentId,
-                      Integer memberId,
+                      Integer enrollmentId,
                       String content,
-                      String submissionFile,
-                      LocalDateTime submittedAt,
-                      SubmissionStatus status) {
+                      String attachmentFile,
+                      LocalDateTime submittedAt) {
         this.assignmentId = assignmentId;
-        this.memberId = memberId;
+        this.enrollmentId = enrollmentId;
         this.content = content;
-        this.submissionFile = submissionFile;
+        this.attachmentFile = attachmentFile;
         this.submittedAt = submittedAt;
-        this.status = status;
     }
 
-    public void changeScoreAndFeedback(Integer score, String feedback) {
+    public void changeSubmission(String content, String attachmentFile) {
+        this.content = content;
+        this.attachmentFile = attachmentFile;
+        this.submittedAt = LocalDateTime.now();
+    }
+
+    public void changeScoreAndFeedback(Double score, String feedback) {
         this.score = score;
         this.feedback = feedback;
-        this.status = SubmissionStatus.GRADED;
     }
 }
