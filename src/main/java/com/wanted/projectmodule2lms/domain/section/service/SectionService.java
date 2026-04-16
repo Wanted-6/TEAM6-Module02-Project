@@ -71,16 +71,18 @@ public class SectionService {
         }
 
         Section section = new Section(
-                null,
+                createDTO.getSectionId(),
                 courseId,
                 createDTO.getTitle(),
                 createDTO.getVideoUrl(),
                 materialPath,
+                // createDTO.getMaterialFile(),
                 createDTO.getSectionOrder(),
                 createDTO.getOpenDate()
         );
 
         sectionRepository.save(section);
+        updateExamDueDate(courseId);
         return section.getSectionId();
     }
 
@@ -116,9 +118,12 @@ public class SectionService {
                 updateDTO.getTitle(),
                 updateDTO.getVideoUrl(),
                 materialPath,
+                // updateDTO.getMaterialFile(),
                 updateDTO.getSectionOrder(),
                 updateDTO.getOpenDate()
         );
+
+        updateExamDueDate(foundSection.getCourseId());
     }
 
     @Transactional
@@ -133,7 +138,9 @@ public class SectionService {
             throw new IllegalArgumentException("승인된 코스의 섹션은 삭제할 수 없습니다.");
         }
 
+        Integer courseId = foundSection.getCourseId();
         sectionRepository.deleteById(sectionId);
+        updateExamDueDate(courseId);
     }
 
     public List<SectionDTO> findMySections(Integer memberId, Integer courseId) {
@@ -203,4 +210,19 @@ public class SectionService {
 
         return "static/files/section/" + savedName;
     }
+    private void updateExamDueDate(Integer courseId) {
+        Section lastSection = sectionRepository.findByCourseIdAndSectionOrder(courseId, 8)
+                .orElse(null);
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+
+        if (lastSection == null || lastSection.getOpenDate() == null) {
+            course.changeExamDueDate(null);
+            return;
+        }
+
+        course.changeExamDueDate(lastSection.getOpenDate().plusDays(3));
+    }
+
 }
