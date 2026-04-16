@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>게시글 수정</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
-<body>
+<body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
 <div class="page-wrapper">
     <div class="top-utility">
         <div class="role-panel">
@@ -15,7 +15,7 @@
                 <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
                 <button class="role-btn" data-role="STUDENT" type="button">학생</button>
             </div>
-            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <div class="role-current">현재 로그인: <span class="role-badge" data-current-role th:text="${currentRole}">STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id th:text="${currentMemberId}">1</span></div>
             <p class="permission-note">기존 게시글 정보를 불러와 게시판 구조에 맞게 수정하는 화면입니다.</p>
         </div>
         <div class="page-main">
@@ -27,17 +27,15 @@
     <div class="box">
         <form method="post" action="/board/modify">
             <input type="hidden" name="postId" th:value="${board.postId}">
+            <input type="hidden" name="postType" th:value="${board.postType}">
+            <input type="hidden" name="courseId" th:value="${board.courseId}">
+            <input type="hidden" name="sectionId" th:value="${board.sectionId}">
             <input type="hidden" name="currentRole" data-current-role-input>
             <input type="hidden" name="currentMemberId" data-current-member-id-input>
 
             <div class="form-row">
-                <label for="postType">게시판 종류</label>
-                <select id="postType" name="postType">
-                    <option value="ADMIN_NOTICE" th:selected="${board.postType != null and board.postType.name() == 'ADMIN_NOTICE'}">ADMIN_NOTICE</option>
-                    <option value="COURSE_NOTICE" th:selected="${board.postType != null and board.postType.name() == 'COURSE_NOTICE'}">COURSE_NOTICE</option>
-                    <option value="FREE" th:selected="${board.postType != null and board.postType.name() == 'FREE'}">FREE</option>
-                    <option value="SECTION_QNA" th:selected="${board.postType != null and board.postType.name() == 'SECTION_QNA'}">SECTION_QNA</option>
-                </select>
+                <label>게시판 종류</label>
+                <div class="context-badge" th:text="${board.postType}">SECTION_QNA</div>
             </div>
 
             <div class="form-row">
@@ -45,14 +43,14 @@
                 <input id="memberId" name="memberId" type="number" th:value="${board.memberId}" readonly>
             </div>
 
-            <div class="form-row">
-                <label for="courseId">코스 ID</label>
-                <input id="courseId" name="courseId" type="number" th:value="${board.courseId}">
+            <div class="form-row" th:if="${board.courseId != null}">
+                <label>코스</label>
+                <input type="text" th:value="${board.courseTitle}" readonly>
             </div>
 
-            <div class="form-row">
-                <label for="sectionId">섹션 ID</label>
-                <input id="sectionId" name="sectionId" type="number" th:value="${board.sectionId}">
+            <div class="form-row" th:if="${board.sectionId != null}">
+                <label>섹션</label>
+                <input type="text" th:value="${board.sectionTitle}" readonly>
             </div>
 
             <div class="form-row">

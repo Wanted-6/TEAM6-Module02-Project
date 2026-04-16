@@ -491,8 +491,9 @@
                 <p class="mt-2 text-sm leading-6 text-slate-600">공지와 게시판을 통해 필요한 정보를 확인합니다.</p>
             </a>
 
-            <a th:href="@{/student/courses(memberId=${memberId})}" class="menu-card rounded-[26px] border border-line bg-white p-6">
-                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-accent">
+            <a th:href="${myClassroomUrl}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-accent">
                     <span class="material-symbols-outlined text-3xl">auto_stories</span>
                 </div>
                 <h2 class="text-xl font-extrabold">내 강의실</h2>

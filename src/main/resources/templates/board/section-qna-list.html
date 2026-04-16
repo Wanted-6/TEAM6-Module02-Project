@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>섹션 Q&amp;A 목록</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
-<body>
+<body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
 <div class="page-wrapper">
     <div class="top-utility">
         <div class="role-panel">
@@ -15,7 +15,7 @@
                 <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
                 <button class="role-btn" data-role="STUDENT" type="button">학생</button>
             </div>
-            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <div class="role-current">현재 로그인: <span class="role-badge" data-current-role th:text="${currentRole}">STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id th:text="${currentMemberId}">1</span></div>
             <p class="permission-note">비밀 질문은 강사, 관리자, 작성자 학생만 내용을 확인할 수 있습니다.</p>
         </div>
         <div class="page-main">
@@ -26,16 +26,20 @@
 
     <div class="box">
         <div class="button-group">
-            <a class="btn" href="/board/regist?type=SECTION_QNA" data-role-only="STUDENT">질문 등록</a>
+            <a class="btn"
+               th:href="@{/board/regist(type='SECTION_QNA', courseId=${courseId})}"
+               data-role-only="STUDENT">질문 등록</a>
             <a class="btn gray" href="/board/list">게시판 메인</a>
         </div>
     </div>
 
     <div class="box">
         <form class="search-bar" method="get" action="/board/section-qna">
+            <input type="hidden" name="courseId" th:value="${courseId}">
             <input type="text" name="keyword" placeholder="섹션 Q&amp;A 제목 검색" th:value="${keyword}">
             <button type="submit" class="btn">검색</button>
-            <a class="btn gray" href="/board/section-qna">초기화</a>
+            <a class="btn gray"
+               th:href="@{/board/section-qna(courseId=${courseId})}">초기화</a>
         </form>
         <p class="meta">검색어: <span th:text="${keyword != null and !keyword.isBlank() ? keyword : '전체'}">전체</span></p>
 

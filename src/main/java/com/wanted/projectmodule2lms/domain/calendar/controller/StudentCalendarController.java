@@ -1,8 +1,10 @@
 package com.wanted.projectmodule2lms.domain.calendar.controller;
 
+import com.wanted.projectmodule2lms.domain.auth.model.dto.AuthDetails;
 import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarEventDTO;
 import com.wanted.projectmodule2lms.domain.calendar.model.service.CalenderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreateDTO;
@@ -28,11 +30,9 @@ public class StudentCalendarController {
 
     @GetMapping("/events")
     @ResponseBody
-    public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
-        if (memberId == null) {
-            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
-        }
-        return calendarService.findStudentCalendarEvents(Math.toIntExact(memberId));
+    public List<CalendarEventDTO> getCalendarEvents(@AuthenticationPrincipal AuthDetails authDetails) {
+        Integer memberId = authDetails.getLoginMemberDTO().getMemberId();
+        return calendarService.findStudentCalendarEvents(memberId);
     }
     @GetMapping("/memos")
     @ResponseBody

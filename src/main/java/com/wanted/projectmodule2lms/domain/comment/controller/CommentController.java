@@ -2,7 +2,10 @@ package com.wanted.projectmodule2lms.domain.comment.controller;
 
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
+import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,12 +20,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CommentController {
 
     private final CommentService commentService;
+    private final MemberRepository memberRepository;
 
     @PostMapping("/regist")
     public String registerComment(@ModelAttribute CommentDTO commentDTO,
-                                  @RequestParam Integer currentMemberId,
-                                  @RequestParam MemberRole currentRole,
                                   RedirectAttributes redirectAttributes) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
         try {
             commentService.registComment(commentDTO, currentMemberId, currentRole);
             return "redirect:/board/detail?postId=" + commentDTO.getPostId();
@@ -34,9 +39,10 @@ public class CommentController {
 
     @PostMapping("/modify")
     public String modifyComment(@ModelAttribute CommentDTO commentDTO,
-                                @RequestParam Integer currentMemberId,
-                                @RequestParam MemberRole currentRole,
                                 RedirectAttributes redirectAttributes) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
         try {
             commentService.modifyComment(commentDTO, currentMemberId, currentRole);
             return "redirect:/board/detail?postId=" + commentDTO.getPostId();
@@ -49,9 +55,10 @@ public class CommentController {
     @PostMapping("/delete")
     public String deleteComment(@RequestParam Integer commentId,
                                 @RequestParam Integer postId,
-                                @RequestParam Integer currentMemberId,
-                                @RequestParam MemberRole currentRole,
                                 RedirectAttributes redirectAttributes) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
         try {
             commentService.deleteComment(commentId, postId, currentMemberId, currentRole);
             return "redirect:/board/detail?postId=" + postId;
@@ -59,5 +66,21 @@ public class CommentController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/detail?postId=" + postId;
         }
+    }
+
+    private Integer getCurrentMemberId() {
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        return currentMemberId != null ? currentMemberId.intValue() : null;
+    }
+
+    private MemberRole getCurrentMemberRole() {
+        Integer currentMemberId = getCurrentMemberId();
+
+        if (currentMemberId == null) {
+            return null;
+        }
+
+        Member member = memberRepository.findById(currentMemberId).orElse(null);
+        return member != null ? member.getRole() : null;
     }
 }
