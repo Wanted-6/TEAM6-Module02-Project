@@ -1,10 +1,7 @@
 package com.wanted.projectmodule2lms.domain.member.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +10,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Builder
+@ToString
 public class Member {
 
     @Id
@@ -46,6 +45,50 @@ public class Member {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    @Column(name = "login_fail_count", nullable = false)
+    private Integer loginFailCount = 0;
+
+    @Builder.Default
+    @Column(name = "is_account_locked", nullable = false)
+    private Boolean accountLocked = false;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+
+        if (this.status == null) {
+            this.status = MemberStatus.ACTIVE;
+        }
+    }
+
+    public void increaseLoginFailCount() {
+        if (this.loginFailCount == null) {
+            this.loginFailCount = 0; // null이면 0으로 초기화
+        }
+        if (this.accountLocked == null) {
+            this.accountLocked = false;
+        }
+
+        this.loginFailCount++;
+    }
+
+    public void resetLoginFailCount() {
+        this.loginFailCount = 0;
+    }
+
+    public void lockAccount() {
+        this.accountLocked = true;
+    }
+
+/*    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }*/
+
+    public void changePassword(String newPassword){
+        this.password = newPassword;
+    }
+
     /**
      * 회원 생성 메서드
      */
@@ -55,17 +98,16 @@ public class Member {
                                       String phone,
                                       String email,
                                       MemberRole role) {
-        return new Member(
-                null,
-                loginId,
-                password,
-                name,
-                phone,
-                email,
-                role,
-                MemberStatus.ACTIVE,
-                LocalDateTime.now()
-        );
+        return Member.builder()
+                .loginId(loginId)
+                .password(password)
+                .name(name)
+                .phone(phone)
+                .email(email)
+                .role(role)
+                .status(MemberStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .build();   // loginFailCount, accountLock 들어가록 함.
     }
 
     /**

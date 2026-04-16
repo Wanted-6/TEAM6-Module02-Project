@@ -21,7 +21,9 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
+// 이 security 설정을 추가하면 따로 설정하지 않아도 로그인화면처럼 보임.
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
@@ -29,12 +31,21 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
     // Source: https://mvnrepository.com/artifact/org.modelmapper/modelmapper
     implementation("org.modelmapper:modelmapper:3.1.1")
-//    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // thymeleaf-extras-springsecurity6: https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    // AoP 로그
+    // Source: https://mvnrepository.com/artifact/org.springframework/spring-aop
+    implementation("org.springframework:spring-aop:5.3.39")
+
+    // 메일 전송
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 }
 
 tasks.named('test') {
