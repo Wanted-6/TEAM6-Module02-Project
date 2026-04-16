@@ -81,7 +81,7 @@ public class CalenderService {
                         "memo-" + memo.getMemoId(),
                         "[메모] " + memo.getContent(),
                         memo.getMemoDate().toString(),
-                        "#f59e0b"
+                        "#C8E6C9"
                 ))
                 .collect(Collectors.toList());
 
@@ -135,7 +135,7 @@ public class CalenderService {
                         "memo-" + memo.getMemoId(),
                         "[메모] " + memo.getContent(),
                         memo.getMemoDate().toString(),
-                        "#f59e0b"
+                        "#C8E6C9"
                 ))
                 .collect(Collectors.toList());
 
