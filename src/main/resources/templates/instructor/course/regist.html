@@ -16,15 +16,16 @@
         <a href="/courses" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
     </div>
 
-    <form action="/courses/regist" method="post" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+    <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
+
+    <form action="/courses/regist" method="post" enctype="multipart/form-data"
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <label class="block text-sm font-medium mb-2">코스 ID</label>
-                <input type="number" name="courseId" class="w-full rounded-lg border-slate-300" required>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-2">강사 ID</label>
-                <input type="number" name="instructorId" class="w-full rounded-lg border-slate-300" required>
+                <label class="block text-sm font-medium mb-2">강사 로그인 ID</label>
+                <input type="text" name="instructorLoginId" class="w-full rounded-lg border-slate-300" required>
             </div>
         </div>
 
@@ -41,11 +42,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium mb-2">카테고리</label>
-                <input type="text" name="category" class="w-full rounded-lg border-slate-300">
+                <select name="category" class="w-full rounded-lg border-slate-300" required>
+                    <option value="">카테고리를 선택하세요</option>
+                    <option value="인문">인문</option>
+                    <option value="사회">사회</option>
+                    <option value="교육">교육</option>
+                    <option value="공학">공학</option>
+                    <option value="자연">자연</option>
+                    <option value="예체능">예체능</option>
+                    <option value="기타">기타</option>
+                </select>
             </div>
             <div>
-                <label class="block text-sm font-medium mb-2">썸네일 파일명</label>
-                <input type="text" name="thumbnailImage" class="w-full rounded-lg border-slate-300">
+                <label class="block text-sm font-medium mb-2">코스 썸네일</label>
+                <input type="file" name="thumbnailFile" accept="image/*" class="w-full rounded-lg border-slate-300">
             </div>
         </div>
 
