@@ -158,14 +158,20 @@
         const todayStr = getTodayString();
 
         return events.map(event => {
-            if (!isExamEvent(event)) return event;
+            let updatedEvent = { ...event };
 
-            const diffDays = getDateDiff(todayStr, event.start);
+            // 기존 기능 유지: 시험 마감일 색상 적용
+            if (isExamEvent(event)) {
+                const diffDays = getDateDiff(todayStr, event.start);
+                updatedEvent.color = getExamColor(diffDays);
+            }
 
-            return {
-                ...event,
-                color: getExamColor(diffDays)
-            };
+            // 추가 기능: 오늘보다 이전 일정은 회색 처리
+            if (event.start < todayStr) {
+                updatedEvent.color = '#9ca3af'; // Tailwind Gray-400
+            }
+
+            return updatedEvent;
         });
     }
 
@@ -348,6 +354,36 @@
                 ${memo.content}
             </div>
         `;
+        });
+    }
+    function isPastDate(dateStr) {
+        const todayStr = getTodayString();
+        return dateStr < todayStr;
+    }
+
+    function applyEventColors(events) {
+        const todayStr = getTodayString();
+
+        return events.map(event => {
+            // 오늘보다 이전 일정이면 무조건 회색
+            if (event.start < todayStr) {
+                return {
+                    ...event,
+                    color: '#9ca3af'   // 회색
+                };
+            }
+
+            // 시험 일정이면 D-day 기준 색상 적용
+            if (isExamEvent(event)) {
+                const diffDays = getDateDiff(todayStr, event.start);
+                return {
+                    ...event,
+                    color: getExamColor(diffDays)
+                };
+            }
+
+            // 그 외 일정은 원래 색 유지
+            return event;
         });
     }
 </script>
