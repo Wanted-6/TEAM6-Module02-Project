@@ -1,9 +1,6 @@
 package com.wanted.projectmodule2lms.domain.assignment.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +13,7 @@ import java.time.LocalDateTime;
 public class Assignment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignment_id")
     private Integer assignmentId;
 
@@ -33,4 +31,26 @@ public class Assignment {
 
     @Column(name = "due_date", nullable = false)
     private LocalDateTime dueDate;
+
+    public Assignment(Integer sectionId,
+                      String title,
+                      String description,
+                      String attachmentFile,
+                      LocalDateTime dueDate) {
+        this.sectionId = sectionId;
+        this.title = title;
+        this.description = description;
+        this.attachmentFile = attachmentFile;
+        this.dueDate = dueDate;
+    }
+
+    public void changeAssignmentInfo(String title,
+                                     String description,
+                                     String attachmentFile,
+                                     LocalDateTime dueDate) {
+        this.title = title;
+        this.description = description;
+        this.attachmentFile = attachmentFile;
+        this.dueDate = dueDate;
+    }
 }
