@@ -107,7 +107,7 @@ public class BoardService {
     @Transactional
     public Integer registBoard(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
         if (!canCreateBoard(currentRole, boardDTO.getPostType())) {
-            throw new IllegalArgumentException("?대떦 寃뚯떆?먯뿉 湲???깅줉??沅뚰븳???놁뒿?덈떎.");
+            throw new IllegalArgumentException("등록 권한이 없습니다.");
         }
 
         normalizeBoardDTO(boardDTO, currentMemberId, currentRole);
@@ -134,7 +134,7 @@ public class BoardService {
         Board board = findActiveBoard(boardDTO.getPostId());
 
         if (!canModifyOrDelete(currentMemberId, currentRole, board)) {
-            throw new IllegalArgumentException("?섏젙 沅뚰븳???놁뒿?덈떎.");
+            throw new IllegalArgumentException("수정 권한이 없습니다.");
         }
 
         Integer courseId = resolveModifiedCourseId(board, boardDTO, currentMemberId, currentRole);
@@ -165,7 +165,7 @@ public class BoardService {
         Board board = findActiveBoard(postId);
 
         if (!canModifyOrDelete(currentMemberId, currentRole, board)) {
-            throw new IllegalArgumentException("??젣 沅뚰븳???놁뒿?덈떎.");
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
 
         board.deleteBoard();
@@ -173,7 +173,7 @@ public class BoardService {
 
     public Board findActiveBoard(Integer postId) {
         return boardRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new IllegalArgumentException("?대떦 寃뚯떆湲??議댁옱?섏? ?딄굅????젣?섏뿀?듬땲??"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
     }
 
     private void normalizeBoardDTO(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
@@ -191,10 +191,10 @@ public class BoardService {
 
         if (boardDTO.getPostType() == BoardType.COURSE_NOTICE) {
             if (boardDTO.getCourseId() == null) {
-                throw new IllegalArgumentException("肄붿뒪 怨듭???肄붿뒪瑜??좏깮?댁빞 ?⑸땲??");
+                throw new IllegalArgumentException("코스를 선택해야 합니다.");
             }
             if (!isInstructorCourse(boardDTO.getCourseId(), currentMemberId)) {
-                throw new IllegalArgumentException("?꾩옱 媛뺤궗媛 ?대떦?섎뒗 肄붿뒪留?怨듭? ?깅줉??媛?ν빀?덈떎.");
+                throw new IllegalArgumentException("담당 코스에만 공지를 등록할 수 있습니다.");
             }
             boardDTO.setSectionId(null);
             boardDTO.setIsSecret(false);
@@ -220,11 +220,11 @@ public class BoardService {
         }
 
         if (boardDTO.getCourseId() == null) {
-            throw new IllegalArgumentException("肄붿뒪 ?뺣낫媛 ?꾩슂??寃뚯떆湲?낅땲??");
+            throw new IllegalArgumentException("코스 정보가 없는 게시글입니다.");
         }
 
         if (board.getPostType() == BoardType.COURSE_NOTICE && !isInstructorCourse(boardDTO.getCourseId(), currentMemberId)) {
-            throw new IllegalArgumentException("?꾩옱 媛뺤궗媛 ?대떦?섎뒗 肄붿뒪留?怨듭? ?섏젙??媛?ν빀?덈떎.");
+            throw new IllegalArgumentException("담당 코스 공지만 수정할 수 있습니다.");
         }
 
         if (board.getPostType() == BoardType.SECTION_QNA) {
@@ -232,7 +232,7 @@ public class BoardService {
         }
 
         if (board.getPostType() == BoardType.SECTION_QNA && !boardDTO.getCourseId().equals(board.getCourseId())) {
-            throw new IllegalArgumentException("?뱀뀡 Q&A??肄붿뒪 ?뺣낫瑜?蹂寃쏀븷 ???놁뒿?덈떎.");
+            throw new IllegalArgumentException("섹션 Q&A의 코스는 변경할 수 없습니다.");
         }
 
         return boardDTO.getCourseId();
@@ -244,13 +244,13 @@ public class BoardService {
         }
 
         if (boardDTO.getSectionId() == null) {
-            throw new IllegalArgumentException("?뱀뀡 Q&A???뱀뀡 ?뺣낫瑜??낅젰?댁빞 ?⑸땲??");
+            throw new IllegalArgumentException("섹션을 선택해야 합니다.");
         }
 
         validateSectionQnaAccess(board.getCourseId(), boardDTO.getSectionId(), currentMemberId, currentRole, false);
 
         if (!boardDTO.getSectionId().equals(board.getSectionId())) {
-            throw new IllegalArgumentException("?뱀뀡 Q&A???뱀뀡 ?뺣낫瑜?蹂寃쏀븷 ???놁뒿?덈떎.");
+            throw new IllegalArgumentException("섹션 Q&A의 섹션은 변경할 수 없습니다.");
         }
 
         return boardDTO.getSectionId();
@@ -347,21 +347,21 @@ public class BoardService {
                                           MemberRole currentRole,
                                           boolean isCreate) {
         if (courseId == null || sectionId == null) {
-            throw new IllegalArgumentException("?뱀뀡 Q&A??肄붿뒪? ?뱀뀡 ?뺣낫瑜?紐⑤몢 ?낅젰?댁빞 ?⑸땲??");
+            throw new IllegalArgumentException("코스와 섹션을 모두 선택해야 합니다.");
         }
 
         Set<Integer> allowedCourseIds = getAllowedCourseIdsForSectionQna(currentMemberId, currentRole);
         if (!allowedCourseIds.contains(courseId)) {
             throw new IllegalArgumentException(isCreate
-                    ? "?꾩옱 ?ъ슜?먭? ?묎렐 媛?ν븳 肄붿뒪?먯꽌留?吏덈Ц???깅줉?????덉뒿?덈떎."
-                    : "?꾩옱 ?ъ슜?먭? ?묎렐 媛?ν븳 肄붿뒪??吏덈Ц留??섏젙?????덉뒿?덈떎.");
+                    ? "수강 중인 코스에만 섹션 질문을 등록할 수 있습니다."
+                    : "수강 중인 코스의 섹션 질문만 수정할 수 있습니다.");
         }
 
         Section section = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("?좏슚???뱀뀡???좏깮?댁빞 ?⑸땲??"));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 섹션입니다."));
 
         if (!section.getCourseId().equals(courseId)) {
-            throw new IllegalArgumentException("?좏깮???뱀뀡? ?대떦 肄붿뒪???랁븯吏 ?딆뒿?덈떎.");
+            throw new IllegalArgumentException("선택한 섹션이 해당 코스에 속하지 않습니다.");
         }
     }
 
@@ -463,12 +463,12 @@ public class BoardService {
 
     private String resolveMemberName(Integer memberId, Map<Integer, String> memberNameMap) {
         if (memberId == null) {
-            throw new IllegalStateException("寃뚯떆湲 ?묒꽦???뺣낫媛 鍮꾩뼱 ?덉뒿?덈떎.");
+            throw new IllegalStateException("게시글 작성자 정보가 없습니다.");
         }
 
         String memberName = memberNameMap.get(memberId);
         if (memberName == null) {
-            throw new IllegalStateException("寃뚯떆湲 ?묒꽦???뺣낫瑜?李얠쓣 ???놁뒿?덈떎. memberId=" + memberId);
+            throw new IllegalStateException("작성자 이름을 찾을 수 없습니다. memberId=" + memberId);
         }
 
         return memberName;
@@ -477,7 +477,7 @@ public class BoardService {
     private String resolveCourseTitle(Integer courseId, Map<Integer, String> courseTitleMap) {
         String courseTitle = courseTitleMap.get(courseId);
         if (courseTitle == null) {
-            throw new IllegalStateException("寃뚯떆湲 肄붿뒪 ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎. courseId=" + courseId);
+            throw new IllegalStateException("코스 제목을 찾을 수 없습니다. courseId=" + courseId);
         }
 
         return courseTitle;
@@ -486,7 +486,7 @@ public class BoardService {
     private Integer resolveCourseInstructorId(Integer courseId, Map<Integer, Integer> courseInstructorMap) {
         Integer courseInstructorId = courseInstructorMap.get(courseId);
         if (courseInstructorId == null) {
-            throw new IllegalStateException("寃뚯떆湲 肄붿뒪 ?대떦 媛뺤궗 ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎. courseId=" + courseId);
+            throw new IllegalStateException("코스 강사 정보를 찾을 수 없습니다. courseId=" + courseId);
         }
 
         return courseInstructorId;
@@ -495,11 +495,12 @@ public class BoardService {
     private String resolveSectionTitle(Integer sectionId, Map<Integer, String> sectionTitleMap) {
         String sectionTitle = sectionTitleMap.get(sectionId);
         if (sectionTitle == null) {
-            throw new IllegalStateException("寃뚯떆湲 ?뱀뀡 ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎. sectionId=" + sectionId);
+            throw new IllegalStateException("섹션 제목을 찾을 수 없습니다. sectionId=" + sectionId);
         }
 
         return sectionTitle;
     }
+
     private String formatSectionQnaTitle(String sectionTitle, String rawTitle) {
         String normalizedTitle = rawTitle == null ? "" : rawTitle.trim();
         String prefix = "[" + sectionTitle + "] ";
@@ -516,7 +517,7 @@ public class BoardService {
 
     @Transactional
     public void increaseViewCount(Integer postId) {
-        Board boad = findActiveBoard(postId);
-        boad.increasedViewCount();
+        Board board = findActiveBoard(postId);
+        board.increasedViewCount();
     }
- }
+}

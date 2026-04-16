@@ -1,27 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>게시판 메인</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
-<body>
+<body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
 <div class="page-wrapper">
     <div class="top-utility">
-        <div class="role-panel">
-            <p class="role-label">현재 역할 전환</p>
-            <div class="role-buttons">
-                <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
-                <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
-                <button class="role-btn" data-role="STUDENT" type="button">학생</button>
-            </div>
-            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
-            <p class="permission-note">역할 전환은 로그인 기능 전 임시 테스트용입니다. 현재 선택한 역할과 사용자 ID를 기준으로 화면 노출과 권한 검증을 확인할 수 있습니다.</p>
-        </div>
-
         <div class="page-main">
             <h1 class="page-title">게시판 메인</h1>
-            <p class="page-desc">LMS 게시판 기능의 시작 화면입니다. 게시판 종류별로 이동하고, 각 문맥에 맞는 등록 화면으로 진입할 수 있습니다.</p>
+            <p class="page-desc">게시판 종류를 선택해서 원하는 목록으로 이동하면 된다.</p>
         </div>
     </div>
 
@@ -30,26 +19,23 @@
         <div class="card-grid">
             <a class="feature-card" href="/board/admin-notices">
                 <h3>관리자 공지</h3>
-                <p>관리자가 작성하고 전체 사용자가 조회하는 전체 공지 게시판입니다.</p>
+                <p>관리자가 작성하는 전체 공지 게시판이다.</p>
             </a>
             <a class="feature-card" href="/board/course-notices">
                 <h3>코스 공지</h3>
-                <p>강사가 코스 단위로 공지를 작성하고 수강생이 확인하는 게시판입니다.</p>
+                <p>강사가 코스 단위로 작성하는 공지 게시판이다.</p>
             </a>
             <a class="feature-card" href="/board/free">
                 <h3>자유게시판</h3>
-                <p>학생과 강사가 자유롭게 글을 쓰고 소통하는 커뮤니티 게시판입니다.</p>
+                <p>학생과 강사가 자유롭게 소통하는 게시판이다.</p>
             </a>
         </div>
     </div>
 
     <div class="box">
-        <h2 class="section-title">공통 기능 바로가기</h2>
+        <h2 class="section-title">바로가기</h2>
         <div class="button-group">
             <a class="btn" href="/board/regist?type=FREE" data-role-only="ADMIN,INSTRUCTOR,STUDENT">게시글 등록</a>
-            <a class="btn" href="/board/detail?postId=4">게시글 상세</a>
-            <a class="btn" href="/board/modify?postId=4">게시글 수정</a>
-            <a class="btn red" href="/board/delete?postId=4">게시글 삭제</a>
             <a class="btn gray" href="/main">메인으로</a>
         </div>
     </div>
