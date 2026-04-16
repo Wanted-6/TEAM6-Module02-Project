@@ -20,12 +20,12 @@
         </div>
     </div>
 
+    <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
     <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm text-slate-500 mb-2" th:text="|코스 ID: ${course.courseId}|"></p>
                 <h2 class="text-2xl font-bold text-slate-900" th:text="${course.title}">코스명</h2>
             </div>
             <span class="px-3 py-1 text-sm rounded-full"
@@ -34,10 +34,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div class="p-4 rounded-xl bg-slate-50">
-                <p class="text-slate-500 mb-1">강사 ID</p>
-                <p class="font-medium" th:text="${course.instructorId}"></p>
-            </div>
 
             <div class="p-4 rounded-xl bg-slate-50">
                 <p class="text-slate-500 mb-1">카테고리</p>

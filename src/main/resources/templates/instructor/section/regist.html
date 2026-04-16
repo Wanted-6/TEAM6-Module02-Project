@@ -17,13 +17,8 @@
            class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
     </div>
 
-    <form th:action="@{/courses/{courseId}/sections(courseId=${courseId})}" method="post"
+    <form th:action="@{/courses/{courseId}/sections(courseId=${courseId})}" method="post" enctype="multipart/form-data"
           class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
-
-        <div>
-            <label class="block text-sm font-medium mb-2">섹션 ID</label>
-            <input type="number" name="sectionId" class="w-full rounded-lg border-slate-300" required>
-        </div>
 
         <div>
             <label class="block text-sm font-medium mb-2">제목</label>
@@ -37,7 +32,7 @@
 
         <div>
             <label class="block text-sm font-medium mb-2">자료 파일</label>
-            <input type="text" name="materialFile" class="w-full rounded-lg border-slate-300">
+            <input type="file" name="materialUpload" class="w-full rounded-lg border-slate-300">
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

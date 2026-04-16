@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
+<html class="light" lang="en"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head>
     <meta charset="utf-8"/>
+
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>64Lab</title>
     <!-- Fonts: Manrope & Inter -->
@@ -96,8 +98,19 @@
             <a class="text-xl font-extrabold tracking-tight text-blue-900 dark:text-blue-50 font-manrope" href="#">64Lab</a>
         </div>
         <div class="flex items-center gap-4">
-            <button class="px-4 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-all rounded-xl font-inter text-sm font-medium">로그인</button>
-            <button class="px-6 py-2 bg-primary-container text-on-primary rounded-xl hover:bg-primary shadow-md hover:shadow-lg transition-all transform active:scale-95 duration-150 font-inter text-sm font-semibold">회원가입</button>
+            <th:block sec:authorize="isAnonymous()">
+                <a th:href="@{/auth/login}" class="text-slate-500 font-medium text-sm tracking-tight hover:text-primary px-4 py-2">로그인</a>
+                <a th:href="@{/member/signup}" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-lg font-semibold text-sm tracking-tight transition-transform active:scale-95">무료 회원가입</a>
+            </th:block>
+
+            <th:block sec:authorize="isAuthenticated()">
+                <span class="text-sm font-medium text-slate-600">
+                    <b sec:authentication="name" class="text-primary"></b>님 환영합니다
+                </span>
+                <form th:action="@{/auth/logout}" th:method="post" class="inline">
+                    <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-slate-700 px-4 py-2 rounded-lg font-semibold text-sm transition-all">로그아웃</button>
+                </form>
+            </th:block>
         </div>
     </div>
 </header>

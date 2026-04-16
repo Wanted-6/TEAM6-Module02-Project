@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class CourseCreateDTO {
 
     private Integer courseId;
-    private Integer instructorId;
+    private String instructorLoginId;
     private String title;
     private String description;
     private String category;

@@ -1,11 +1,7 @@
 package com.wanted.projectmodule2lms.domain.course.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
@@ -21,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class Course {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
     private Integer courseId;
 
@@ -66,6 +63,9 @@ public class Course {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Column(name = "exam_due_date")
+    private LocalDate examDueDate;
 
     public void changeCourseInfo(String title,
                                  String description,
@@ -120,5 +120,8 @@ public class Course {
         this.reviewedBy = adminId;
         this.reviewedAt = LocalDateTime.now();
         this.deletedAt = LocalDateTime.now();
+    }
+    public void changeExamDueDate(LocalDate examDueDate) {
+        this.examDueDate = examDueDate;
     }
 }
