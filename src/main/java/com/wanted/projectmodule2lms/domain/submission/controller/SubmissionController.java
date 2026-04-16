@@ -1,9 +1,12 @@
 package com.wanted.projectmodule2lms.domain.submission.controller;
 
+import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentDTO;
 import com.wanted.projectmodule2lms.domain.assignment.service.AssignmentService;
+import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionCreateDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionScoreDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionUpdateDTO;
+import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionDTO;
 import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -18,52 +21,83 @@ public class SubmissionController {
 
     private final SubmissionService submissionService;
     private final AssignmentService assignmentService;
+    private final CourseService courseService;
 
-    @GetMapping("/assignments/{assignmentId}/submissions")
-    public ModelAndView findSubmissionsByAssignment(@PathVariable Integer assignmentId, ModelAndView mv) {
-        mv.addObject("assignmentId", assignmentId);
-        mv.addObject("assignment", assignmentService.findAssignmentById(assignmentId));
-        mv.addObject("submissionList", submissionService.findSubmissionsByAssignmentId(assignmentId));
+    @GetMapping("/courses/{courseId}/assignment/submissions")
+    public ModelAndView findSubmissionsByCourse(@PathVariable Integer courseId, ModelAndView mv) {
+        AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
+
+        mv.addObject("courseId", courseId);
+        mv.addObject("course", courseService.findCourseById(courseId));
+        mv.addObject("assignment", assignment);
+        mv.addObject("submissionList", submissionService.findSubmissionsByAssignmentId(assignment.getAssignmentId()));
         mv.setViewName("submission/list");
         return mv;
     }
 
-    @GetMapping("/assignments/{assignmentId}/submissions/regist")
-    public ModelAndView registPage(@PathVariable Integer assignmentId, ModelAndView mv) {
-        mv.addObject("assignmentId", assignmentId);
-        mv.addObject("assignment", assignmentService.findAssignmentById(assignmentId));
+    @GetMapping("/courses/{courseId}/assignment/submissions/regist")
+    public ModelAndView registPage(@PathVariable Integer courseId, ModelAndView mv) {
+        AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
+
+        mv.addObject("courseId", courseId);
+        mv.addObject("course", courseService.findCourseById(courseId));
+        mv.addObject("assignment", assignment);
         mv.setViewName("submission/regist");
         return mv;
     }
 
-    @PostMapping("/assignments/{assignmentId}/submissions")
-    public String registSubmission(@PathVariable Integer assignmentId,
+    @PostMapping("/courses/{courseId}/assignment/submissions")
+    public String registSubmission(@PathVariable Integer courseId,
                                    @ModelAttribute SubmissionCreateDTO createDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
         try {
-            submissionService.registSubmission(assignmentId, createDTO, attachmentUpload);
+            AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
+            submissionService.registSubmission(assignment.getAssignmentId(), createDTO, attachmentUpload);
             rttr.addFlashAttribute("successMessage", "과제가 제출되었습니다.");
-            return "redirect:/assignments/" + assignmentId + "/submissions";
+            return "redirect:/courses/" + courseId + "/assignment/submissions/me?enrollmentId=" + createDTO.getEnrollmentId();
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/assignments/" + assignmentId + "/submissions/regist";
+            return "redirect:/courses/" + courseId + "/assignment/submissions/regist";
         } catch (Exception e) {
             rttr.addFlashAttribute("errorMessage", "과제 제출 중 오류가 발생했습니다.");
-            return "redirect:/assignments/" + assignmentId + "/submissions/regist";
+            return "redirect:/courses/" + courseId + "/assignment/submissions/regist";
         }
+    }
+
+    @GetMapping("/courses/{courseId}/assignment/submissions/me")
+    public ModelAndView findMySubmission(@PathVariable Integer courseId,
+                                         @RequestParam Integer enrollmentId,
+                                         ModelAndView mv) {
+        AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
+        SubmissionDTO submission = submissionService.findMySubmission(assignment.getAssignmentId(), enrollmentId);
+
+        mv.addObject("courseId", courseId);
+        mv.addObject("course", courseService.findCourseById(courseId));
+        mv.addObject("assignment", assignment);
+        mv.addObject("submission", submission);
+        mv.setViewName("submission/detail");
+        return mv;
     }
 
     @GetMapping("/submissions/{submissionId}")
     public ModelAndView findSubmissionById(@PathVariable Integer submissionId, ModelAndView mv) {
-        mv.addObject("submission", submissionService.findSubmissionById(submissionId));
+        SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
+        Integer courseId = assignmentService.findAssignmentById(submission.getAssignmentId()).getCourseId();
+
+        mv.addObject("courseId", courseId);
+        mv.addObject("submission", submission);
         mv.setViewName("submission/detail");
         return mv;
     }
 
     @GetMapping("/submissions/{submissionId}/modify")
     public ModelAndView modifyPage(@PathVariable Integer submissionId, ModelAndView mv) {
-        mv.addObject("submission", submissionService.findSubmissionById(submissionId));
+        SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
+        Integer courseId = assignmentService.findAssignmentById(submission.getAssignmentId()).getCourseId();
+
+        mv.addObject("courseId", courseId);
+        mv.addObject("submission", submission);
         mv.setViewName("submission/modify");
         return mv;
     }
@@ -73,12 +107,13 @@ public class SubmissionController {
                                    @ModelAttribute SubmissionUpdateDTO updateDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
-        Integer assignmentId = submissionService.findSubmissionById(submissionId).getAssignmentId();
+        SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
+        Integer courseId = assignmentService.findAssignmentById(submission.getAssignmentId()).getCourseId();
 
         try {
             submissionService.modifySubmission(submissionId, updateDTO, attachmentUpload);
             rttr.addFlashAttribute("successMessage", "제출물이 수정되었습니다.");
-            return "redirect:/assignments/" + assignmentId + "/submissions";
+            return "redirect:/courses/" + courseId + "/assignment/submissions/me?enrollmentId=" + submission.getEnrollmentId();
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/submissions/" + submissionId + "/modify";
@@ -92,7 +127,8 @@ public class SubmissionController {
     public String scoreSubmission(@PathVariable Integer submissionId,
                                   @ModelAttribute SubmissionScoreDTO scoreDTO,
                                   RedirectAttributes rttr) {
-        Integer assignmentId = submissionService.findSubmissionById(submissionId).getAssignmentId();
+        SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
+        Integer courseId = assignmentService.findAssignmentById(submission.getAssignmentId()).getCourseId();
 
         try {
             submissionService.scoreSubmission(submissionId, scoreDTO);
@@ -101,6 +137,6 @@ public class SubmissionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
 
-        return "redirect:/assignments/" + assignmentId + "/submissions";
+        return "redirect:/courses/" + courseId + "/assignment/submissions";
     }
 }

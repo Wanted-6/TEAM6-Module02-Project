@@ -12,9 +12,9 @@
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-3xl font-bold text-slate-900">제출 목록</h1>
-            <p class="text-slate-500 mt-2">과제 제출 내역을 확인합니다.</p>
+            <p class="text-slate-500 mt-2">해당 코스 과제의 제출 내역입니다.</p>
         </div>
-        <a th:href="@{/assignments/{assignmentId}(assignmentId=${assignmentId})}"
+        <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
            class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
             과제 상세
         </a>
@@ -64,6 +64,7 @@
             </tbody>
         </table>
     </div>
+
 </div>
 </body>
 </html>

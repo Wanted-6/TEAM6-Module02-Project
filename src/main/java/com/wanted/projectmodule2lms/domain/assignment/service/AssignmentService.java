@@ -5,8 +5,7 @@ import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentCreate
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentUpdateDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
-import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
-import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.Resource;
@@ -17,25 +16,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
-    private final SectionRepository sectionRepository;
+    private final CourseRepository courseRepository;
     private final ModelMapper modelMapper;
     private final ResourceLoader resourceLoader;
 
-    public List<AssignmentDTO> findAssignmentsBySectionId(Integer sectionId) {
-        List<Assignment> assignmentList = assignmentRepository.findBySectionIdOrderByDueDateAsc(sectionId);
+    public AssignmentDTO findAssignmentByCourseId(Integer courseId) {
+        Assignment foundAssignment = assignmentRepository.findByCourseId(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 코스에 등록된 과제가 없습니다."));
 
-        return assignmentList.stream()
-                .map(assignment -> modelMapper.map(assignment, AssignmentDTO.class))
-                .collect(Collectors.toList());
+        return modelMapper.map(foundAssignment, AssignmentDTO.class);
     }
 
     public AssignmentDTO findAssignmentById(Integer assignmentId) {
@@ -46,12 +42,16 @@ public class AssignmentService {
     }
 
     @Transactional
-    public Integer registAssignment(Integer sectionId,
+    public Integer registAssignment(Integer courseId,
                                     AssignmentCreateDTO createDTO,
                                     MultipartFile attachmentUpload) throws IOException {
 
-        Section section = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("섹션이 존재하지 않습니다."));
+        courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("코스가 존재하지 않습니다."));
+
+        if (assignmentRepository.findByCourseId(courseId).isPresent()) {
+            throw new IllegalArgumentException("해당 코스에는 이미 과제가 등록되어 있습니다.");
+        }
 
         String attachmentPath = saveAttachmentFile(attachmentUpload);
 
@@ -60,7 +60,7 @@ public class AssignmentService {
         }
 
         Assignment assignment = new Assignment(
-                section.getSectionId(),
+                courseId,
                 createDTO.getTitle(),
                 createDTO.getDescription(),
                 attachmentPath,
@@ -72,11 +72,11 @@ public class AssignmentService {
     }
 
     @Transactional
-    public void modifyAssignment(Integer assignmentId,
-                                 AssignmentUpdateDTO updateDTO,
-                                 MultipartFile attachmentUpload) throws IOException {
+    public void modifyAssignmentByCourseId(Integer courseId,
+                                           AssignmentUpdateDTO updateDTO,
+                                           MultipartFile attachmentUpload) throws IOException {
 
-        Assignment foundAssignment = assignmentRepository.findById(assignmentId)
+        Assignment foundAssignment = assignmentRepository.findByCourseId(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 과제가 존재하지 않습니다."));
 
         String attachmentPath = foundAssignment.getAttachmentFile();

@@ -12,7 +12,7 @@
 
         <div>
             <h1 class="text-3xl font-bold text-slate-900">제출 상세</h1>
-            <p class="text-slate-500 mt-2">제출한 과제와 채점 결과를 확인합니다.</p>
+            <p class="text-slate-500 mt-2">제출 내용과 피드백을 확인합니다.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -46,7 +46,7 @@
             <p class="text-sm text-slate-500 mb-2">첨부 파일</p>
             <span th:if="${submission.attachmentFile == null or submission.attachmentFile == ''}">-</span>
             <a th:if="${submission.attachmentFile != null and submission.attachmentFile != ''}"
-               th:href="@{/{path}(path=${submission.attachmentFile})}"
+               th:href="@{/${submission.attachmentFile}}"
                class="text-blue-600 hover:underline">
                 파일 다운로드
             </a>
@@ -82,11 +82,18 @@
                 </div>
 
                 <div class="flex justify-end gap-3">
-                    <a th:href="@{/assignments/{assignmentId}/submissions(assignmentId=${submission.assignmentId})}"
-                       class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
+                    <a th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId})}"
+                       class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                        목록
+                    </a>
                     <a th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId})}"
-                       class="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100">제출 수정</a>
-                    <button type="submit" class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">채점 저장</button>
+                       class="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100">
+                        제출 수정
+                    </a>
+                    <button type="submit"
+                            class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
+                        채점 저장
+                    </button>
                 </div>
             </form>
         </div>

@@ -1,10 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코스 과제 목록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-6xl mx-auto px-6 py-10">
 
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-900">코스 과제 목록</h1>
+            <p class="text-slate-500 mt-2">테스트 또는 관리용 과제 목록 화면입니다.</p>
+        </div>
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+         th:text="${errorMessage}">
+        에러 메시지
+    </div>
+
+    <div th:if="${successMessage}"
+         class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700"
+         th:text="${successMessage}">
+        성공 메시지
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-slate-100 text-slate-700">
+            <tr>
+                <th class="px-6 py-4">과제 ID</th>
+                <th class="px-6 py-4">코스 ID</th>
+                <th class="px-6 py-4">제목</th>
+                <th class="px-6 py-4">마감일</th>
+                <th class="px-6 py-4">관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${assignment == null}">
+                <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+                    등록된 과제가 없습니다.
+                </td>
+            </tr>
+
+            <tr th:if="${assignment != null}" class="border-t border-slate-200">
+                <td class="px-6 py-4" th:text="${assignment.assignmentId}">1</td>
+                <td class="px-6 py-4" th:text="${assignment.courseId}">4</td>
+                <td class="px-6 py-4 font-medium" th:text="${assignment.title}">과제 제목</td>
+                <td class="px-6 py-4" th:text="${#temporals.format(assignment.dueDate, 'yyyy-MM-dd HH:mm')}">2026-04-20 23:59</td>
+                <td class="px-6 py-4 flex gap-2">
+                    <a th:href="@{/courses/{courseId}/assignment(courseId=${assignment.courseId})}"
+                       class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                        상세
+                    </a>
+                    <a th:href="@{/courses/{courseId}/assignment/modify(courseId=${assignment.courseId})}"
+                       class="px-3 py-1 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100">
+                        수정
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
 </body>
 </html>

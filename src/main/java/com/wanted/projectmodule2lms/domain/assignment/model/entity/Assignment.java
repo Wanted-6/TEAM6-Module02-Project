@@ -1,13 +1,6 @@
 package com.wanted.projectmodule2lms.domain.assignment.model.entity;
 
-<<<<<<< HEAD
 import jakarta.persistence.*;
-=======
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
->>>>>>> e54066727348eccaac506e4439656ada00f4d5ee
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,35 +13,31 @@ import java.time.LocalDateTime;
 public class Assignment {
 
     @Id
-<<<<<<< HEAD
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-=======
->>>>>>> e54066727348eccaac506e4439656ada00f4d5ee
     @Column(name = "assignment_id")
     private Integer assignmentId;
 
-    @Column(name = "section_id", nullable = false)
-    private Integer sectionId;
+    @Column(name = "course_id", nullable = false)
+    private Integer courseId;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "attachment_file")
+    @Column(name = "attachment_file", length = 255)
     private String attachmentFile;
 
     @Column(name = "due_date", nullable = false)
     private LocalDateTime dueDate;
-<<<<<<< HEAD
 
-    public Assignment(Integer sectionId,
+    public Assignment(Integer courseId,
                       String title,
                       String description,
                       String attachmentFile,
                       LocalDateTime dueDate) {
-        this.sectionId = sectionId;
+        this.courseId = courseId;
         this.title = title;
         this.description = description;
         this.attachmentFile = attachmentFile;
@@ -65,6 +54,3 @@ public class Assignment {
         this.dueDate = dueDate;
     }
 }
-=======
-}
->>>>>>> e54066727348eccaac506e4439656ada00f4d5ee
