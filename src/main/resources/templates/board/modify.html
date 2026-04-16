@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>게시글 수정</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
-<body>
+<body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
 <div class="page-wrapper">
     <div class="top-utility">
         <div class="role-panel">
@@ -15,7 +15,7 @@
                 <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
                 <button class="role-btn" data-role="STUDENT" type="button">학생</button>
             </div>
-            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
+            <div class="role-current">현재 로그인: <span class="role-badge" data-current-role th:text="${currentRole}">STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id th:text="${currentMemberId}">1</span></div>
             <p class="permission-note">기존 게시글 정보를 불러와 게시판 구조에 맞게 수정하는 화면입니다.</p>
         </div>
         <div class="page-main">
@@ -30,9 +30,6 @@
             <input type="hidden" name="postType" th:value="${board.postType}">
             <input type="hidden" name="courseId" th:value="${board.courseId}">
             <input type="hidden" name="sectionId" th:value="${board.sectionId}">
-            <input type="hidden" name="contextCourseId" th:value="${contextCourseId}">
-            <input type="hidden" name="contextCurrentMemberId" th:value="${contextCurrentMemberId}">
-            <input type="hidden" name="contextCurrentRole" th:value="${contextCurrentRole}">
             <input type="hidden" name="currentRole" data-current-role-input>
             <input type="hidden" name="currentMemberId" data-current-member-id-input>
 
@@ -84,8 +81,7 @@
 
             <div class="button-group">
                 <button type="submit" class="btn">수정</button>
-                <a class="btn gray"
-                   th:href="@{/board/detail(postId=${board.postId}, courseId=${contextCourseId}, currentMemberId=${contextCurrentMemberId}, currentRole=${contextCurrentRole})}">상세로</a>
+                <a class="btn gray" th:href="@{/board/detail(postId=${board.postId})}">상세로</a>
             </div>
         </form>
     </div>

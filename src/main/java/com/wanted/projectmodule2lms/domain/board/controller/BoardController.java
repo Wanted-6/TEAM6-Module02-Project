@@ -6,7 +6,10 @@ import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
+import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +29,16 @@ public class BoardController {
 
     private final CommentService commentService;
     private final BoardService boardService;
+    private final MemberRepository memberRepository;
+
+    @ModelAttribute
+    public void addCurrentMemberInfo(Model model) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
+        model.addAttribute("currentMemberId", currentMemberId);
+        model.addAttribute("currentRole", currentRole);
+    }
 
     @GetMapping({"", "/"})
     public String boardHomePage() {
@@ -70,34 +83,37 @@ public class BoardController {
     @GetMapping("/section-qna")
     public String sectionQnaListPage(@RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) Integer courseId,
-                                     @RequestParam(required = false) Integer currentMemberId,
-                                     @RequestParam(required = false) MemberRole currentRole,
                                      Model model) {
-        List<BoardDTO> boardList = (currentMemberId != null && currentRole != null)
-                ? boardService.findVisibleSectionQna(currentMemberId, currentRole, keyword)
-                : ((keyword == null || keyword.isBlank())
-                ? boardService.findBoardByPostType(BoardType.SECTION_QNA)
-                : boardService.searchBoardByPostTypeAndTitle(BoardType.SECTION_QNA, keyword));
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+        List<BoardDTO> boardList;
+
+        if (currentMemberId != null && currentRole != null) {
+            boardList = boardService.findVisibleSectionQna(currentMemberId, currentRole, keyword);
+        } else if (keyword == null || keyword.isBlank()) {
+            boardList = boardService.findBoardByPostType(BoardType.SECTION_QNA);
+        } else {
+            boardList = boardService.searchBoardByPostTypeAndTitle(BoardType.SECTION_QNA, keyword);
+        }
+
+        if (courseId != null) {
+            boardList.removeIf(board -> board.getCourseId() == null || !board.getCourseId().equals(courseId));
+        }
+
         model.addAttribute("boardList", boardList);
         model.addAttribute("keyword", keyword);
         model.addAttribute("courseId", courseId);
-        model.addAttribute("currentMemberId", currentMemberId);
-        model.addAttribute("currentRole", currentRole);
         return "board/section-qna-list";
     }
 
     @GetMapping("/detail")
-    public String boardDetailPage(@RequestParam Integer postId,
-                                  @RequestParam(required = false) Integer courseId,
-                                  @RequestParam(required = false) Integer currentMemberId,
-                                  @RequestParam(required = false) MemberRole currentRole,
-                                  Model model) {
+    public String boardDetailPage(@RequestParam Integer postId, Model model) {
         boardService.increaseViewCount(postId);
         BoardDTO board = boardService.findBoardById(postId);
         List<CommentDTO> commentList=commentService.findCommentsByPostId(postId);
         model.addAttribute("board", board);
         model.addAttribute("commentList", commentList);
-        model.addAttribute("listPath", getListPath(board.getPostType(), courseId, currentMemberId, currentRole));
+        model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/detail";
     }
 
@@ -105,9 +121,10 @@ public class BoardController {
     public String boardRegistPage(@RequestParam(defaultValue = "FREE") BoardType type,
                                   @RequestParam(required = false) Integer courseId,
                                   @RequestParam(required = false) Integer sectionId,
-                                  @RequestParam(required = false) Integer currentMemberId,
-                                  @RequestParam(required = false) MemberRole currentRole,
                                   Model model) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
         List<Course> courses = (currentMemberId != null && currentRole != null)
                 ? boardService.findAvailableCourses(type, currentMemberId, currentRole)
                 : boardService.findAllCourses();
@@ -124,63 +141,47 @@ public class BoardController {
         model.addAttribute("selectedCourseId", courseId);
         model.addAttribute("selectedCourseTitle", selectedCourseTitle);
         model.addAttribute("selectedSectionId", sectionId);
-        model.addAttribute("listPath", getListPath(type));
+        model.addAttribute("listPath", getListPath(type, courseId));
         return "board/regist";
     }
 
     @PostMapping("/regist")
     public String registBoard(@ModelAttribute BoardDTO boardDTO,
-                              @RequestParam Integer currentMemberId,
-                              @RequestParam MemberRole currentRole,
                               RedirectAttributes redirectAttributes) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
         try {
             boardService.registBoard(boardDTO, currentMemberId, currentRole);
-            return "redirect:" + getListPath(boardDTO.getPostType());
+            return "redirect:" + getListPath(boardDTO.getPostType(), boardDTO.getCourseId());
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/regist?type=" + boardDTO.getPostType()
-                    + appendNumberQuery("currentMemberId", currentMemberId)
-                    + appendTextQuery("currentRole", currentRole != null ? currentRole.name() : null)
                     + appendNumberQuery("courseId", boardDTO.getCourseId())
                     + appendNumberQuery("sectionId", boardDTO.getSectionId());
         }
     }
 
     @GetMapping("/modify")
-    public String boardModifyPage(@RequestParam Integer postId,
-                                  @RequestParam(required = false) Integer courseId,
-                                  @RequestParam(required = false) Integer currentMemberId,
-                                  @RequestParam(required = false) MemberRole currentRole,
-                                  Model model) {
+    public String boardModifyPage(@RequestParam Integer postId, Model model) {
         BoardDTO board = boardService.findBoardById(postId);
         model.addAttribute("board", board);
-        model.addAttribute("contextCourseId", courseId);
-        model.addAttribute("contextCurrentMemberId", currentMemberId);
-        model.addAttribute("contextCurrentRole", currentRole);
-        model.addAttribute("listPath", getListPath(board.getPostType(), courseId, currentMemberId, currentRole));
+        model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/modify";
     }
 
     @PostMapping("/modify")
     public String modifyBoard(@ModelAttribute BoardDTO boardDTO,
-                              @RequestParam(required = false) Integer contextCourseId,
-                              @RequestParam(required = false) Integer contextCurrentMemberId,
-                              @RequestParam(required = false) MemberRole contextCurrentRole,
-                              @RequestParam Integer currentMemberId,
-                              @RequestParam MemberRole currentRole,
                               RedirectAttributes redirectAttributes) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
+
         try {
             boardService.modifyBoard(boardDTO, currentMemberId, currentRole);
-            return "redirect:/board/detail?postId=" + boardDTO.getPostId()
-                    + appendNumberQuery("courseId", contextCourseId)
-                    + appendNumberQuery("currentMemberId", contextCurrentMemberId)
-                    + appendTextQuery("currentRole", contextCurrentRole != null ? contextCurrentRole.name() : null);
+            return "redirect:/board/detail?postId=" + boardDTO.getPostId();
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/board/modify?postId=" + boardDTO.getPostId()
-                    + appendNumberQuery("courseId", contextCourseId)
-                    + appendNumberQuery("currentMemberId", contextCurrentMemberId)
-                    + appendTextQuery("currentRole", contextCurrentRole != null ? contextCurrentRole.name() : null);
+            return "redirect:/board/modify?postId=" + boardDTO.getPostId();
         }
     }
 
@@ -188,19 +189,19 @@ public class BoardController {
     public String boardDeletePage(@RequestParam Integer postId, Model model) {
         BoardDTO board = boardService.findBoardById(postId);
         model.addAttribute("board", board);
-        model.addAttribute("listPath", getListPath(board.getPostType()));
+        model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/delete";
     }
 
     @PostMapping("/delete")
     public String deleteBoard(@RequestParam Integer postId,
-                              @RequestParam Integer currentMemberId,
-                              @RequestParam MemberRole currentRole,
                               RedirectAttributes redirectAttributes) {
+        Integer currentMemberId = getCurrentMemberId();
+        MemberRole currentRole = getCurrentMemberRole();
         BoardDTO board = boardService.findBoardById(postId);
         try {
             boardService.deleteBoard(postId, currentMemberId, currentRole);
-            return "redirect:" + getListPath(board.getPostType());
+            return "redirect:" + getListPath(board.getPostType(), board.getCourseId());
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/detail?postId=" + postId;
@@ -234,10 +235,7 @@ public class BoardController {
         };
     }
 
-    private String getListPath(BoardType boardType,
-                               Integer courseId,
-                               Integer currentMemberId,
-                               MemberRole currentRole) {
+    private String getListPath(BoardType boardType, Integer courseId) {
         String basePath = getListPath(boardType);
 
         if (boardType != BoardType.SECTION_QNA) {
@@ -245,11 +243,7 @@ public class BoardController {
         }
 
         StringBuilder pathBuilder = new StringBuilder(basePath);
-        boolean hasQuery = false;
-
-        hasQuery = appendQuery(pathBuilder, "courseId", courseId, hasQuery);
-        hasQuery = appendQuery(pathBuilder, "currentMemberId", currentMemberId, hasQuery);
-        appendQuery(pathBuilder, "currentRole", currentRole != null ? currentRole.name() : null, hasQuery);
+        appendQuery(pathBuilder, "courseId", courseId, false);
 
         return pathBuilder.toString();
     }
@@ -284,5 +278,21 @@ public class BoardController {
                 .append("=")
                 .append(value);
         return true;
+    }
+
+    private Integer getCurrentMemberId() {
+        Long currentMemberId = SecurityUtil.getCurrentMemberId();
+        return currentMemberId != null ? currentMemberId.intValue() : null;
+    }
+
+    private MemberRole getCurrentMemberRole() {
+        Integer currentMemberId = getCurrentMemberId();
+
+        if (currentMemberId == null) {
+            return null;
+        }
+
+        Member member = memberRepository.findById(currentMemberId).orElse(null);
+        return member != null ? member.getRole() : null;
     }
 }
