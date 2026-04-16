@@ -52,11 +52,11 @@
 
         <div class="button-group">
             <a class="btn"
-               th:href="@{/board/modify(postId=${board.postId})}"
+               th:href="@{/board/modify(postId=${board.postId}, courseId=${param.courseId}, currentMemberId=${param.currentMemberId}, currentRole=${param.currentRole})}"
                data-board-action="modify"
                th:attr="data-post-type=${board.postType},data-author-id=${board.memberId}">수정하기</a>
             <a class="btn red"
-               th:href="@{/board/delete(postId=${board.postId})}"
+               th:href="@{/board/delete(postId=${board.postId}, courseId=${param.courseId}, currentMemberId=${param.currentMemberId}, currentRole=${param.currentRole})}"
                data-board-action="delete"
                th:attr="data-post-type=${board.postType},data-author-id=${board.memberId}">삭제하기</a>
             <a class="btn gray" th:href="${listPath}">목록으로</a>
