@@ -1,6 +1,8 @@
 package com.wanted.projectmodule2lms.domain.member.model.dao;
 
+import com.wanted.projectmodule2lms.domain.member.model.entity.ApprovalStatus;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
+import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -26,4 +28,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
 
     List<Member> findByMemberIdIn(List<Integer> memberIds);
+
+    List<Member> findByRoleAndApprovalStatus(MemberRole role, ApprovalStatus approvalStatus);
 }

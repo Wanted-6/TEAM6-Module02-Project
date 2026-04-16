@@ -1,23 +1,33 @@
 package com.wanted.projectmodule2lms.domain.member.model.controller;
 
 import com.wanted.projectmodule2lms.domain.member.model.dao.LoginLogRepository;
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
+import com.wanted.projectmodule2lms.domain.member.model.entity.ApprovalStatus;
 import com.wanted.projectmodule2lms.domain.member.model.entity.LoginLog;
+import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
+import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.domain.member.model.service.AdminService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
 @Controller
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
     private final LoginLogRepository loginLogRepository;
     private final SessionRegistry sessionRegistry;
-
+    private final AdminService adminService;
+    private final MemberRepository memberRepository;
     /**
      * 관리자 로그인 로그 페이지를 조회하기 위한 메서드이다.
      *
@@ -63,4 +73,32 @@ public class AdminController {
 
         return mv;
     }
+
+    @GetMapping("/instructors")
+    public String pendingInstructors(Model model){
+        // 대기중, 강사 인 사람 찾기
+        List<Member> pendingList = memberRepository.findByRoleAndApprovalStatus(MemberRole.INSTRUCTOR, ApprovalStatus.PENDING);
+        model.addAttribute("instructors", pendingList);
+
+        return "admin/instructor-list";
+    }
+
+    @AuditLog
+    @PostMapping("/instructors/{memberId}/approve")
+    public String approveInstructor(@PathVariable Integer memberId, RedirectAttributes rttr) {
+        String code = adminService.approveInstructor(memberId);
+
+        // 화면에 발급된 코드 띄워
+        rttr.addFlashAttribute("message", "승인 완료! 발급된 코드: [" + code + "]");
+        return "redirect:/admin/instructors";
+    }
+
+    @AuditLog
+    @PostMapping("/instructors/{memberId}/reject")
+    public String rejectInstructor(@PathVariable Integer memberId, @RequestParam("reason") String reason, RedirectAttributes rttr) {
+        adminService.rejectInstructor(memberId, reason);
+        rttr.addFlashAttribute("message", "반려 처리되었습니다. 사유: " + reason);
+        return "redirect:/admin/instructors";
+    }
+
 }

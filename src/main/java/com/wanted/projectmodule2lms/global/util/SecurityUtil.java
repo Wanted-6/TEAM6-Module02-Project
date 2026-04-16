@@ -36,15 +36,11 @@ public class SecurityUtil {
 
         // 3. Principal 객체를 만들어진 DTO로 형변환해서 PK만 빼서 반환.
         Object principal = authentication.getPrincipal();
-        if (principal instanceof AuthDetails) {
-            LoginMemberDTO loginMemberDTO = ((AuthDetails) principal).getLoginMemberDTO();
-            Integer memberId = loginMemberDTO != null ? loginMemberDTO.getMemberId() : null;
-            return memberId != null ? memberId.longValue() : null;
-        }
-
-        if (principal instanceof LoginMemberDTO) {
-            Integer memberId = ((LoginMemberDTO) principal).getMemberId();
-            return memberId != null ? memberId.longValue() : null;
+        if (principal instanceof com.wanted.projectmodule2lms.domain.auth.model.dto.AuthDetails authDetails) {
+            com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO loginMember = authDetails.getLoginMemberDTO();
+            if (loginMember != null && loginMember.getMemberId() != null) {
+                return loginMember.getMemberId().longValue();
+            }
         }
 
         return null;
@@ -64,7 +60,6 @@ if (currentMemberId != null) {
 
 
 * */
-
 
 
 
