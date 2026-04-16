@@ -58,6 +58,34 @@
             font-weight: bold;
             color: #d97706;
         }
+
+        .dday-item {
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .dday-yellow {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .dday-orange {
+            background-color: #fed7aa;
+            color: #9a3412;
+        }
+
+        .dday-red {
+            background-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .dday-default {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
     </style>
 </head>
 <body>
@@ -86,6 +114,12 @@
             <textarea id="memoContent" placeholder="메모를 입력하세요"></textarea>
             <button type="button" id="saveMemoBtn">추가</button>
         </div>
+
+        <div class="panel-box">
+            <h4>D-day</h4>
+            <div id="ddayList">임박한 시험 일정이 표시됩니다.</div>
+        </div>
+
     </div>
 </div>
 
@@ -94,13 +128,100 @@
     let selectedDate = null;
     let calendar = null;
 
+    function getTodayString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getDateDiff(todayStr, targetStr) {
+        const today = new Date(todayStr + 'T00:00:00');
+        const target = new Date(targetStr + 'T00:00:00');
+        const diffMs = target - today;
+        return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    function isExamEvent(event) {
+        return event.title && event.title.includes('시험 마감');
+    }
+
+    function getExamColor(diffDays) {
+        if (diffDays === 3) return '#facc15'; // 노랑
+        if (diffDays === 2) return '#fb923c'; // 주황
+        if (diffDays === 1) return '#ef4444'; // 빨강
+        return '#c4b5fd'; // 기본 시험 마감색
+    }
+
+    function applyExamDeadlineColors(events) {
+        const todayStr = getTodayString();
+
+        return events.map(event => {
+            if (!isExamEvent(event)) return event;
+
+            const diffDays = getDateDiff(todayStr, event.start);
+
+            return {
+                ...event,
+                color: getExamColor(diffDays)
+            };
+        });
+    }
+
+    function renderDdayList() {
+        const ddayList = document.getElementById('ddayList');
+        ddayList.innerHTML = '';
+
+        const todayStr = getTodayString();
+
+        const imminentExamEvents = allEvents
+            .filter(event => isExamEvent(event))
+            .map(event => ({
+                ...event,
+                diffDays: getDateDiff(todayStr, event.start)
+            }))
+            .filter(event => event.diffDays >= 0 && event.diffDays <= 3)
+            .sort((a, b) => a.diffDays - b.diffDays);
+
+        if (imminentExamEvents.length === 0) {
+            ddayList.innerHTML = '<div class="panel-item">임박한 시험 일정 없음</div>';
+            return;
+        }
+
+        imminentExamEvents.forEach(event => {
+            let label = '';
+            let className = 'dday-default';
+
+            if (event.diffDays === 0) {
+                label = 'D-Day';
+                className = 'dday-red';
+            } else if (event.diffDays === 1) {
+                label = 'D-1';
+                className = 'dday-red';
+            } else if (event.diffDays === 2) {
+                label = 'D-2';
+                className = 'dday-orange';
+            } else if (event.diffDays === 3) {
+                label = 'D-3';
+                className = 'dday-yellow';
+            }
+
+            ddayList.innerHTML += `
+                <div class="dday-item ${className}">
+                    ${label} : ${event.title} (${event.start})
+                </div>
+            `;
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('calendar');
 
         fetch('/student/calendar/events')
             .then(response => response.json())
             .then(data => {
-                allEvents = data;
+                allEvents = applyExamDeadlineColors(data);
 
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
@@ -118,6 +239,7 @@
                 });
 
                 calendar.render();
+                renderDdayList(); // D-day 표시
             });
 
         document.getElementById('saveMemoBtn').addEventListener('click', function () {
