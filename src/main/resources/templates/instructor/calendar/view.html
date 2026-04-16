@@ -101,7 +101,7 @@
         fetch('/instructor/calendar/events')
             .then(response => response.json())
             .then(data => {
-                allEvents = data;
+                allEvents = applyExamDeadlineColors(data);
 
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
@@ -195,11 +195,19 @@
             .then(() => {
                 document.getElementById('memoContent').value = '';
 
+                // ✅ 오늘 날짜 가져오기
+                const todayStr = getTodayString();
+
+                // ✅ 과거 날짜 여부에 따라 색상 결정
+                const memoColor = selectedDate < todayStr
+                    ? '#9ca3af'   // 회색 (과거 일정)
+                    : '#C8E6C9';  // 기존 연두색
+
                 const newMemoEvent = {
                     id: 'memo-temp-' + Date.now(),
                     title: '[메모] ' + content,
                     start: selectedDate,
-                    color: '#C8E6C9'
+                    color: memoColor
                 };
 
                 allEvents.push(newMemoEvent);
@@ -245,6 +253,33 @@
             .catch(error => {
                 console.error('캘린더 새로고침 오류:', error);
             });
+    }
+    function getTodayString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function applyExamDeadlineColors(events) {
+        const todayStr = getTodayString();
+
+        return events.map(event => {
+            let updatedEvent = { ...event };
+
+            // 기존 색상 유지 (시험 일정 등)
+            if (event.title && event.title.includes('시험 마감')) {
+                // 기존 로직 유지 – 색상 변경 없음
+            }
+
+            // 오늘보다 이전 일정은 회색 처리
+            if (event.start < todayStr) {
+                updatedEvent.color = '#9ca3af';
+            }
+
+            return updatedEvent;
+        });
     }
 </script>
 </body>
