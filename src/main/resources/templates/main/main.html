@@ -1,268 +1,1026 @@
+<!--<!DOCTYPE html>-->
+
+<!--<html class="light" lang="en"-->
+<!--      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head>-->
+<!--    <meta charset="utf-8"/>-->
+
+<!--    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>-->
+<!--    <title>64Lab</title>-->
+<!--    &lt;!&ndash; Fonts: Manrope & Inter &ndash;&gt;-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>-->
+<!--    &lt;!&ndash; Material Symbols &ndash;&gt;-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>-->
+<!--    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>-->
+<!--    <script id="tailwind-config">-->
+<!--        tailwind.config = {-->
+<!--            darkMode: "class",-->
+<!--            theme: {-->
+<!--                extend: {-->
+<!--                    "colors": {-->
+<!--                        "inverse-primary": "#b6c4ff",-->
+<!--                        "on-primary-fixed": "#00164e",-->
+<!--                        "tertiary-container": "#6e2c00",-->
+<!--                        "on-secondary-fixed-variant": "#3d4565",-->
+<!--                        "outline": "#757682",-->
+<!--                        "primary-fixed-dim": "#b6c4ff",-->
+<!--                        "primary": "#00236f",-->
+<!--                        "tertiary": "#4b1c00",-->
+<!--                        "on-error": "#ffffff",-->
+<!--                        "on-tertiary": "#ffffff",-->
+<!--                        "on-secondary": "#ffffff",-->
+<!--                        "surface-dim": "#d8dadc",-->
+<!--                        "secondary": "#555d7e",-->
+<!--                        "secondary-container": "#d0d8ff",-->
+<!--                        "tertiary-fixed": "#ffdbcb",-->
+<!--                        "surface-container": "#eceef0",-->
+<!--                        "on-tertiary-container": "#f39461",-->
+<!--                        "surface-container-high": "#e6e8ea",-->
+<!--                        "secondary-fixed": "#dce1ff",-->
+<!--                        "tertiary-fixed-dim": "#ffb691",-->
+<!--                        "on-secondary-fixed": "#111a37",-->
+<!--                        "secondary-fixed-dim": "#bdc5eb",-->
+<!--                        "on-primary-fixed-variant": "#264191",-->
+<!--                        "primary-fixed": "#dce1ff",-->
+<!--                        "surface": "#f7f9fb",-->
+<!--                        "surface-tint": "#4059aa",-->
+<!--                        "on-error-container": "#93000a",-->
+<!--                        "primary-container": "#1e3a8a",-->
+<!--                        "on-surface-variant": "#444651",-->
+<!--                        "on-primary-container": "#90a8ff",-->
+<!--                        "outline-variant": "#c5c5d3",-->
+<!--                        "on-tertiary-fixed": "#341100",-->
+<!--                        "on-surface": "#191c1e",-->
+<!--                        "surface-container-highest": "#e0e3e5",-->
+<!--                        "surface-bright": "#f7f9fb",-->
+<!--                        "surface-container-low": "#f2f4f6",-->
+<!--                        "surface-container-lowest": "#ffffff",-->
+<!--                        "error": "#ba1a1a",-->
+<!--                        "surface-variant": "#e0e3e5",-->
+<!--                        "on-primary": "#ffffff",-->
+<!--                        "error-container": "#ffdad6",-->
+<!--                        "on-secondary-container": "#555e7f",-->
+<!--                        "background": "#f7f9fb",-->
+<!--                        "on-background": "#191c1e",-->
+<!--                        "inverse-on-surface": "#eff1f3",-->
+<!--                        "inverse-surface": "#2d3133",-->
+<!--                        "on-tertiary-fixed-variant": "#773205"-->
+<!--                    },-->
+<!--                    "borderRadius": {-->
+<!--                        "DEFAULT": "0.25rem",-->
+<!--                        "lg": "0.5rem",-->
+<!--                        "xl": "0.75rem",-->
+<!--                        "full": "9999px"-->
+<!--                    },-->
+<!--                    "fontFamily": {-->
+<!--                        "headline": ["Manrope"],-->
+<!--                        "body": ["Inter"],-->
+<!--                        "label": ["Inter"]-->
+<!--                    }-->
+<!--                },-->
+<!--            },-->
+<!--        }-->
+<!--    </script>-->
+<!--    <style>-->
+<!--        .material-symbols-outlined {-->
+<!--            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;-->
+<!--        }-->
+<!--        .glass-effect {-->
+<!--            backdrop-filter: blur(20px);-->
+<!--            -webkit-backdrop-filter: blur(20px);-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body class="bg-background text-on-background font-body antialiased">-->
+<!--&lt;!&ndash; TopNavBar &ndash;&gt;-->
+<!--<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm dark:shadow-none">-->
+<!--    <div class="flex justify-between items-center h-16 px-6 lg:px-12 w-full mx-auto">-->
+<!--        <div class="flex items-center gap-8">-->
+<!--            <a class="text-xl font-extrabold tracking-tight text-blue-900 dark:text-blue-50 font-manrope" href="#">64Lab</a>-->
+<!--        </div>-->
+<!--        <div class="flex items-center gap-4">-->
+<!--            <th:block sec:authorize="isAnonymous()">-->
+<!--                <a th:href="@{/auth/login}" class="text-slate-500 font-medium text-sm tracking-tight hover:text-primary px-4 py-2">로그인</a>-->
+<!--                <a th:href="@{/member/signup}" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-lg font-semibold text-sm tracking-tight transition-transform active:scale-95">무료 회원가입</a>-->
+<!--            </th:block>-->
+
+<!--            <th:block sec:authorize="isAuthenticated()">-->
+<!--                <span class="text-sm font-medium text-slate-600">-->
+<!--                    <b sec:authentication="name" class="text-primary"></b>님 환영합니다-->
+<!--                </span>-->
+<!--                <form th:action="@{/auth/logout}" th:method="post" class="inline">-->
+<!--                    <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-slate-700 px-4 py-2 rounded-lg font-semibold text-sm transition-all">로그아웃</button>-->
+<!--                </form>-->
+<!--            </th:block>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</header>-->
+<!--<main class="pt-16 pb-24">-->
+<!--    &lt;!&ndash; Feature Banner / Navigation Cards &ndash;&gt;-->
+<!--    <section class="w-full px-6 lg:px-12 mt-8 mb-12">-->
+<!--        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">-->
+<!--            &lt;!&ndash; Course Application &ndash;&gt;-->
+<!--            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-primary">-->
+<!--                <div class="w-12 h-12 bg-primary-container/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">-->
+<!--                    <span class="material-symbols-outlined text-primary text-3xl" data-icon="school">school</span>-->
+<!--                </div>-->
+<!--                <h3 class="font-headline font-bold text-lg text-primary mb-1">강의신청</h3>-->
+<!--                <p class="text-on-surface-variant text-sm">엄선된 프리미엄 학술 과정을 탐색하세요.</p>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Communication &ndash;&gt;-->
+<!--            <a class="block bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-secondary" href="/board/list">-->
+<!--                <div class="w-12 h-12 bg-secondary-container/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">-->
+<!--                    <span class="material-symbols-outlined text-secondary text-3xl" data-icon="forum">forum</span>-->
+<!--                </div>-->
+<!--                <h3 class="font-headline font-bold text-lg text-secondary mb-1">커뮤니케이션</h3>-->
+<!--                <p class="text-on-surface-variant text-sm">연구 동료 및 교수진과 소통하세요.</p>-->
+<!--            </a>-->
+<!--            &lt;!&ndash; My Classroom &ndash;&gt;-->
+<!--            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-tertiary">-->
+<!--                <div class="w-12 h-12 bg-tertiary-fixed/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">-->
+<!--                    <span class="material-symbols-outlined text-on-tertiary-fixed-variant text-3xl" data-icon="auto_stories">auto_stories</span>-->
+<!--                </div>-->
+<!--                <h3 class="font-headline font-bold text-lg text-on-tertiary-fixed-variant mb-1">내 강의실</h3>-->
+<!--                <p class="text-on-surface-variant text-sm">개인화된 학습 경로를 이어가세요.</p>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; My Page &ndash;&gt;-->
+<!--            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-outline-variant">-->
+<!--                <div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">-->
+<!--                    <span class="material-symbols-outlined text-on-surface text-3xl" data-icon="person_search">person_search</span>-->
+<!--                </div>-->
+<!--                <h3 class="font-headline font-bold text-lg text-on-surface mb-1">마이페이지</h3>-->
+<!--                <p class="text-on-surface-variant text-sm">프로필과 자격증을 관리하세요.</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+<!--    &lt;!&ndash; Main Content: Focused Academic Schedule &ndash;&gt;-->
+<!--    <section class="w-full px-6 lg:px-12">-->
+<!--        <div class="bg-surface-container-lowest rounded-xl shadow-sm p-10 flex flex-col border border-outline-variant/10">-->
+<!--            <div class="flex justify-between items-center mb-10">-->
+<!--                <div>-->
+<!--                    <h2 class="font-headline text-3xl font-extrabold text-blue-900">학사 일정</h2>-->
+<!--                    <p class="text-on-surface-variant text-base">연구 이정표와 강의 마감일을 계획하세요.</p>-->
+<!--                </div>-->
+<!--                <div class="flex items-center gap-6 bg-surface-container-low px-8 py-3 rounded-full">-->
+<!--                    <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-2xl" data-icon="chevron_left">chevron_left</button>-->
+<!--                    <span class="font-headline font-extrabold text-3xl text-blue-900 tracking-tighter mx-6">12</span>-->
+<!--                    <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-2xl" data-icon="chevron_right">chevron_right</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="grid grid-cols-7 gap-px bg-outline-variant/20 rounded-lg overflow-hidden border border-outline-variant/20">-->
+<!--                &lt;!&ndash; Weekdays &ndash;&gt;-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">일</div>-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">월</div>-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">화</div>-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">수</div>-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">목</div>-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">금</div>-->
+<!--                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">토</div>-->
+<!--                &lt;!&ndash; Calendar Grid: Row 1 &ndash;&gt;-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-outline-variant font-medium text-base">30</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">1</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">-->
+<!--                    <span class="block mb-3">2</span>-->
+<!--                    <div class="p-3 bg-primary-container/10 border-l-4 border-primary rounded-r">-->
+<!--                        <p class="text-[10px] font-bold text-primary uppercase mb-1">이정표</p>-->
+<!--                        <p class="text-xs font-semibold text-on-surface leading-tight">초록 제출 마감</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">3</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">4</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">5</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">6</div>-->
+<!--                &lt;!&ndash; Calendar Grid: Row 2 &ndash;&gt;-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">7</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">8</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">9</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">10</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base relative ring-4 ring-primary ring-inset bg-primary-container/5">-->
+<!--                    <span class="font-bold text-primary block mb-3">11</span>-->
+<!--                    <div class="p-4 bg-primary rounded shadow-lg text-on-primary">-->
+<!--                        <p class="text-[10px] font-bold uppercase opacity-80 mb-1">현재 과제</p>-->
+<!--                        <p class="text-sm font-semibold leading-tight">피어 리뷰 실시간 세션</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">12</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">13</div>-->
+<!--                &lt;!&ndash; Calendar Grid: Row 3 &ndash;&gt;-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">14</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">15</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">16</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">17</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">18</div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">-->
+<!--                    <span class="block mb-3">19</span>-->
+<!--                    <div class="p-3 bg-secondary-container/30 border-l-4 border-secondary rounded-r">-->
+<!--                        <p class="text-[10px] font-bold text-secondary uppercase mb-1">웨비나</p>-->
+<!--                        <p class="text-xs font-semibold text-on-surface leading-tight">학계에서의 AI 활용 전략</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">20</div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+<!--    &lt;!&ndash; Dynamic Value Proposition Section &ndash;&gt;-->
+<!--    <section class="w-full px-6 lg:px-12 mt-20">-->
+<!--        <div class="bg-surface-container-high rounded-3xl p-12 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">-->
+<!--            <div class="absolute -right-24 top-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl"></div>-->
+<!--            <div class="md:w-1/2 relative z-10">-->
+<!--                <h2 class="font-headline text-3xl font-extrabold text-blue-900 mb-6">정밀한 큐레이션으로 학술적 여정의 품격을 높이세요.</h2>-->
+<!--                <p class="text-on-surface-variant font-body mb-8 leading-relaxed">일반적인 LMS 플랫폼과 달리, The Academic Curator는 불필요한 정보를 걸러내고 고품질 연구 리소스를 대시보드에 직접 제공합니다. 우리는 양보다 깊이를 우선시합니다.</p>-->
+<!--                <div class="flex gap-4">-->
+<!--                    <button class="bg-primary-container text-on-primary px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all">지금 시작하기</button>-->
+<!--                    <button class="border border-outline text-on-surface px-8 py-4 rounded-xl font-bold hover:bg-surface transition-all">모든 강의 보기</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="md:w-1/2 relative">-->
+<!--                <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl rotate-3 transform hover:rotate-0 transition-transform duration-500">-->
+<!--                    <img class="w-full h-auto" data-alt="slick user interface showing complex data visualizations and scholarly charts on a tablet screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBC2x1xegonw2AshuOisWcCdpFRPVIvt3YRuhYASgcY3zxgfmlUzNlr3wOk8Gle_5CE4J6uge1EFvjLSQV4N6QbLB6aFjuDML3vyIrZ2NzvYylehhTlrUSuAiipoz7uUCDKDxFLzKyxXq9_VKBx1kAxdS4YLyZaPf3Ee2YJxbFUuzz9U-wJCpoxMWQOeofdyXH2jwEIvxOxhbrss_tb7U1aURBU9LBxQbBFon6uL1Nrhsj3jXgBo0cWqEtBaL85KDNzUtoXQGIdACE"/>-->
+<!--                </div>-->
+<!--                <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl z-20 max-w-[200px]">-->
+<!--                    <p class="text-xs text-primary font-bold mb-2 uppercase">글로벌 네트워크</p>-->
+<!--                    <p class="text-xl font-extrabold text-blue-900">450+</p>-->
+<!--                    <p class="text-[10px] text-on-surface-variant">450개 이상의 글로벌 협력 연구 기관</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+<!--</main>-->
+<!--&lt;!&ndash; Footer &ndash;&gt;-->
+<!--<footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">-->
+<!--    <div class="py-12 px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-8">-->
+<!--        <div class="flex flex-col gap-2">-->
+<!--            <span class="font-manrope font-bold text-blue-900 dark:text-blue-100 text-lg">64Lab</span>-->
+<!--            <p class="font-inter text-xs uppercase tracking-widest text-slate-500">© 2026 64Lab. 모든 권리 보유.</p>-->
+<!--        </div>-->
+<!--        <div class="flex flex-wrap justify-center gap-8">-->
+<!--            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">개인정보처리방침</a>-->
+<!--            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">이용약관</a>-->
+<!--            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">고객센터</a>-->
+<!--            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">접근성</a>-->
+<!--        </div>-->
+<!--        <div class="flex gap-4">-->
+<!--            <a class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center hover:bg-primary-container hover:text-on-primary transition-all" href="#">-->
+<!--                <span class="material-symbols-outlined text-sm" data-icon="policy">policy</span>-->
+<!--            </a>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</footer>-->
+<!--</body></html>-->
+
 <!DOCTYPE html>
-
-<html class="light" lang="en"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><head>
-    <meta charset="utf-8"/>
-
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>64Lab</title>
-    <!-- Fonts: Manrope & Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-    <!-- Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script id="tailwind-config">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+    <script>
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
-                    "colors": {
-                        "inverse-primary": "#b6c4ff",
-                        "on-primary-fixed": "#00164e",
-                        "tertiary-container": "#6e2c00",
-                        "on-secondary-fixed-variant": "#3d4565",
-                        "outline": "#757682",
-                        "primary-fixed-dim": "#b6c4ff",
-                        "primary": "#00236f",
-                        "tertiary": "#4b1c00",
-                        "on-error": "#ffffff",
-                        "on-tertiary": "#ffffff",
-                        "on-secondary": "#ffffff",
-                        "surface-dim": "#d8dadc",
-                        "secondary": "#555d7e",
-                        "secondary-container": "#d0d8ff",
-                        "tertiary-fixed": "#ffdbcb",
-                        "surface-container": "#eceef0",
-                        "on-tertiary-container": "#f39461",
-                        "surface-container-high": "#e6e8ea",
-                        "secondary-fixed": "#dce1ff",
-                        "tertiary-fixed-dim": "#ffb691",
-                        "on-secondary-fixed": "#111a37",
-                        "secondary-fixed-dim": "#bdc5eb",
-                        "on-primary-fixed-variant": "#264191",
-                        "primary-fixed": "#dce1ff",
-                        "surface": "#f7f9fb",
-                        "surface-tint": "#4059aa",
-                        "on-error-container": "#93000a",
-                        "primary-container": "#1e3a8a",
-                        "on-surface-variant": "#444651",
-                        "on-primary-container": "#90a8ff",
-                        "outline-variant": "#c5c5d3",
-                        "on-tertiary-fixed": "#341100",
-                        "on-surface": "#191c1e",
-                        "surface-container-highest": "#e0e3e5",
-                        "surface-bright": "#f7f9fb",
-                        "surface-container-low": "#f2f4f6",
-                        "surface-container-lowest": "#ffffff",
-                        "error": "#ba1a1a",
-                        "surface-variant": "#e0e3e5",
-                        "on-primary": "#ffffff",
-                        "error-container": "#ffdad6",
-                        "on-secondary-container": "#555e7f",
-                        "background": "#f7f9fb",
-                        "on-background": "#191c1e",
-                        "inverse-on-surface": "#eff1f3",
-                        "inverse-surface": "#2d3133",
-                        "on-tertiary-fixed-variant": "#773205"
+                    fontFamily: {
+                        headline: ['Manrope', 'sans-serif'],
+                        body: ['Noto Sans KR', 'sans-serif']
                     },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
+                    colors: {
+                        brand: '#2b3f8f',
+                        brandSoft: '#edf2ff',
+                        ink: '#1b2540',
+                        line: '#dbe3f1',
+                        paper: '#f6f8fc',
+                        accent: '#8a5b2b',
+                        mint: '#0f766e'
                     },
-                    "fontFamily": {
-                        "headline": ["Manrope"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
+                    boxShadow: {
+                        soft: '0 18px 40px rgba(43, 63, 143, 0.08)'
                     }
-                },
-            },
+                }
+            }
         }
     </script>
+
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background:
+                    radial-gradient(circle at top left, rgba(43, 63, 143, 0.08), transparent 28%),
+                    linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%);
         }
-        .glass-effect {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .menu-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 36px rgba(43, 63, 143, 0.12);
+            border-color: rgba(43, 63, 143, 0.22);
+        }
+
+        .fc {
+            --fc-border-color: #dbe3f1;
+            --fc-button-bg-color: #2b3f8f;
+            --fc-button-border-color: #2b3f8f;
+            --fc-button-hover-bg-color: #223374;
+            --fc-button-hover-border-color: #223374;
+            --fc-button-active-bg-color: #1a285b;
+            --fc-button-active-border-color: #1a285b;
+            --fc-today-bg-color: rgba(43, 63, 143, 0.08);
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1b2540;
+        }
+
+        .fc .fc-daygrid-day-number {
+            color: #1b2540;
+            font-weight: 700;
+        }
+
+        .fc-event {
+            border: none;
+            border-radius: 10px;
+            padding: 2px 4px;
         }
     </style>
 </head>
-<body class="bg-background text-on-background font-body antialiased">
-<!-- TopNavBar -->
-<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm dark:shadow-none">
-    <div class="flex justify-between items-center h-16 px-6 lg:px-12 w-full mx-auto">
-        <div class="flex items-center gap-8">
-            <a class="text-xl font-extrabold tracking-tight text-blue-900 dark:text-blue-50 font-manrope" href="#">64Lab</a>
-        </div>
-        <div class="flex items-center gap-4">
+<body class="text-ink">
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
+
+        <div class="flex items-center gap-3">
             <th:block sec:authorize="isAnonymous()">
-                <a th:href="@{/auth/login}" class="text-slate-500 font-medium text-sm tracking-tight hover:text-primary px-4 py-2">로그인</a>
-                <a th:href="@{/member/signup}" class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-lg font-semibold text-sm tracking-tight transition-transform active:scale-95">무료 회원가입</a>
+                <a th:href="@{/auth/login}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-brand">
+                    로그인
+                </a>
+                <a th:href="@{/member/signup}" class="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
+                    회원가입
+                </a>
             </th:block>
 
             <th:block sec:authorize="isAuthenticated()">
-                <span class="text-sm font-medium text-slate-600">
-                    <b sec:authentication="name" class="text-primary"></b>님 환영합니다
+                <span class="hidden text-sm font-medium text-slate-600 sm:block">
+                    <strong class="text-brand" th:text="${memberName} ?: ${#authentication.name}">사용자</strong>님, 환영합니다.
                 </span>
                 <form th:action="@{/auth/logout}" th:method="post" class="inline">
-                    <button type="submit" class="bg-gray-100 hover:bg-gray-200 text-slate-700 px-4 py-2 rounded-lg font-semibold text-sm transition-all">로그아웃</button>
+                    <button type="submit" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                        로그아웃
+                    </button>
                 </form>
             </th:block>
         </div>
     </div>
 </header>
-<main class="pt-16 pb-24">
-    <!-- Feature Banner / Navigation Cards -->
-    <section class="w-full px-6 lg:px-12 mt-8 mb-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Course Application -->
-            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-primary">
-                <div class="w-12 h-12 bg-primary-container/10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-primary text-3xl" data-icon="school">school</span>
+
+<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <section th:if="${!loggedIn}" class="rounded-[28px] bg-white/90 px-6 py-8 shadow-soft sm:px-8">
+        <div class="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+            <div>
+                <p class="mb-3 inline-flex rounded-full bg-brandSoft px-4 py-1 text-sm font-semibold text-brand">학습 관리 플랫폼</p>
+                <h1 class="font-headline text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
+                    로그인 후
+                    <span class="text-brand">학생/강사 전용 메인페이지</span>를
+                    이용할 수 있습니다.
+                </h1>
+                <p class="mt-5 max-w-2xl text-base leading-7 text-slate-600">
+                    로그인 전에는 소개 화면만 보이고,
+                    로그인 후에는 역할에 따라 상단 메뉴와 중앙 캘린더가 달라집니다.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <a th:href="@{/auth/login}" class="rounded-full bg-brand px-6 py-3 font-semibold text-white transition hover:bg-[#223374]">
+                        로그인
+                    </a>
+                    <a th:href="@{/member/signup}" class="rounded-full border border-slate-200 px-6 py-3 font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                        회원가입
+                    </a>
                 </div>
-                <h3 class="font-headline font-bold text-lg text-primary mb-1">강의신청</h3>
-                <p class="text-on-surface-variant text-sm">엄선된 프리미엄 학술 과정을 탐색하세요.</p>
             </div>
-            <!-- Communication -->
-            <a class="block bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-secondary" href="/board/list">
-                <div class="w-12 h-12 bg-secondary-container/20 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-secondary text-3xl" data-icon="forum">forum</span>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div class="rounded-3xl border border-line bg-paper p-5">
+                    <span class="material-symbols-outlined mb-4 text-4xl text-brand">school</span>
+                    <h2 class="text-lg font-bold">학생 메인</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        수강 신청, 내 강의실, 성적 조회, 학생 캘린더를 메인에서 확인합니다.
+                    </p>
                 </div>
-                <h3 class="font-headline font-bold text-lg text-secondary mb-1">커뮤니케이션</h3>
-                <p class="text-on-surface-variant text-sm">연구 동료 및 교수진과 소통하세요.</p>
-            </a>
-            <!-- My Classroom -->
-            <a class="block bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-tertiary" th:href="${myClassroomUrl}">
-                <div class="w-12 h-12 bg-tertiary-fixed/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-on-tertiary-fixed-variant text-3xl" data-icon="auto_stories">auto_stories</span>
+
+                <div class="rounded-3xl border border-line bg-paper p-5">
+                    <span class="material-symbols-outlined mb-4 text-4xl text-accent">co_present</span>
+                    <h2 class="text-lg font-bold">강사 메인</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        강의 관리, 성적 관리, 게시판, 강사 캘린더를 메인에서 확인합니다.
+                    </p>
                 </div>
-                <h3 class="font-headline font-bold text-lg text-on-tertiary-fixed-variant mb-1">내 강의실</h3>
-                <p class="text-on-surface-variant text-sm">개인화된 학습 경로를 이어가세요.</p>
-            </a>
-            <!-- My Page -->
-            <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm hover:shadow-md transition-all group cursor-pointer border-l-4 border-outline-variant">
-                <div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-on-surface text-3xl" data-icon="person_search">person_search</span>
+
+                <div class="rounded-3xl border border-line bg-white p-5 sm:col-span-2">
+                    <h2 class="text-lg font-bold">메인 페이지 구조</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        위에는 메뉴 카드, 중앙에는 역할별 캘린더가 표시되도록 구성했습니다.
+                    </p>
                 </div>
-                <h3 class="font-headline font-bold text-lg text-on-surface mb-1">마이페이지</h3>
-                <p class="text-on-surface-variant text-sm">프로필과 자격증을 관리하세요.</p>
             </div>
         </div>
     </section>
-    <!-- Main Content: Focused Academic Schedule -->
-    <section class="w-full px-6 lg:px-12">
-        <div class="bg-surface-container-lowest rounded-xl shadow-sm p-10 flex flex-col border border-outline-variant/10">
-            <div class="flex justify-between items-center mb-10">
+
+    <th:block th:if="${loggedIn}">
+        <section class="mb-8 rounded-[28px] bg-white/90 px-6 py-8 shadow-soft sm:px-8">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h2 class="font-headline text-3xl font-extrabold text-blue-900">학사 일정</h2>
-                    <p class="text-on-surface-variant text-base">연구 이정표와 강의 마감일을 계획하세요.</p>
+                    <p class="mb-3 inline-flex rounded-full bg-brandSoft px-4 py-1 text-sm font-semibold text-brand"
+                       th:text="${dashboardRole == 'INSTRUCTOR' ? '강사 대시보드' : (dashboardRole == 'ADMIN' ? '관리자 대시보드' : '학생 대시보드')}">
+                        학생 대시보드
+                    </p>
+
+                    <h1 class="font-headline text-3xl font-extrabold leading-tight text-ink sm:text-4xl">
+                        <span th:text="${memberName} ?: ${#authentication.name}">사용자</span>님의 메인페이지
+                    </h1>
+
+                    <p class="mt-3 text-base leading-7 text-slate-600"
+                       th:text="${dashboardRole == 'INSTRUCTOR' ? '강의 관리와 성적 관리, 강사 캘린더를 메인에서 바로 확인하세요.' : (dashboardRole == 'ADMIN' ? '관리자 권한으로 전체 강의와 주요 기능에 빠르게 접근할 수 있습니다.' : '수강 신청, 내 강의실, 성적 조회와 학생 캘린더를 메인에서 바로 확인하세요.')}">
+                        수강 신청, 내 강의실, 성적 조회와 학생 캘린더를 메인에서 바로 확인하세요.
+                    </p>
                 </div>
-                <div class="flex items-center gap-6 bg-surface-container-low px-8 py-3 rounded-full">
-                    <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-2xl" data-icon="chevron_left">chevron_left</button>
-                    <span class="font-headline font-extrabold text-3xl text-blue-900 tracking-tighter mx-6">12</span>
-                    <button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors text-2xl" data-icon="chevron_right">chevron_right</button>
-                </div>
+
+                <a th:if="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'}"
+                   th:href="@{/instructor/calendar}"
+                   class="inline-flex items-center gap-2 self-start rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                    <span class="material-symbols-outlined text-base">calendar_month</span>
+                    전체 캘린더 보기
+                </a>
+
+                <a th:if="${dashboardRole == 'STUDENT'}"
+                   th:href="@{/student/calendar}"
+                   class="inline-flex items-center gap-2 self-start rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                    <span class="material-symbols-outlined text-base">calendar_month</span>
+                    전체 캘린더 보기
+                </a>
             </div>
-            <div class="grid grid-cols-7 gap-px bg-outline-variant/20 rounded-lg overflow-hidden border border-outline-variant/20">
-                <!-- Weekdays -->
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">일</div>
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">월</div>
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">화</div>
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">수</div>
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">목</div>
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">금</div>
-                <div class="bg-surface-container-low py-4 text-center text-xs font-bold text-on-surface-variant uppercase tracking-widest">토</div>
-                <!-- Calendar Grid: Row 1 -->
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-outline-variant font-medium text-base">30</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">1</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">
-                    <span class="block mb-3">2</span>
-                    <div class="p-3 bg-primary-container/10 border-l-4 border-primary rounded-r">
-                        <p class="text-[10px] font-bold text-primary uppercase mb-1">이정표</p>
-                        <p class="text-xs font-semibold text-on-surface leading-tight">초록 제출 마감</p>
-                    </div>
+        </section>
+
+        <section th:if="${dashboardRole == 'STUDENT'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <a th:href="@{/student/enrollments/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
+                    <span class="material-symbols-outlined text-3xl">school</span>
                 </div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">3</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">4</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">5</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">6</div>
-                <!-- Calendar Grid: Row 2 -->
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">7</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">8</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">9</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">10</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base relative ring-4 ring-primary ring-inset bg-primary-container/5">
-                    <span class="font-bold text-primary block mb-3">11</span>
-                    <div class="p-4 bg-primary rounded shadow-lg text-on-primary">
-                        <p class="text-[10px] font-bold uppercase opacity-80 mb-1">현재 과제</p>
-                        <p class="text-sm font-semibold leading-tight">피어 리뷰 실시간 세션</p>
-                    </div>
-                </div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">12</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">13</div>
-                <!-- Calendar Grid: Row 3 -->
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">14</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">15</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">16</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">17</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">18</div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">
-                    <span class="block mb-3">19</span>
-                    <div class="p-3 bg-secondary-container/30 border-l-4 border-secondary rounded-r">
-                        <p class="text-[10px] font-bold text-secondary uppercase mb-1">웨비나</p>
-                        <p class="text-xs font-semibold text-on-surface leading-tight">학계에서의 AI 활용 전략</p>
-                    </div>
-                </div>
-                <div class="bg-surface-container-lowest min-h-[160px] p-6 text-on-surface font-medium text-base">20</div>
-            </div>
-        </div>
-    </section>
-    <!-- Dynamic Value Proposition Section -->
-    <section class="w-full px-6 lg:px-12 mt-20">
-        <div class="bg-surface-container-high rounded-3xl p-12 flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">
-            <div class="absolute -right-24 top-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl"></div>
-            <div class="md:w-1/2 relative z-10">
-                <h2 class="font-headline text-3xl font-extrabold text-blue-900 mb-6">정밀한 큐레이션으로 학술적 여정의 품격을 높이세요.</h2>
-                <p class="text-on-surface-variant font-body mb-8 leading-relaxed">일반적인 LMS 플랫폼과 달리, The Academic Curator는 불필요한 정보를 걸러내고 고품질 연구 리소스를 대시보드에 직접 제공합니다. 우리는 양보다 깊이를 우선시합니다.</p>
-                <div class="flex gap-4">
-                    <button class="bg-primary-container text-on-primary px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all">지금 시작하기</button>
-                    <button class="border border-outline text-on-surface px-8 py-4 rounded-xl font-bold hover:bg-surface transition-all">모든 강의 보기</button>
-                </div>
-            </div>
-            <div class="md:w-1/2 relative">
-                <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl rotate-3 transform hover:rotate-0 transition-transform duration-500">
-                    <img class="w-full h-auto" data-alt="slick user interface showing complex data visualizations and scholarly charts on a tablet screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBC2x1xegonw2AshuOisWcCdpFRPVIvt3YRuhYASgcY3zxgfmlUzNlr3wOk8Gle_5CE4J6uge1EFvjLSQV4N6QbLB6aFjuDML3vyIrZ2NzvYylehhTlrUSuAiipoz7uUCDKDxFLzKyxXq9_VKBx1kAxdS4YLyZaPf3Ee2YJxbFUuzz9U-wJCpoxMWQOeofdyXH2jwEIvxOxhbrss_tb7U1aURBU9LBxQbBFon6uL1Nrhsj3jXgBo0cWqEtBaL85KDNzUtoXQGIdACE"/>
-                </div>
-                <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl z-20 max-w-[200px]">
-                    <p class="text-xs text-primary font-bold mb-2 uppercase">글로벌 네트워크</p>
-                    <p class="text-xl font-extrabold text-blue-900">450+</p>
-                    <p class="text-[10px] text-on-surface-variant">450개 이상의 글로벌 협력 연구 기관</p>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
-<!-- Footer -->
-<footer class="w-full border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
-    <div class="py-12 px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
-        <div class="flex flex-col gap-2">
-            <span class="font-manrope font-bold text-blue-900 dark:text-blue-100 text-lg">64Lab</span>
-            <p class="font-inter text-xs uppercase tracking-widest text-slate-500">© 2026 64Lab. 모든 권리 보유.</p>
-        </div>
-        <div class="flex flex-wrap justify-center gap-8">
-            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">개인정보처리방침</a>
-            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">이용약관</a>
-            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">고객센터</a>
-            <a class="font-inter text-xs uppercase tracking-widest text-slate-500 hover:text-blue-700 dark:hover:text-blue-300 transition-opacity opacity-80 hover:opacity-100" href="#">접근성</a>
-        </div>
-        <div class="flex gap-4">
-            <a class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center hover:bg-primary-container hover:text-on-primary transition-all" href="#">
-                <span class="material-symbols-outlined text-sm" data-icon="policy">policy</span>
+                <h2 class="text-xl font-extrabold">강의 신청</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">수강 가능한 강의를 확인하고 바로 신청합니다.</p>
             </a>
+
+            <a th:href="@{/board/list}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0f1ff] text-[#5f67a8]">
+                    <span class="material-symbols-outlined text-3xl">forum</span>
+                </div>
+                <h2 class="text-xl font-extrabold">커뮤니케이션</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">공지와 게시판을 통해 필요한 정보를 확인합니다.</p>
+            </a>
+
+            <a th:href="${myClassroomUrl}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+
+            <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-accent">
+                    <span class="material-symbols-outlined text-3xl">auto_stories</span>
+                </div>
+                <h2 class="text-xl font-extrabold">내 강의실</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">수강 중인 강의와 학습 섹션으로 이동합니다.</p>
+            </a>
+
+            <a th:href="@{/grades}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef6f4] text-mint">
+                    <span class="material-symbols-outlined text-3xl">grading</span>
+                </div>
+                <h2 class="text-xl font-extrabold">성적 조회</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">내 성적을 빠르게 확인하고 학습 현황을 점검합니다.</p>
+            </a>
+        </section>
+
+        <section th:if="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <a th:href="@{/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
+                    <span class="material-symbols-outlined text-3xl">menu_book</span>
+                </div>
+                <h2 class="text-xl font-extrabold">강의 관리</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">강의 목록을 보고 상세, 수정, 학생 목록으로 이동합니다.</p>
+            </a>
+
+            <a th:href="@{/instructor/grades}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef6f4] text-mint">
+                    <span class="material-symbols-outlined text-3xl">fact_check</span>
+                </div>
+                <h2 class="text-xl font-extrabold">성적 관리</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">수강생 성적을 확인하고 수정 화면으로 이동합니다.</p>
+            </a>
+
+            <a th:href="@{/board/list}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0f1ff] text-[#5f67a8]">
+                    <span class="material-symbols-outlined text-3xl">forum</span>
+                </div>
+                <h2 class="text-xl font-extrabold">게시판</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">공지와 소통 게시판으로 바로 이동할 수 있습니다.</p>
+            </a>
+
+            <a th:href="@{/instructor/calendar}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-accent">
+                    <span class="material-symbols-outlined text-3xl">calendar_month</span>
+                </div>
+                <h2 class="text-xl font-extrabold">강사 캘린더</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">강의 일정과 메모를 캘린더 중심으로 관리합니다.</p>
+            </a>
+        </section>
+
+        <section class="rounded-[30px] border border-line bg-white p-4 shadow-soft sm:p-6 lg:p-8">
+            <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="font-headline text-3xl font-extrabold text-ink"
+                        th:text="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'} ? '강사 캘린더' : '학생 캘린더'">
+                        학생 캘린더
+                    </h2>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-600"
+                       th:text="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'} ? '메인페이지 중앙에서 강의 일정과 메모 흐름을 바로 확인할 수 있습니다.' : '메인페이지 중앙에서 학습 일정과 중요한 마감 일정을 바로 확인할 수 있습니다.'">
+                        메인페이지 중앙에서 학습 일정과 중요한 마감 일정을 바로 확인할 수 있습니다.
+                    </p>
+
+                </div>
+
+                <div class="rounded-full bg-paper px-4 py-2 text-sm font-semibold text-slate-600">
+                    오늘 기준 일정 확인
+                </div>
+            </div>
+
+            <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+                <div class="rounded-[24px] border border-line bg-white p-3 sm:p-4">
+                    <div id="dashboardCalendar"></div>
+                </div>
+
+                <aside class="rounded-[24px] border border-line bg-paper p-5">
+                    <div class="rounded-2xl bg-white p-4">
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-brand">Selected Date</p>
+                        <h3 id="selectedDateLabel" class="mt-2 text-2xl font-extrabold text-ink">날짜를 선택하세요</h3>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl bg-white p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-brand">event</span>
+                            <h4 class="font-bold text-ink">선택한 날짜 일정</h4>
+                        </div>
+                        <div id="selectedScheduleList" class="space-y-3 text-sm text-slate-600">
+                            <p>캘린더에서 날짜를 클릭하면 일정이 표시됩니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl bg-white p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-brand">edit_note</span>
+                            <h4 class="font-bold text-ink">메모</h4>
+                        </div>
+                        <div id="memoList" class="space-y-3 text-sm text-slate-600">
+                            <p>날짜를 선택하면 메모가 표시됩니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl bg-white p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-brand">note_add</span>
+                            <h4 class="font-bold text-ink">메모 작성</h4>
+                        </div>
+                        <textarea id="memoContent"
+                                  class="min-h-[110px] w-full rounded-2xl border border-line px-4 py-3 text-sm outline-none transition focus:border-brand"
+                                  placeholder="메모를 입력하세요"></textarea>
+                        <button id="saveMemoBtn"
+                                type="button"
+                                class="mt-3 w-full rounded-2xl bg-brand px-4 py-3 text-sm font-bold text-white transition hover:bg-[#223374]">
+                            메모 저장
+                        </button>
+                    </div>
+
+                    <div th:if="${dashboardRole == 'STUDENT'}" class="mt-4 rounded-2xl bg-white p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-brand">schedule</span>
+                            <h4 class="font-bold text-ink">D-day</h4>
+                        </div>
+                        <div id="ddayList" class="space-y-3 text-sm text-slate-600">
+                            <p>다가오는 시험 일정을 불러오는 중입니다.</p>
+                        </div>
+                    </div>
+                </aside>
+
+            </div>
+        </section>
+    </th:block>
+</main>
+
+<footer class="border-t border-white/60 bg-white/80">
+    <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-sm text-slate-500 sm:px-6 lg:px-8 md:flex-row md:items-center md:justify-between">
+        <p>© 2026 64Lab. 메인 대시보드에서 주요 기능을 바로 시작할 수 있습니다.</p>
+        <div class="flex gap-4">
+            <a th:href="@{/board/list}" class="transition hover:text-brand">게시판</a>
+            <a th:href="@{/auth/login}" class="transition hover:text-brand">로그인</a>
         </div>
     </div>
 </footer>
-</body></html>
+
+<script th:inline="javascript">
+    const loggedIn = /*[[${loggedIn}]]*/ false;
+    const dashboardRole = /*[[${dashboardRole}]]*/ 'STUDENT';
+
+    const isInstructorDashboard = dashboardRole === 'INSTRUCTOR' || dashboardRole === 'ADMIN';
+    const isStudentDashboard = dashboardRole === 'STUDENT';
+
+    const eventUrl = isInstructorDashboard
+        ? '/instructor/calendar/events'
+        : '/student/calendar/events';
+
+    const memoBaseUrl = isInstructorDashboard
+        ? '/instructor/calendar'
+        : '/student/calendar';
+
+    let allEvents = [];
+    let selectedDate = null;
+    let editingMemoId = null;
+    let calendarInstance = null;
+
+    function getTodayString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getDateDiff(todayStr, targetStr) {
+        const today = new Date(todayStr + 'T00:00:00');
+        const target = new Date(targetStr + 'T00:00:00');
+        const diffMs = target - today;
+        return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    function isExamEvent(event) {
+        return event.title && event.title.includes('시험 마감');
+    }
+
+    function getExamColor(diffDays) {
+        if (diffDays === 3) return '#facc15';
+        if (diffDays === 2) return '#fb923c';
+        if (diffDays === 1) return '#ef4444';
+        if (diffDays === 0) return '#dc2626';
+        return '#4f46e5';
+    }
+
+    function applyDashboardEventColors(events) {
+        const todayStr = getTodayString();
+
+        return events.map(event => {
+            const updatedEvent = { ...event };
+
+            if (updatedEvent.start < todayStr) {
+                updatedEvent.color = '#9ca3af';
+                return updatedEvent;
+            }
+
+            if (isStudentDashboard && isExamEvent(updatedEvent)) {
+                const diffDays = getDateDiff(todayStr, updatedEvent.start);
+                updatedEvent.color = getExamColor(diffDays);
+            }
+
+            return updatedEvent;
+        });
+    }
+
+    function renderSelectedEvents(events, dateStr) {
+        const selectedDateLabel = document.getElementById('selectedDateLabel');
+        const selectedScheduleList = document.getElementById('selectedScheduleList');
+
+        if (!selectedDateLabel || !selectedScheduleList) {
+            return;
+        }
+
+        selectedDateLabel.textContent = dateStr;
+
+        const dayEvents = events.filter(event =>
+            event.start === dateStr && !(event.title && event.title.startsWith('[메모]'))
+        );
+
+        if (dayEvents.length === 0) {
+            selectedScheduleList.innerHTML = '<p>선택한 날짜에 등록된 일정이 없습니다.</p>';
+            return;
+        }
+
+        selectedScheduleList.innerHTML = dayEvents.map(event => `
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+                <p class="font-semibold text-slate-800">${event.title}</p>
+            </div>
+        `).join('');
+    }
+
+    function renderDdayList(events) {
+        const ddayList = document.getElementById('ddayList');
+        if (!ddayList) return;
+
+        ddayList.innerHTML = '';
+
+        if (!isStudentDashboard) {
+            return;
+        }
+
+        const todayStr = getTodayString();
+
+        const imminentExamEvents = events
+            .filter(event => isExamEvent(event))
+            .map(event => ({
+                ...event,
+                diffDays: getDateDiff(todayStr, event.start)
+            }))
+            .filter(event => event.diffDays >= 0 && event.diffDays <= 3)
+            .sort((a, b) => a.diffDays - b.diffDays);
+
+        if (imminentExamEvents.length === 0) {
+            ddayList.innerHTML = '<p>가까운 시험 일정이 없습니다.</p>';
+            return;
+        }
+
+        ddayList.innerHTML = imminentExamEvents.map(event => {
+            let badgeClass = 'bg-slate-100 text-slate-700';
+            let label = `D-${event.diffDays}`;
+
+            if (event.diffDays === 0) {
+                badgeClass = 'bg-red-100 text-red-700';
+                label = 'D-Day';
+            } else if (event.diffDays === 1) {
+                badgeClass = 'bg-red-50 text-red-600';
+            } else if (event.diffDays === 2) {
+                badgeClass = 'bg-orange-50 text-orange-600';
+            } else if (event.diffDays === 3) {
+                badgeClass = 'bg-yellow-50 text-yellow-700';
+            }
+
+            return `
+                <div class="rounded-2xl ${badgeClass} px-4 py-3">
+                    <p class="text-xs font-bold">${label}</p>
+                    <p class="mt-1 font-semibold">${event.title}</p>
+                    <p class="mt-1 text-xs opacity-80">${event.start}</p>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderMemoList(memos) {
+        const memoList = document.getElementById('memoList');
+        if (!memoList) return;
+
+        memoList.innerHTML = '';
+
+        if (!memos || memos.length === 0) {
+            memoList.innerHTML = '<p>메모가 없습니다.</p>';
+            return;
+        }
+
+        memos.forEach(memo => {
+            const item = document.createElement('div');
+            item.className = 'rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3';
+
+            const text = document.createElement('p');
+            text.className = 'text-sm font-medium text-slate-800';
+            text.textContent = memo.content;
+
+            const actions = document.createElement('div');
+            actions.className = 'mt-3 flex gap-2';
+
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'rounded-xl border border-line px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-brand hover:text-brand';
+            editBtn.textContent = '수정';
+            editBtn.addEventListener('click', function () {
+                startEditMemo(memo.memoId, memo.content);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50';
+            deleteBtn.textContent = '삭제';
+            deleteBtn.addEventListener('click', function () {
+                deleteMemo(memo.memoId);
+            });
+
+            actions.appendChild(editBtn);
+            actions.appendChild(deleteBtn);
+
+            item.appendChild(text);
+            item.appendChild(actions);
+
+            memoList.appendChild(item);
+        });
+    }
+
+    function loadMemos(date) {
+        fetch(`${memoBaseUrl}/memos?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                renderMemoList(data);
+            })
+            .catch(() => {
+                const memoList = document.getElementById('memoList');
+                if (memoList) {
+                    memoList.innerHTML = '<p>메모를 불러오지 못했습니다.</p>';
+                }
+            });
+    }
+
+    function startEditMemo(memoId, content) {
+        editingMemoId = memoId;
+        const memoContent = document.getElementById('memoContent');
+        const saveMemoBtn = document.getElementById('saveMemoBtn');
+
+        if (memoContent) {
+            memoContent.value = content;
+            memoContent.focus();
+        }
+
+        if (saveMemoBtn) {
+            saveMemoBtn.textContent = '메모 수정';
+        }
+    }
+
+    function resetMemoEditor() {
+        editingMemoId = null;
+
+        const memoContent = document.getElementById('memoContent');
+        const saveMemoBtn = document.getElementById('saveMemoBtn');
+
+        if (memoContent) {
+            memoContent.value = '';
+        }
+
+        if (saveMemoBtn) {
+            saveMemoBtn.textContent = '메모 저장';
+        }
+    }
+
+    function refreshCalendarEvents() {
+        fetch(eventUrl)
+            .then(response => response.json())
+            .then(events => {
+                allEvents = applyDashboardEventColors(events);
+
+                if (calendarInstance) {
+                    calendarInstance.removeAllEvents();
+                    calendarInstance.addEventSource(allEvents);
+                }
+
+                if (selectedDate) {
+                    renderSelectedEvents(allEvents, selectedDate);
+                }
+
+                renderDdayList(allEvents);
+            });
+    }
+
+    function saveMemo() {
+        const memoContent = document.getElementById('memoContent');
+        if (!memoContent) return;
+
+        const content = memoContent.value.trim();
+
+        if (!selectedDate) {
+            alert('먼저 날짜를 선택하세요.');
+            return;
+        }
+
+        if (!content) {
+            alert('메모 내용을 입력하세요.');
+            return;
+        }
+
+        const formData = new URLSearchParams();
+        formData.append('content', content);
+        formData.append('memoDate', selectedDate);
+
+        const isEditMode = editingMemoId !== null;
+        const requestUrl = isEditMode
+            ? `${memoBaseUrl}/${editingMemoId}`
+            : memoBaseUrl;
+        const requestMethod = isEditMode ? 'PUT' : 'POST';
+
+        fetch(requestUrl, {
+            method: requestMethod,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('memo request failed');
+                }
+                return response.text();
+            })
+            .then(() => {
+                resetMemoEditor();
+                loadMemos(selectedDate);
+                refreshCalendarEvents();
+            })
+            .catch(() => {
+                alert(isEditMode ? '메모 수정 중 오류가 발생했습니다.' : '메모 저장 중 오류가 발생했습니다.');
+            });
+    }
+
+    function deleteMemo(memoId) {
+        if (!confirm('메모를 삭제하시겠습니까?')) {
+            return;
+        }
+
+        fetch(`${memoBaseUrl}/${memoId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('memo delete failed');
+                }
+                return response.text();
+            })
+            .then(() => {
+                if (editingMemoId === memoId) {
+                    resetMemoEditor();
+                }
+                loadMemos(selectedDate);
+                refreshCalendarEvents();
+            })
+            .catch(() => {
+                alert('메모 삭제 중 오류가 발생했습니다.');
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!loggedIn) return;
+
+        const calendarEl = document.getElementById('dashboardCalendar');
+        const saveMemoBtn = document.getElementById('saveMemoBtn');
+
+        if (saveMemoBtn) {
+            saveMemoBtn.addEventListener('click', saveMemo);
+        }
+
+        if (!calendarEl) return;
+
+        fetch(eventUrl)
+            .then(response => response.json())
+            .then(events => {
+                allEvents = applyDashboardEventColors(events);
+
+                calendarInstance = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'ko',
+                    height: 'auto',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth'
+                    },
+                    events: allEvents,
+                    dateClick: function(info) {
+                        selectedDate = info.dateStr;
+                        renderSelectedEvents(allEvents, selectedDate);
+                        loadMemos(selectedDate);
+                    }
+                });
+
+                calendarInstance.render();
+                renderDdayList(allEvents);
+            })
+            .catch(() => {
+                const selectedScheduleList = document.getElementById('selectedScheduleList');
+                if (selectedScheduleList) {
+                    selectedScheduleList.innerHTML = '<p>캘린더 데이터를 불러오지 못했습니다. 전체 캘린더 페이지에서 다시 확인해주세요.</p>';
+                }
+
+                const memoList = document.getElementById('memoList');
+                if (memoList) {
+                    memoList.innerHTML = '<p>메모 데이터를 불러오지 못했습니다.</p>';
+                }
+
+                const ddayList = document.getElementById('ddayList');
+                if (ddayList) {
+                    ddayList.innerHTML = '<p>D-day 데이터를 불러오지 못했습니다.</p>';
+                }
+            });
+    });
+</script>
+
+
+</body>
+</html>
