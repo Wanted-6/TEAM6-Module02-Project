@@ -117,6 +117,20 @@
             element.value = currentMemberId;
         });
 
+        document.querySelectorAll("[data-append-current-context]").forEach(element => {
+            const baseHref = element.dataset.baseHref || element.getAttribute("href") || "";
+            if (!element.dataset.baseHref) {
+                element.dataset.baseHref = baseHref;
+            }
+
+            if (!baseHref) {
+                return;
+            }
+
+            const separator = baseHref.includes("?") ? "&" : "?";
+            element.setAttribute("href", `${baseHref}${separator}currentMemberId=${currentMemberId}&currentRole=${role}`);
+        });
+
         document.querySelectorAll("[data-sync-current-member]").forEach(element => {
             element.value = currentMemberId;
         });

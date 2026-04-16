@@ -26,16 +26,22 @@
 
     <div class="box">
         <div class="button-group">
-            <a class="btn" href="/board/regist?type=SECTION_QNA" data-role-only="STUDENT">질문 등록</a>
+            <a class="btn"
+               th:href="@{/board/regist(type='SECTION_QNA', courseId=${param.courseId}, currentMemberId=${param.currentMemberId}, currentRole=${param.currentRole})}"
+               data-role-only="STUDENT">질문 등록</a>
             <a class="btn gray" href="/board/list">게시판 메인</a>
         </div>
     </div>
 
     <div class="box">
         <form class="search-bar" method="get" action="/board/section-qna">
+            <input type="hidden" name="courseId" th:value="${param.courseId}">
+            <input type="hidden" name="currentMemberId" th:value="${param.currentMemberId}">
+            <input type="hidden" name="currentRole" th:value="${param.currentRole}">
             <input type="text" name="keyword" placeholder="섹션 Q&amp;A 제목 검색" th:value="${keyword}">
             <button type="submit" class="btn">검색</button>
-            <a class="btn gray" href="/board/section-qna">초기화</a>
+            <a class="btn gray"
+               th:href="@{/board/section-qna(courseId=${param.courseId}, currentMemberId=${param.currentMemberId}, currentRole=${param.currentRole})}">초기화</a>
         </form>
         <p class="meta">검색어: <span th:text="${keyword != null and !keyword.isBlank() ? keyword : '전체'}">전체</span></p>
 
@@ -53,7 +59,7 @@
             <tr th:each="board, stat : ${boardList}">
                 <td th:text="${stat.count}">1</td>
                 <td>
-                    <a th:href="@{/board/detail(postId=${board.postId})}"
+                    <a th:href="@{/board/detail(postId=${board.postId}, courseId=${param.courseId}, currentMemberId=${param.currentMemberId}, currentRole=${param.currentRole})}"
                        th:attr="data-secret-guard=${true},data-post-type=${board.postType},data-author-id=${board.memberId},data-secret=${board.isSecret}">
                         <span th:text="${board.title}">질문 제목</span>
                     </a>

@@ -15,4 +15,8 @@ public class AssignmentDTO {
     private String description;
     private String attachmentFile;
     private LocalDateTime dueDate;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> e54066727348eccaac506e4439656ada00f4d5ee
