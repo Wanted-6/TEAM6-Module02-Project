@@ -41,4 +41,21 @@ public class StudentCalendarController {
         calendarService.createMemo(memberId, dto);
         return "ok";
     }
+
+    @PutMapping("/{memoId}")
+    @ResponseBody
+    public String updateMemo(@PathVariable Integer memoId,
+                             @ModelAttribute CalendarMemoCreateDTO dto) {
+        Integer memberId = 1; // 임시 로그인 사용자
+        calendarService.updateMemo(memberId, memoId, dto);
+        return "ok";
+    }
+
+    @DeleteMapping("/{memoId}")
+    @ResponseBody
+    public String deleteMemo(@PathVariable Integer memoId) {
+        Integer memberId = 1; // 임시 로그인 사용자
+        calendarService.deleteMemo(memberId, memoId);
+        return "ok";
+    }
 }
