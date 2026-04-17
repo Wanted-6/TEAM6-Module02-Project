@@ -21,7 +21,7 @@ public class GradeController {
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+            throw new IllegalStateException("Login member id is required.");
         }
 
         List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());

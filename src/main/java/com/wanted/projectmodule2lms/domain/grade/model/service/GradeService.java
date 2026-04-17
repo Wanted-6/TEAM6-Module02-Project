@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
@@ -116,6 +118,35 @@ public class GradeService {
                 assignmentScore,
                 examScore,
                 attitudeScore,
+                totalScore,
+                isPassed
+        );
+    }
+
+    @Transactional
+    public void refreshGradeScoresByEnrollmentId(Integer enrollmentId) {
+        Grade grade = gradeRepository.findByEnrollmentId(enrollmentId)
+                .orElseThrow(() -> new IllegalArgumentException("성적 정보가 존재하지 않습니다."));
+
+        BigDecimal attendanceScore = calculateAttendanceScore(enrollmentId);
+        BigDecimal assignmentScore = normalizeScore(grade.getAssignmentScore());
+        BigDecimal examScore = normalizeScore(grade.getExamScore());
+        BigDecimal attitudeScore = normalizeScore(grade.getAttitudeScore());
+
+        BigDecimal totalScore = calculateTotalScore(
+                attendanceScore,
+                assignmentScore,
+                examScore,
+                attitudeScore
+        );
+
+        boolean isPassed = totalScore.compareTo(new BigDecimal("60")) >= 0;
+
+        grade.updateScore(
+                attendanceScore,
+                grade.getAssignmentScore(),
+                grade.getExamScore(),
+                grade.getAttitudeScore(),
                 totalScore,
                 isPassed
         );
@@ -297,5 +328,8 @@ public class GradeService {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
+    private BigDecimal normalizeScore(BigDecimal score) {
+        return score != null ? score : BigDecimal.ZERO;
+    }
 
 }
