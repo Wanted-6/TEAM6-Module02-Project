@@ -31,7 +31,7 @@ public class CommentService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
 
-    public List<CommentDTO> findCommentsByPostId(Integer postId) {
+        public List<CommentDTO> findCommentsByPostId(Integer postId) {
         List<Comment> commentList = commentRepository.findByPostIdAndIsDeletedFalseOrderByCommentIdAsc(postId);
 
         return commentList.stream()
