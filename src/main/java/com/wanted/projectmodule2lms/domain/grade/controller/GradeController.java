@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -21,7 +21,7 @@ public class GradeController {
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
 
         List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());

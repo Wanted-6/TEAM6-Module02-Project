@@ -29,7 +29,7 @@ public class StudentCalendarController {
     @ResponseBody
     public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
         return calendarService.findStudentCalendarEvents(memberId.intValue());
     }
@@ -40,7 +40,7 @@ public class StudentCalendarController {
     public List<?> getMemosByDate(@LoginMemberId Long memberId,
                                   @RequestParam String date) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
         return calendarService.findMemosByDate(memberId.intValue(), date);
     }
@@ -51,7 +51,7 @@ public class StudentCalendarController {
     public String createMemo(@LoginMemberId Long memberId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
         calendarService.createMemo(memberId.intValue(), dto);
         return "ok";
@@ -64,7 +64,7 @@ public class StudentCalendarController {
                              @PathVariable Integer memoId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
         calendarService.updateMemo(memberId.intValue(), memoId, dto);
         return "ok";
@@ -76,7 +76,7 @@ public class StudentCalendarController {
     public String deleteMemo(@LoginMemberId Long memberId,
                              @PathVariable Integer memoId) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
         calendarService.deleteMemo(memberId.intValue(), memoId);
         return "ok";

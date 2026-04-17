@@ -30,4 +30,6 @@ public class AttendancePageDTO {
     private Integer attitudeScore;
     private Integer attitudeMaxScore;
     private Integer totalScore;
+    private String certificateStatus;
+
 }

@@ -37,7 +37,7 @@ public class EnrollmentController {
         }
 
         List<CourseDTO> courseList = courseService.findOpenCourses();
-        if (category != null && !category.isBlank() && !category.equals("��ü")) {
+        if (category != null && !category.isBlank() && !category.equals("전체")) {
             courseList = courseList.stream()
                     .filter(course -> category.equals(course.getCategory()))
                     .toList();
@@ -77,7 +77,6 @@ public class EnrollmentController {
         return "student/enrollment/detail";
     }
 
-
     @PostMapping
     public String enrollCourse(
             @LoginMemberId Long memberId,
@@ -90,7 +89,7 @@ public class EnrollmentController {
 
         try {
             enrollmentService.enrollCourse(Math.toIntExact(memberId), request.getCourseId());
-            rttr.addFlashAttribute("successMessage", "������û�� �Ϸ�Ǿ����ϴ�.");
+            rttr.addFlashAttribute("successMessage", "수강 신청이 완료되었습니다.");
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }

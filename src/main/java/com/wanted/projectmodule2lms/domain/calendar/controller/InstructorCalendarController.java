@@ -23,7 +23,7 @@ public class InstructorCalendarController {
     @GetMapping
     public String showInstructorCalendarPage(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
@@ -36,7 +36,7 @@ public class InstructorCalendarController {
     @ResponseBody
     public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
@@ -49,20 +49,19 @@ public class InstructorCalendarController {
     public List<?> getMemosByDate(@LoginMemberId Long memberId,
                                   @RequestParam String date) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
         return calendarService.findMemosByDate(instructorId, date);
     }
 
-
     @PostMapping
     @ResponseBody
     public String createMemo(@LoginMemberId Long memberId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
@@ -70,14 +69,13 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-
     @PutMapping("/{memoId}")
     @ResponseBody
     public String updateMemo(@LoginMemberId Long memberId,
                              @PathVariable Integer memoId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
@@ -85,13 +83,12 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-
     @DeleteMapping("/{memoId}")
     @ResponseBody
     public String deleteMemo(@LoginMemberId Long memberId,
                              @PathVariable Integer memoId) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
