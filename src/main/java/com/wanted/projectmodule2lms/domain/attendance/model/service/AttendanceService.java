@@ -12,6 +12,8 @@ import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
+import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
+import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
@@ -38,12 +40,14 @@ public class AttendanceService {
     private static final double LATE_PENALTY_WEIGHT = 0.5;
     private static final double ABSENT_PENALTY_WEIGHT = 1.0;
 
+
     private final AttendanceRepository attendanceRepository;
     private final SectionRepository sectionRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final SectionService sectionService;
     private final CourseService courseService;
     private final AssignmentRepository assignmentRepository;
+    private final GradeRepository gradeRepository;
 
     public AttendancePageDTO findAttendancePage(Integer memberId, Integer courseId, Integer sectionId) {
         CourseDTO course = courseService.findMyCourseDetail(memberId, courseId);
@@ -56,10 +60,36 @@ public class AttendanceService {
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
                 .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
 
+        Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                .orElse(null);
+
         long totalSectionCount = sectionRepository.countByCourseId(courseId);
         List<Attendance> attendanceList = attendanceRepository.findByEnrollmentId(enrollment.getEnrollmentId());
         Map<Integer, String> attendanceStatusMap = buildAttendanceStatusMap(attendanceList);
         int attendanceScore = calculateAttendanceScore(totalSectionCount, attendanceList);
+
+        int assignmentScore = 0;
+        int examScore = 0;
+        int attitudeScore = 0;
+
+        if (grade != null) {
+            if (grade.getAssignmentScore() != null) {
+                assignmentScore = grade.getAssignmentScore().intValue();
+            }
+
+            if (grade.getExamScore() != null) {
+                examScore = grade.getExamScore().intValue();
+            }
+
+            if (grade.getAttitudeScore() != null) {
+                attitudeScore = grade.getAttitudeScore().intValue();
+            }
+        }
+
+        int weightedAssignmentScore = calculateWeightedScore(assignmentScore, ASSIGNMENT_MAX_SCORE);
+        int weightedExamScore = calculateWeightedScore(examScore, EXAM_MAX_SCORE);
+        int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
+        int totalScore = attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
 
         return new AttendancePageDTO(
                 memberId,
@@ -72,13 +102,15 @@ public class AttendanceService {
                 attendanceStatusMap,
                 attendanceScore,
                 ATTENDANCE_MAX_SCORE,
-                0,
+                weightedAssignmentScore,
                 ASSIGNMENT_MAX_SCORE,
-                0,
+                weightedExamScore,
                 EXAM_MAX_SCORE,
-                0,
-                ATTITUDE_MAX_SCORE
+                weightedAttitudeScore,
+                ATTITUDE_MAX_SCORE,
+                totalScore
         );
+
     }
 
     @Transactional
@@ -149,6 +181,14 @@ public class AttendanceService {
         return attendanceStatusMap;
     }
 
+    private int calculateWeightedScore(Integer rawScore, int maxWeight) {
+        if (rawScore == null) {
+            return 0;
+        }
+
+        return (int) Math.round(rawScore * maxWeight / 100.0);
+    }
+
     private int calculateAttendanceScore(long totalSectionCount, List<Attendance> attendanceList) {
         if (totalSectionCount <= 0) {
             return ATTENDANCE_MAX_SCORE;
@@ -170,14 +210,14 @@ public class AttendanceService {
 
     private String buildAttendanceMessage(AttendanceStatus status) {
         if (status == AttendanceStatus.LATE) {
-            return "지각으로 출석 완료되었습니다.";
+            return "지각으로 출석 완료했습니다.";
         }
 
         if (status == AttendanceStatus.ABSENT) {
-            return "결석으로 출석 완료되었습니다.";
+            return "결석으로 출석 완료했습니다.";
         }
 
-        return "출석 완료되었습니다.";
+        return "출석 완료했습니다.";
     }
 
     private AssignmentDTO toAssignmentDTO(Assignment assignment) {
@@ -190,4 +230,5 @@ public class AttendanceService {
                 assignment.getDueDate()
         );
     }
+
 }
