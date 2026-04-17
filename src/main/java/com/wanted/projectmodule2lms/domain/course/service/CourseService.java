@@ -191,9 +191,24 @@ public class CourseService {
     }
 
     @Transactional
-    public void modifyCourse(Integer courseId, CourseUpdateDTO updateDTO, MultipartFile thumbnailFile) throws IOException {
+    public void modifyCourse(Integer courseId,
+                             String instructorLoginId,
+                             CourseUpdateDTO updateDTO,
+                             MultipartFile thumbnailFile) throws IOException {
+
         Course foundCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 코스가 존재하지 않습니다."));
+
+        Member instructor = memberRepository.findByLoginId(instructorLoginId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
+
+        if (instructor.getRole() != MemberRole.INSTRUCTOR) {
+            throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
+        }
+
+        if (!foundCourse.getInstructorId().equals(instructor.getMemberId())) {
+            throw new IllegalArgumentException("본인이 등록한 코스만 수정할 수 있습니다.");
+        }
 
         if (!isValidCategory(updateDTO.getCategory())) {
             throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");

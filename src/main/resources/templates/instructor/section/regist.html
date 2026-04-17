@@ -17,6 +17,18 @@
            class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
     </div>
 
+    <div th:if="${errorMessage}"
+         class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+         th:text="${errorMessage}">
+        에러 메시지
+    </div>
+
+    <div th:if="${successMessage}"
+         class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700"
+         th:text="${successMessage}">
+        성공 메시지
+    </div>
+
     <form th:action="@{/courses/{courseId}/sections(courseId=${courseId})}" method="post" enctype="multipart/form-data"
           class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
 
