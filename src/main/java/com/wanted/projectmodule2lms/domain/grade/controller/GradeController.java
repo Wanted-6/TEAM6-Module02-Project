@@ -15,13 +15,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GradeController {
 
+    private static final String LOGIN_MEMBER_REQUIRED = "Login member id is required.";
+
     private final GradeService gradeService;
 
     @AuditLog
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
 
         List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());

@@ -8,12 +8,18 @@ import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/instructor/grades")
 public class InstructorGradeController {
+
+    private static final String LOGIN_MEMBER_REQUIRED = "Login member id is required.";
 
     private final GradeService gradeService;
     private final CourseService courseService;
@@ -21,7 +27,7 @@ public class InstructorGradeController {
     @GetMapping("/courses")
     public String instructorCourseList(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
 
         Integer instructorId = memberId.intValue();
@@ -35,7 +41,7 @@ public class InstructorGradeController {
                                          @RequestParam(required = false) Integer courseId,
                                          Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
@@ -53,7 +59,7 @@ public class InstructorGradeController {
                                @RequestParam Integer enrollmentId,
                                Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
@@ -66,7 +72,7 @@ public class InstructorGradeController {
     public String updateGrade(@LoginMemberId Long memberId,
                               @ModelAttribute GradeUpdateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
