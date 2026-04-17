@@ -5,6 +5,8 @@ import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -22,10 +24,12 @@ public class CommentController {
     private final CommentService commentService;
     private final MemberRepository memberRepository;
 
+    @AuditLog
     @PostMapping("/regist")
-    public String registerComment(@ModelAttribute CommentDTO commentDTO,
+    public String registerComment(@LoginMemberId Long loginMemberId,
+                                  @ModelAttribute CommentDTO commentDTO,
                                   RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
 
         try {
@@ -37,10 +41,12 @@ public class CommentController {
         }
     }
 
+    @AuditLog
     @PostMapping("/modify")
-    public String modifyComment(@ModelAttribute CommentDTO commentDTO,
+    public String modifyComment(@LoginMemberId Long loginMemberId,
+                                @ModelAttribute CommentDTO commentDTO,
                                 RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
 
         try {
@@ -52,11 +58,13 @@ public class CommentController {
         }
     }
 
+    @AuditLog
     @PostMapping("/delete")
-    public String deleteComment(@RequestParam Integer commentId,
+    public String deleteComment(@LoginMemberId Long loginMemberId,
+                                @RequestParam Integer commentId,
                                 @RequestParam Integer postId,
                                 RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
 
         try {
@@ -68,13 +76,9 @@ public class CommentController {
         }
     }
 
-    private Integer getCurrentMemberId() {
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        return currentMemberId != null ? currentMemberId.intValue() : null;
-    }
-
     private MemberRole getCurrentMemberRole() {
-        Integer currentMemberId = getCurrentMemberId();
+        Long loginMemberId = SecurityUtil.getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
 
         if (currentMemberId == null) {
             return null;

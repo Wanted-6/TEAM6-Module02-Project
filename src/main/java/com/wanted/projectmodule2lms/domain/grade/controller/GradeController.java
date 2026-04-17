@@ -2,14 +2,14 @@ package com.wanted.projectmodule2lms.domain.grade.controller;
 
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.service.GradeService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
-import com.wanted.projectmodule2lms.global.util.SecurityUtil;
-
 
 @Controller
 @RequiredArgsConstructor
@@ -17,16 +17,14 @@ public class GradeController {
 
     private final GradeService gradeService;
 
+    @AuditLog
     @GetMapping("/grades")
-    public String findMyGrades(Model model) {
-
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        if (currentMemberId == null) {
-            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+    public String findMyGrades(@LoginMemberId Long memberId, Model model) {
+        if (memberId == null) {
+            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
         }
-        Integer memberId = currentMemberId.intValue();
-        List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId);
 
+        List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());
         model.addAttribute("grades", grades);
 
         return "student/grade/gradeview";

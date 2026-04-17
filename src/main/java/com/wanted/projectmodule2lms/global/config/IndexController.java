@@ -51,21 +51,7 @@ public class IndexController {
             return "/auth/login";
         }
 
-        List<Enrollment> enrollmentList = enrollmentRepository.findByMemberId(currentMemberId.intValue());
-
-        if (enrollmentList.isEmpty()) {
-            return "/main";
-        }
-
-        Enrollment enrollment = enrollmentList.get(0);
-        List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(enrollment.getCourseId());
-
-        if (sectionList.isEmpty()) {
-            return "/main";
-        }
-
-        Section section = sectionList.get(0);
-        return "/student/attendance/" + enrollment.getCourseId() + "/" + section.getSectionId();
+        return "/student/courses";
     }
 }
 

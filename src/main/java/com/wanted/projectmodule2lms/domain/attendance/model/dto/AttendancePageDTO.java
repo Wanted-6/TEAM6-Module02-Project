@@ -14,6 +14,7 @@ import java.util.Map;
 public class AttendancePageDTO {
 
     private Integer memberId;
+    private Integer enrollmentId;
     private Integer courseId;
     private CourseDTO course;
     private SectionDTO section;
@@ -28,4 +29,5 @@ public class AttendancePageDTO {
     private Integer examMaxScore;
     private Integer attitudeScore;
     private Integer attitudeMaxScore;
+    private Integer totalScore;
 }

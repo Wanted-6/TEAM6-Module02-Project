@@ -1,17 +1,13 @@
 package com.wanted.projectmodule2lms.domain.calendar.controller;
 
-import com.wanted.projectmodule2lms.domain.auth.model.dto.AuthDetails;
 import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarEventDTO;
+import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreateDTO;
 import com.wanted.projectmodule2lms.domain.calendar.model.service.CalenderService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreateDTO;
-import com.wanted.projectmodule2lms.global.util.SecurityUtil;
-
-
-
 
 import java.util.List;
 
@@ -22,59 +18,67 @@ public class StudentCalendarController {
 
     private final CalenderService calendarService;
 
+    @AuditLog
     @GetMapping
     public String showCalendarPage() {
         return "student/calendar/view";
     }
 
-
+    @AuditLog
     @GetMapping("/events")
     @ResponseBody
-    public List<CalendarEventDTO> getCalendarEvents(@AuthenticationPrincipal AuthDetails authDetails) {
-        Integer memberId = authDetails.getLoginMemberDTO().getMemberId();
-        return calendarService.findStudentCalendarEvents(memberId);
+    public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
+        if (memberId == null) {
+            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+        }
+        return calendarService.findStudentCalendarEvents(memberId.intValue());
     }
+
+    @AuditLog
     @GetMapping("/memos")
     @ResponseBody
-    public List<?> getMemosByDate(@RequestParam String date) {
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        if (currentMemberId == null) {
-            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+    public List<?> getMemosByDate(@LoginMemberId Long memberId,
+                                  @RequestParam String date) {
+        if (memberId == null) {
+            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
         }
-        return calendarService.findMemosByDate(currentMemberId.intValue(), date);
+        return calendarService.findMemosByDate(memberId.intValue(), date);
     }
 
+    @AuditLog
     @PostMapping
     @ResponseBody
-    public String createMemo(@ModelAttribute CalendarMemoCreateDTO dto) {
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        if (currentMemberId == null) {
-            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+    public String createMemo(@LoginMemberId Long memberId,
+                             @ModelAttribute CalendarMemoCreateDTO dto) {
+        if (memberId == null) {
+            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
         }
-        calendarService.createMemo(currentMemberId.intValue(), dto);
+        calendarService.createMemo(memberId.intValue(), dto);
         return "ok";
     }
 
+    @AuditLog
     @PutMapping("/{memoId}")
     @ResponseBody
-    public String updateMemo(@PathVariable Integer memoId,
+    public String updateMemo(@LoginMemberId Long memberId,
+                             @PathVariable Integer memoId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        if (currentMemberId == null) {
-            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+        if (memberId == null) {
+            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
         }
-        calendarService.updateMemo(currentMemberId.intValue(), memoId, dto);
+        calendarService.updateMemo(memberId.intValue(), memoId, dto);
         return "ok";
     }
 
+    @AuditLog
     @DeleteMapping("/{memoId}")
     @ResponseBody
-    public String deleteMemo(@PathVariable Integer memoId) {
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        if (currentMemberId == null) {
-            throw new IllegalStateException("ë¡œê·¸ì¸ ì‚¬ìš©ì ì •ë³´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+    public String deleteMemo(@LoginMemberId Long memberId,
+                             @PathVariable Integer memoId) {
+        if (memberId == null) {
+            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
         }
-        calendarService.deleteMemo(currentMemberId.intValue(), memoId);
+        calendarService.deleteMemo(memberId.intValue(), memoId);
         return "ok";
     }
 }

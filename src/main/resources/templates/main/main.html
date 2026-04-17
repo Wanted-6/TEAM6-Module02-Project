@@ -519,8 +519,8 @@
             </a>
         </section>
 
-        <section th:if="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <a th:href="@{/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+        <section th:if="${dashboardRole == 'INSTRUCTOR'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <a th:href="@{/courses(role='INSTRUCTOR')}" class="menu-card rounded-[26px] border border-line bg-white p-6">
                 <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
                     <span class="material-symbols-outlined text-3xl">menu_book</span>
                 </div>
@@ -528,7 +528,7 @@
                 <p class="mt-2 text-sm leading-6 text-slate-600">강의 목록을 보고 상세, 수정, 학생 목록으로 이동합니다.</p>
             </a>
 
-            <a th:href="@{/instructor/grades}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+            <a th:href="@{/instructor/grades/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
                 <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef6f4] text-mint">
                     <span class="material-symbols-outlined text-3xl">fact_check</span>
                 </div>
@@ -550,6 +550,40 @@
                 </div>
                 <h2 class="text-xl font-extrabold">강사 캘린더</h2>
                 <p class="mt-2 text-sm leading-6 text-slate-600">강의 일정과 메모를 캘린더 중심으로 관리합니다.</p>
+            </a>
+        </section>
+
+        <section th:if="${dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <a th:href="@{/admin/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
+                    <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+                </div>
+                <h2 class="text-xl font-extrabold">강의 승인 관리</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">코스 목록을 보고 승인, 반려, 삭제 처리를 관리합니다.</p>
+            </a>
+
+            <a th:href="@{/instructor/grades/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef6f4] text-mint">
+                    <span class="material-symbols-outlined text-3xl">fact_check</span>
+                </div>
+                <h2 class="text-xl font-extrabold">성적 관리</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">전체 성적 관리 화면으로 이동합니다.</p>
+            </a>
+
+            <a th:href="@{/board/list}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0f1ff] text-[#5f67a8]">
+                    <span class="material-symbols-outlined text-3xl">forum</span>
+                </div>
+                <h2 class="text-xl font-extrabold">게시판</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">공지와 게시판을 확인합니다.</p>
+            </a>
+
+            <a th:href="@{/instructor/calendar}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-accent">
+                    <span class="material-symbols-outlined text-3xl">calendar_month</span>
+                </div>
+                <h2 class="text-xl font-extrabold">관리 캘린더</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">주요 일정과 메모를 확인합니다.</p>
             </a>
         </section>
 
@@ -680,11 +714,18 @@
         return Math.floor(diffMs / (1000 * 60 * 60 * 24));
     }
 
-    function isExamEvent(event) {
-        return event.title && event.title.includes('시험 마감');
+    function normalizeDate(value) {
+        return String(value).slice(0, 10);
     }
 
-    function getExamColor(diffDays) {
+    function isDeadlineEvent(event) {
+        if (!event) return false;
+
+        const eventId = event.id || '';
+        return eventId.startsWith('exam-') || eventId.startsWith('assignment-');
+    }
+
+    function getDeadlineColor(diffDays) {
         if (diffDays === 3) return '#facc15';
         if (diffDays === 2) return '#fb923c';
         if (diffDays === 1) return '#ef4444';
@@ -697,15 +738,18 @@
 
         return events.map(event => {
             const updatedEvent = { ...event };
+            const eventDate = normalizeDate(updatedEvent.start);
 
-            if (updatedEvent.start < todayStr) {
+            updatedEvent.start = eventDate;
+
+            if (eventDate < todayStr) {
                 updatedEvent.color = '#9ca3af';
                 return updatedEvent;
             }
 
-            if (isStudentDashboard && isExamEvent(updatedEvent)) {
-                const diffDays = getDateDiff(todayStr, updatedEvent.start);
-                updatedEvent.color = getExamColor(diffDays);
+            if (isStudentDashboard && isDeadlineEvent(updatedEvent)) {
+                const diffDays = getDateDiff(todayStr, eventDate);
+                updatedEvent.color = getDeadlineColor(diffDays);
             }
 
             return updatedEvent;
@@ -722,8 +766,11 @@
 
         selectedDateLabel.textContent = dateStr;
 
+        const normalizedDate = normalizeDate(dateStr);
+
         const dayEvents = events.filter(event =>
-            event.start === dateStr && !(event.title && event.title.startsWith('[메모]'))
+            normalizeDate(event.start) === normalizedDate &&
+            !(event.title && event.title.startsWith('[메모]'))
         );
 
         if (dayEvents.length === 0) {
@@ -750,21 +797,25 @@
 
         const todayStr = getTodayString();
 
-        const imminentExamEvents = events
-            .filter(event => isExamEvent(event))
-            .map(event => ({
-                ...event,
-                diffDays: getDateDiff(todayStr, event.start)
-            }))
+        const imminentDeadlineEvents = events
+            .filter(event => isDeadlineEvent(event))
+            .map(event => {
+                const eventDate = normalizeDate(event.start);
+                return {
+                    ...event,
+                    start: eventDate,
+                    diffDays: getDateDiff(todayStr, eventDate)
+                };
+            })
             .filter(event => event.diffDays >= 0 && event.diffDays <= 3)
             .sort((a, b) => a.diffDays - b.diffDays);
 
-        if (imminentExamEvents.length === 0) {
-            ddayList.innerHTML = '<p>가까운 시험 일정이 없습니다.</p>';
+        if (imminentDeadlineEvents.length === 0) {
+            ddayList.innerHTML = '<p>가까운 마감 일정이 없습니다.</p>';
             return;
         }
 
-        ddayList.innerHTML = imminentExamEvents.map(event => {
+        ddayList.innerHTML = imminentDeadlineEvents.map(event => {
             let badgeClass = 'bg-slate-100 text-slate-700';
             let label = `D-${event.diffDays}`;
 
@@ -1034,3 +1085,405 @@
 
 </body>
 </html>
+<!--<script th:inline="javascript">-->
+<!--    const loggedIn = /*[[${loggedIn}]]*/ false;-->
+<!--    const dashboardRole = /*[[${dashboardRole}]]*/ 'STUDENT';-->
+
+<!--    const isInstructorDashboard = dashboardRole === 'INSTRUCTOR' || dashboardRole === 'ADMIN';-->
+<!--    const isStudentDashboard = dashboardRole === 'STUDENT';-->
+
+<!--    const eventUrl = isInstructorDashboard-->
+<!--        ? '/instructor/calendar/events'-->
+<!--        : '/student/calendar/events';-->
+
+<!--    const memoBaseUrl = isInstructorDashboard-->
+<!--        ? '/instructor/calendar'-->
+<!--        : '/student/calendar';-->
+
+<!--    let allEvents = [];-->
+<!--    let selectedDate = null;-->
+<!--    let editingMemoId = null;-->
+<!--    let calendarInstance = null;-->
+
+<!--    function getTodayString() {-->
+<!--        const today = new Date();-->
+<!--        const year = today.getFullYear();-->
+<!--        const month = String(today.getMonth() + 1).padStart(2, '0');-->
+<!--        const day = String(today.getDate()).padStart(2, '0');-->
+<!--        return `${year}-${month}-${day}`;-->
+<!--    }-->
+
+<!--    function getDateDiff(todayStr, targetStr) {-->
+<!--        const today = new Date(todayStr + 'T00:00:00');-->
+<!--        const target = new Date(targetStr + 'T00:00:00');-->
+<!--        const diffMs = target - today;-->
+<!--        return Math.floor(diffMs / (1000 * 60 * 60 * 24));-->
+<!--    }-->
+
+<!--    function normalizeDate(value) {-->
+<!--        return String(value).slice(0, 10);-->
+<!--    }-->
+
+<!--    function isDeadlineEvent(event) {-->
+<!--        if (!event) return false;-->
+
+<!--        const eventId = event.id || '';-->
+<!--        return eventId.startsWith('exam-') || eventId.startsWith('assignment-');-->
+<!--    }-->
+
+<!--    function getDeadlineColor(diffDays) {-->
+<!--        if (diffDays === 3) return '#facc15';-->
+<!--        if (diffDays === 2) return '#fb923c';-->
+<!--        if (diffDays === 1) return '#ef4444';-->
+<!--        if (diffDays === 0) return '#dc2626';-->
+<!--        return '#4f46e5';-->
+<!--    }-->
+
+<!--    function applyDashboardEventColors(events) {-->
+<!--        const todayStr = getTodayString();-->
+
+<!--        return events.map(event => {-->
+<!--            const updatedEvent = { ...event };-->
+<!--            const eventDate = normalizeDate(updatedEvent.start);-->
+
+<!--            updatedEvent.start = eventDate;-->
+
+<!--            if (eventDate < todayStr) {-->
+<!--                updatedEvent.color = '#9ca3af';-->
+<!--                return updatedEvent;-->
+<!--            }-->
+
+<!--            if (isStudentDashboard && isDeadlineEvent(updatedEvent)) {-->
+<!--                const diffDays = getDateDiff(todayStr, eventDate);-->
+<!--                updatedEvent.color = getDeadlineColor(diffDays);-->
+<!--            }-->
+
+<!--            return updatedEvent;-->
+<!--        });-->
+<!--    }-->
+
+<!--    function renderSelectedEvents(events, dateStr) {-->
+<!--        const selectedDateLabel = document.getElementById('selectedDateLabel');-->
+<!--        const selectedScheduleList = document.getElementById('selectedScheduleList');-->
+
+<!--        if (!selectedDateLabel || !selectedScheduleList) {-->
+<!--            return;-->
+<!--        }-->
+
+<!--        selectedDateLabel.textContent = dateStr;-->
+
+<!--        const normalizedDate = normalizeDate(dateStr);-->
+
+<!--        const dayEvents = events.filter(event =>-->
+<!--            normalizeDate(event.start) === normalizedDate &&-->
+<!--            !(event.title && event.title.startsWith('[메모]'))-->
+<!--        );-->
+
+<!--        if (dayEvents.length === 0) {-->
+<!--            selectedScheduleList.innerHTML = '<p>선택한 날짜에 등록된 일정이 없습니다.</p>';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        selectedScheduleList.innerHTML = dayEvents.map(event => `-->
+<!--            <div class="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">-->
+<!--                <p class="font-semibold text-slate-800">${event.title}</p>-->
+<!--            </div>-->
+<!--        `).join('');-->
+<!--    }-->
+
+<!--    function renderDdayList(events) {-->
+<!--        const ddayList = document.getElementById('ddayList');-->
+<!--        if (!ddayList) return;-->
+
+<!--        ddayList.innerHTML = '';-->
+
+<!--        if (!isStudentDashboard) {-->
+<!--            return;-->
+<!--        }-->
+
+<!--        const todayStr = getTodayString();-->
+
+<!--        const imminentDeadlineEvents = events-->
+<!--            .filter(event => isDeadlineEvent(event))-->
+<!--            .map(event => {-->
+<!--                const eventDate = normalizeDate(event.start);-->
+<!--                return {-->
+<!--                    ...event,-->
+<!--                    start: eventDate,-->
+<!--                    diffDays: getDateDiff(todayStr, eventDate)-->
+<!--                };-->
+<!--            })-->
+<!--            .filter(event => event.diffDays >= 0 && event.diffDays <= 3)-->
+<!--            .sort((a, b) => a.diffDays - b.diffDays);-->
+
+<!--        if (imminentDeadlineEvents.length === 0) {-->
+<!--            ddayList.innerHTML = '<p>가까운 마감 일정이 없습니다.</p>';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        ddayList.innerHTML = imminentDeadlineEvents.map(event => {-->
+<!--            let badgeClass = 'bg-slate-100 text-slate-700';-->
+<!--            let label = `D-${event.diffDays}`;-->
+
+<!--            if (event.diffDays === 0) {-->
+<!--                badgeClass = 'bg-red-100 text-red-700';-->
+<!--                label = 'D-Day';-->
+<!--            } else if (event.diffDays === 1) {-->
+<!--                badgeClass = 'bg-red-50 text-red-600';-->
+<!--            } else if (event.diffDays === 2) {-->
+<!--                badgeClass = 'bg-orange-50 text-orange-600';-->
+<!--            } else if (event.diffDays === 3) {-->
+<!--                badgeClass = 'bg-yellow-50 text-yellow-700';-->
+<!--            }-->
+
+<!--            return `-->
+<!--                <div class="rounded-2xl ${badgeClass} px-4 py-3">-->
+<!--                    <p class="text-xs font-bold">${label}</p>-->
+<!--                    <p class="mt-1 font-semibold">${event.title}</p>-->
+<!--                    <p class="mt-1 text-xs opacity-80">${event.start}</p>-->
+<!--                </div>-->
+<!--            `;-->
+<!--        }).join('');-->
+<!--    }-->
+
+<!--    function renderMemoList(memos) {-->
+<!--        const memoList = document.getElementById('memoList');-->
+<!--        if (!memoList) return;-->
+
+<!--        memoList.innerHTML = '';-->
+
+<!--        if (!memos || memos.length === 0) {-->
+<!--            memoList.innerHTML = '<p>메모가 없습니다.</p>';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        memos.forEach(memo => {-->
+<!--            const item = document.createElement('div');-->
+<!--            item.className = 'rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3';-->
+
+<!--            const text = document.createElement('p');-->
+<!--            text.className = 'text-sm font-medium text-slate-800';-->
+<!--            text.textContent = memo.content;-->
+
+<!--            const actions = document.createElement('div');-->
+<!--            actions.className = 'mt-3 flex gap-2';-->
+
+<!--            const editBtn = document.createElement('button');-->
+<!--            editBtn.type = 'button';-->
+<!--            editBtn.className = 'rounded-xl border border-line px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-brand hover:text-brand';-->
+<!--            editBtn.textContent = '수정';-->
+<!--            editBtn.addEventListener('click', function () {-->
+<!--                startEditMemo(memo.memoId, memo.content);-->
+<!--            });-->
+
+<!--            const deleteBtn = document.createElement('button');-->
+<!--            deleteBtn.type = 'button';-->
+<!--            deleteBtn.className = 'rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50';-->
+<!--            deleteBtn.textContent = '삭제';-->
+<!--            deleteBtn.addEventListener('click', function () {-->
+<!--                deleteMemo(memo.memoId);-->
+<!--            });-->
+
+<!--            actions.appendChild(editBtn);-->
+<!--            actions.appendChild(deleteBtn);-->
+
+<!--            item.appendChild(text);-->
+<!--            item.appendChild(actions);-->
+
+<!--            memoList.appendChild(item);-->
+<!--        });-->
+<!--    }-->
+
+<!--    function loadMemos(date) {-->
+<!--        fetch(`${memoBaseUrl}/memos?date=${date}`)-->
+<!--            .then(response => response.json())-->
+<!--            .then(data => {-->
+<!--                renderMemoList(data);-->
+<!--            })-->
+<!--            .catch(() => {-->
+<!--                const memoList = document.getElementById('memoList');-->
+<!--                if (memoList) {-->
+<!--                    memoList.innerHTML = '<p>메모를 불러오지 못했습니다.</p>';-->
+<!--                }-->
+<!--            });-->
+<!--    }-->
+
+<!--    function startEditMemo(memoId, content) {-->
+<!--        editingMemoId = memoId;-->
+<!--        const memoContent = document.getElementById('memoContent');-->
+<!--        const saveMemoBtn = document.getElementById('saveMemoBtn');-->
+
+<!--        if (memoContent) {-->
+<!--            memoContent.value = content;-->
+<!--            memoContent.focus();-->
+<!--        }-->
+
+<!--        if (saveMemoBtn) {-->
+<!--            saveMemoBtn.textContent = '메모 수정';-->
+<!--        }-->
+<!--    }-->
+
+<!--    function resetMemoEditor() {-->
+<!--        editingMemoId = null;-->
+
+<!--        const memoContent = document.getElementById('memoContent');-->
+<!--        const saveMemoBtn = document.getElementById('saveMemoBtn');-->
+
+<!--        if (memoContent) {-->
+<!--            memoContent.value = '';-->
+<!--        }-->
+
+<!--        if (saveMemoBtn) {-->
+<!--            saveMemoBtn.textContent = '메모 저장';-->
+<!--        }-->
+<!--    }-->
+
+<!--    function refreshCalendarEvents() {-->
+<!--        fetch(eventUrl)-->
+<!--            .then(response => response.json())-->
+<!--            .then(events => {-->
+<!--                allEvents = applyDashboardEventColors(events);-->
+
+<!--                if (calendarInstance) {-->
+<!--                    calendarInstance.removeAllEvents();-->
+<!--                    calendarInstance.addEventSource(allEvents);-->
+<!--                }-->
+
+<!--                if (selectedDate) {-->
+<!--                    renderSelectedEvents(allEvents, selectedDate);-->
+<!--                }-->
+
+<!--                renderDdayList(allEvents);-->
+<!--            });-->
+<!--    }-->
+
+<!--    function saveMemo() {-->
+<!--        const memoContent = document.getElementById('memoContent');-->
+<!--        if (!memoContent) return;-->
+
+<!--        const content = memoContent.value.trim();-->
+
+<!--        if (!selectedDate) {-->
+<!--            alert('먼저 날짜를 선택하세요.');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        if (!content) {-->
+<!--            alert('메모 내용을 입력하세요.');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        const formData = new URLSearchParams();-->
+<!--        formData.append('content', content);-->
+<!--        formData.append('memoDate', selectedDate);-->
+
+<!--        const isEditMode = editingMemoId !== null;-->
+<!--        const requestUrl = isEditMode-->
+<!--            ? `${memoBaseUrl}/${editingMemoId}`-->
+<!--            : memoBaseUrl;-->
+<!--        const requestMethod = isEditMode ? 'PUT' : 'POST';-->
+
+<!--        fetch(requestUrl, {-->
+<!--            method: requestMethod,-->
+<!--            headers: {-->
+<!--                'Content-Type': 'application/x-www-form-urlencoded'-->
+<!--            },-->
+<!--            body: formData-->
+<!--        })-->
+<!--            .then(response => {-->
+<!--                if (!response.ok) {-->
+<!--                    throw new Error('memo request failed');-->
+<!--                }-->
+<!--                return response.text();-->
+<!--            })-->
+<!--            .then(() => {-->
+<!--                resetMemoEditor();-->
+<!--                loadMemos(selectedDate);-->
+<!--                refreshCalendarEvents();-->
+<!--            })-->
+<!--            .catch(() => {-->
+<!--                alert(isEditMode ? '메모 수정 중 오류가 발생했습니다.' : '메모 저장 중 오류가 발생했습니다.');-->
+<!--            });-->
+<!--    }-->
+
+<!--    function deleteMemo(memoId) {-->
+<!--        if (!confirm('메모를 삭제하시겠습니까?')) {-->
+<!--            return;-->
+<!--        }-->
+
+<!--        fetch(`${memoBaseUrl}/${memoId}`, {-->
+<!--            method: 'DELETE'-->
+<!--        })-->
+<!--            .then(response => {-->
+<!--                if (!response.ok) {-->
+<!--                    throw new Error('memo delete failed');-->
+<!--                }-->
+<!--                return response.text();-->
+<!--            })-->
+<!--            .then(() => {-->
+<!--                if (editingMemoId === memoId) {-->
+<!--                    resetMemoEditor();-->
+<!--                }-->
+<!--                loadMemos(selectedDate);-->
+<!--                refreshCalendarEvents();-->
+<!--            })-->
+<!--            .catch(() => {-->
+<!--                alert('메모 삭제 중 오류가 발생했습니다.');-->
+<!--            });-->
+<!--    }-->
+
+<!--    document.addEventListener('DOMContentLoaded', function () {-->
+<!--        if (!loggedIn) return;-->
+
+<!--        const calendarEl = document.getElementById('dashboardCalendar');-->
+<!--        const saveMemoBtn = document.getElementById('saveMemoBtn');-->
+
+<!--        if (saveMemoBtn) {-->
+<!--            saveMemoBtn.addEventListener('click', saveMemo);-->
+<!--        }-->
+
+<!--        if (!calendarEl) return;-->
+
+<!--        fetch(eventUrl)-->
+<!--            .then(response => response.json())-->
+<!--            .then(events => {-->
+<!--                allEvents = applyDashboardEventColors(events);-->
+
+<!--                calendarInstance = new FullCalendar.Calendar(calendarEl, {-->
+<!--                    initialView: 'dayGridMonth',-->
+<!--                    locale: 'ko',-->
+<!--                    height: 'auto',-->
+<!--                    headerToolbar: {-->
+<!--                        left: 'prev,next today',-->
+<!--                        center: 'title',-->
+<!--                        right: 'dayGridMonth'-->
+<!--                    },-->
+<!--                    events: allEvents,-->
+<!--                    dateClick: function(info) {-->
+<!--                        selectedDate = info.dateStr;-->
+<!--                        renderSelectedEvents(allEvents, selectedDate);-->
+<!--                        loadMemos(selectedDate);-->
+<!--                    }-->
+<!--                });-->
+
+<!--                calendarInstance.render();-->
+<!--                renderDdayList(allEvents);-->
+<!--            })-->
+<!--            .catch(() => {-->
+<!--                const selectedScheduleList = document.getElementById('selectedScheduleList');-->
+<!--                if (selectedScheduleList) {-->
+<!--                    selectedScheduleList.innerHTML = '<p>캘린더 데이터를 불러오지 못했습니다. 전체 캘린더 페이지에서 다시 확인해주세요.</p>';-->
+<!--                }-->
+
+<!--                const memoList = document.getElementById('memoList');-->
+<!--                if (memoList) {-->
+<!--                    memoList.innerHTML = '<p>메모 데이터를 불러오지 못했습니다.</p>';-->
+<!--                }-->
+
+<!--                const ddayList = document.getElementById('ddayList');-->
+<!--                if (ddayList) {-->
+<!--                    ddayList.innerHTML = '<p>D-day 데이터를 불러오지 못했습니다.</p>';-->
+<!--                }-->
+<!--            });-->
+<!--    });-->
+<!--</script>-->
