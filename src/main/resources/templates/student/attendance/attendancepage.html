@@ -194,6 +194,52 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="mt-8 hidden flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+                    <div class="text-sm text-on-surface-variant">
+                        <span class="font-bold text-on-surface">총점</span>
+                        <span th:text="|${attendancePage.attendanceScore + attendancePage.assignmentScore + attendancePage.examScore + attendancePage.attitudeScore}점 / 100점|">80점 / 100점</span>
+                    </div>
+
+                    <div th:if="${attendancePage.attendanceScore + attendancePage.assignmentScore + attendancePage.examScore + attendancePage.attitudeScore >= 80}">
+                        <a class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
+                           th:href="@{/student/certificate(courseId=${attendancePage.courseId})}">
+                            <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
+                            수료증 발급
+                        </a>
+                    </div>
+
+                    <button th:unless="${attendancePage.attendanceScore + attendancePage.assignmentScore + attendancePage.examScore + attendancePage.attitudeScore >= 80}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">lock</span>
+                        수료 기준 미달
+                    </button>
+                </div>
+
+                <div class="mt-8 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+                    <div class="text-sm text-on-surface-variant">
+                        <span class="font-bold text-on-surface">총점</span>
+                        <span th:text="|${attendancePage.totalScore}점 / 100점|">80점 / 100점</span>
+                    </div>
+
+                    <div th:if="${attendancePage.totalScore >= 80}">
+                        <a class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
+                           th:href="@{/student/certificate/request(courseId=${attendancePage.courseId})}">
+                            <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
+                            수료증 발급 신청
+                        </a>
+                    </div>
+
+                    <button th:unless="${attendancePage.totalScore >= 80}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">lock</span>
+                        수료 기준 미달
+                    </button>
+                </div>
             </div>
         </section>
 

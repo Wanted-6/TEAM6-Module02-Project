@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>강의 코스 목록</title>
+    <title>내 강의실</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#f6f7fb] text-slate-900">
@@ -11,11 +11,9 @@
     <div class="mx-auto max-w-7xl px-6 py-10">
         <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-                <p class="text-sm font-bold uppercase tracking-[0.25em] text-[#5b63b7]">Instructor Courses</p>
-                <h1 class="mt-3 text-4xl font-extrabold tracking-tight">담당 코스 목록</h1>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                    관리할 코스를 선택하면 해당 코스의 성적 목록과 학생 관리 화면으로 이어진다.
-                </p>
+                <p class="text-sm font-bold uppercase tracking-[0.25em] text-[#5b63b7]">My Classroom</p>
+                <h1 class="mt-3 text-4xl font-extrabold tracking-tight">수강 중인 코스</h1>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">신청한 코스를 확인하고 원하는 코스를 눌러 학습 화면으로 바로 이동할 수 있다.</p>
             </div>
             <a th:href="@{/main}" class="inline-flex items-center rounded-2xl bg-[#334155] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#1f2937]">
                 메인으로 돌아가기
@@ -24,9 +22,9 @@
 
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3" th:if="${courseList != null and !#lists.isEmpty(courseList)}">
             <a th:each="course : ${courseList}"
-               th:href="@{/instructor/grades(courseId=${course.courseId})}"
+               th:href="@{/student/courses/{courseId}(courseId=${course.courseId})}"
                class="group overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-                <div class="h-44 bg-gradient-to-br from-[#dbeafe] via-[#eff6ff] to-[#c7d2fe]"></div>
+                <div class="h-44 bg-gradient-to-br from-[#e6ebff] via-[#f8faff] to-[#d8e1ff]"></div>
                 <div class="p-6">
                     <div class="mb-4 flex items-center justify-between gap-3">
                         <span class="rounded-full bg-[#eef2ff] px-3 py-1 text-xs font-bold text-[#4f46e5]"
@@ -36,9 +34,7 @@
                     </div>
 
                     <h2 class="text-2xl font-extrabold leading-tight" th:text="${course.title}">Spring Boot 입문</h2>
-                    <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600" th:text="${course.description}">
-                        코스 설명
-                    </p>
+                    <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600" th:text="${course.description}">코스 설명</p>
 
                     <div class="mt-6 grid grid-cols-2 gap-3 text-sm text-slate-600">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">
@@ -54,7 +50,7 @@
                     <div class="mt-6 flex items-center justify-between">
                         <p class="text-sm font-semibold text-slate-500" th:text="|정원 ${course.capacity}명|">정원 30명</p>
                         <span class="inline-flex items-center rounded-2xl bg-[#1d4ed8] px-4 py-2 text-sm font-bold text-white transition group-hover:bg-[#1e40af]">
-                            성적 관리
+                            코스 입장
                         </span>
                     </div>
                 </div>
@@ -63,8 +59,8 @@
 
         <div th:if="${courseList == null or #lists.isEmpty(courseList)}"
              class="rounded-[28px] border border-dashed border-slate-300 bg-white px-8 py-20 text-center text-slate-500">
-            <p class="text-lg font-bold text-slate-700">담당 중인 코스가 없습니다.</p>
-            <p class="mt-3 text-sm">코스가 승인되면 이 화면에서 바로 학생 관리로 이동할 수 있다.</p>
+            <p class="text-lg font-bold text-slate-700">수강 중인 코스가 없습니다.</p>
+            <p class="mt-3 text-sm">코스를 신청한 뒤 내 강의실에서 다시 확인해 주세요.</p>
         </div>
     </div>
 </div>

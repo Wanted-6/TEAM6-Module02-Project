@@ -1,6 +1,6 @@
 package com.wanted.projectmodule2lms.domain.grade.controller;
 
-import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
+import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeUpdateDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.service.GradeService;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
@@ -8,10 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.wanted.projectmodule2lms.global.util.SecurityUtil;
-
-
-
 
 @Controller
 @RequiredArgsConstructor
@@ -19,16 +15,35 @@ import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 public class InstructorGradeController {
 
     private final GradeService gradeService;
+    private final CourseService courseService;
 
     // 성적 목록 조회
+    @GetMapping("/courses")
+    public String instructorCourseList(@LoginMemberId Long memberId, Model model) {
+        if (memberId == null) {
+            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
+        }
+
+        Integer instructorId = memberId.intValue();
+        model.addAttribute("courseList", courseService.findCoursesByInstructor(instructorId));
+        return "instructor/grade/course-list";
+    }
+
     @GetMapping
-    public String findGradesByInstructor(@LoginMemberId Long memberId, Model model) {
+    public String findGradesByInstructor(@LoginMemberId Long memberId,
+                                         @RequestParam(required = false) Integer courseId,
+                                         Model model) {
         if (memberId == null) {
             throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
         }
         Integer instructorId = memberId.intValue();
 
-        model.addAttribute("grades", gradeService.findGradesByInstructorId(instructorId));
+        if (courseId != null) {
+            model.addAttribute("selectedCourseId", courseId);
+            model.addAttribute("grades", gradeService.findGradesByInstructorIdAndCourseId(instructorId, courseId));
+        } else {
+            model.addAttribute("grades", gradeService.findGradesByInstructorId(instructorId));
+        }
         return "instructor/grade/list-view";
     }
 

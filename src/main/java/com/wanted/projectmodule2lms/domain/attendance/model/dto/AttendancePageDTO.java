@@ -29,4 +29,5 @@ public class AttendancePageDTO {
     private Integer examMaxScore;
     private Integer attitudeScore;
     private Integer attitudeMaxScore;
+    private Integer totalScore;
 }
