@@ -63,6 +63,7 @@ public class AttendanceService {
 
         return new AttendancePageDTO(
                 memberId,
+                enrollment.getEnrollmentId(),
                 courseId,
                 course,
                 section,

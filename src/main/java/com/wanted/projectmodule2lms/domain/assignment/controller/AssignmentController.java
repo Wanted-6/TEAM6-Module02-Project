@@ -19,16 +19,25 @@ public class AssignmentController {
     private final CourseService courseService;
 
     @GetMapping("/courses/{courseId}/assignment")
-    public ModelAndView findAssignmentByCourse(@PathVariable Integer courseId, ModelAndView mv) {
+    public ModelAndView findAssignmentByCourse(@PathVariable Integer courseId,
+                                               @RequestParam(defaultValue = "STUDENT") String role,
+                                               ModelAndView mv) {
         mv.addObject("courseId", courseId);
         mv.addObject("course", courseService.findCourseById(courseId));
         mv.addObject("assignment", assignmentService.findAssignmentByCourseId(courseId));
+        mv.addObject("role", role);
         mv.setViewName("assignment/detail");
         return mv;
     }
 
     @GetMapping("/courses/{courseId}/assignment/regist")
-    public ModelAndView registPage(@PathVariable Integer courseId, ModelAndView mv) {
+    public ModelAndView registPage(@PathVariable Integer courseId,
+                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                   ModelAndView mv) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 과제를 등록할 수 있습니다.");
+        }
+
         mv.addObject("courseId", courseId);
         mv.addObject("course", courseService.findCourseById(courseId));
         mv.setViewName("assignment/regist");
@@ -37,24 +46,35 @@ public class AssignmentController {
 
     @PostMapping("/courses/{courseId}/assignment")
     public String registAssignment(@PathVariable Integer courseId,
+                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                    @ModelAttribute AssignmentCreateDTO createDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 과제를 등록할 수 있습니다.");
+        }
+
         try {
             assignmentService.registAssignment(courseId, createDTO, attachmentUpload);
             rttr.addFlashAttribute("successMessage", "과제가 등록되었습니다.");
-            return "redirect:/courses/" + courseId + "/assignment";
+            return "redirect:/courses/" + courseId + "/assignment?role=INSTRUCTOR";
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/courses/" + courseId + "/assignment/regist";
+            return "redirect:/courses/" + courseId + "/assignment/regist?role=INSTRUCTOR";
         } catch (Exception e) {
             rttr.addFlashAttribute("errorMessage", "과제 등록 중 오류가 발생했습니다.");
-            return "redirect:/courses/" + courseId + "/assignment/regist";
+            return "redirect:/courses/" + courseId + "/assignment/regist?role=INSTRUCTOR";
         }
     }
 
     @GetMapping("/courses/{courseId}/assignment/modify")
-    public ModelAndView modifyPage(@PathVariable Integer courseId, ModelAndView mv) {
+    public ModelAndView modifyPage(@PathVariable Integer courseId,
+                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                   ModelAndView mv) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 과제를 수정할 수 있습니다.");
+        }
+
         mv.addObject("courseId", courseId);
         mv.addObject("course", courseService.findCourseById(courseId));
         mv.addObject("assignment", assignmentService.findAssignmentByCourseId(courseId));
@@ -64,19 +84,24 @@ public class AssignmentController {
 
     @PostMapping("/courses/{courseId}/assignment/modify")
     public String modifyAssignment(@PathVariable Integer courseId,
+                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                    @ModelAttribute AssignmentUpdateDTO updateDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 과제를 수정할 수 있습니다.");
+        }
+
         try {
             assignmentService.modifyAssignmentByCourseId(courseId, updateDTO, attachmentUpload);
             rttr.addFlashAttribute("successMessage", "과제가 수정되었습니다.");
-            return "redirect:/courses/" + courseId + "/assignment";
+            return "redirect:/courses/" + courseId + "/assignment?role=INSTRUCTOR";
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/courses/" + courseId + "/assignment/modify";
+            return "redirect:/courses/" + courseId + "/assignment/modify?role=INSTRUCTOR";
         } catch (Exception e) {
             rttr.addFlashAttribute("errorMessage", "과제 수정 중 오류가 발생했습니다.");
-            return "redirect:/courses/" + courseId + "/assignment/modify";
+            return "redirect:/courses/" + courseId + "/assignment/modify?role=INSTRUCTOR";
         }
     }
 }

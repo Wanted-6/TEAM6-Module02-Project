@@ -14,7 +14,7 @@
             <h1 class="text-3xl font-bold text-slate-900">과제 제출</h1>
             <p class="text-slate-500 mt-2">현재 코스 과제를 제출합니다.</p>
         </div>
-        <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
+        <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId}, role='STUDENT')}"
            class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
             과제 상세
         </a>
@@ -28,7 +28,7 @@
          class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700"
          th:text="${successMessage}"></div>
 
-    <form th:action="@{/courses/{courseId}/assignment/submissions(courseId=${courseId})}"
+    <form th:action="@{/courses/{courseId}/assignment/submissions(courseId=${courseId}, role='STUDENT')}"
           method="post"
           enctype="multipart/form-data"
           class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
@@ -49,7 +49,7 @@
         </div>
 
         <div class="flex justify-end gap-3">
-            <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
+            <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId}, role='STUDENT')}"
                class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
                 취소
             </a>

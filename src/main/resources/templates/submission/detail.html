@@ -15,6 +15,18 @@
             <p class="text-slate-500 mt-2">제출 내용과 피드백을 확인합니다.</p>
         </div>
 
+        <div th:if="${errorMessage}"
+             class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+             th:text="${errorMessage}">
+            에러 메시지
+        </div>
+
+        <div th:if="${successMessage}"
+             class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700"
+             th:text="${successMessage}">
+            성공 메시지
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <p class="text-sm text-slate-500 mb-2">제출 ID</p>
@@ -61,10 +73,11 @@
             </p>
         </div>
 
-        <div class="border-t border-slate-200 pt-6">
+        <!-- 강사용 -->
+        <div th:if="${role == 'INSTRUCTOR'}" class="border-t border-slate-200 pt-6">
             <h2 class="text-xl font-semibold mb-4">채점 / 피드백</h2>
 
-            <form th:action="@{/submissions/{submissionId}/score(submissionId=${submission.submissionId})}"
+            <form th:action="@{/submissions/{submissionId}/score(submissionId=${submission.submissionId}, role='INSTRUCTOR')}"
                   method="post"
                   class="space-y-4">
 
@@ -82,13 +95,9 @@
                 </div>
 
                 <div class="flex justify-end gap-3">
-                    <a th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId})}"
+                    <a th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId}, role='INSTRUCTOR')}"
                        class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
                         목록
-                    </a>
-                    <a th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId})}"
-                       class="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100">
-                        제출 수정
                     </a>
                     <button type="submit"
                             class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
@@ -96,6 +105,20 @@
                     </button>
                 </div>
             </form>
+        </div>
+
+        <!-- 학생용 -->
+        <div th:if="${role == 'STUDENT'}" class="border-t border-slate-200 pt-6">
+            <div class="flex justify-end gap-3">
+                <a th:href="@{/courses/{courseId}/assignment/submissions/me(courseId=${courseId}, enrollmentId=${submission.enrollmentId}, role='STUDENT')}"
+                   class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                    새로고침
+                </a>
+                <a th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId}, role='STUDENT')}"
+                   class="px-4 py-2 rounded-lg border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100">
+                    제출 수정
+                </a>
+            </div>
         </div>
 
     </div>

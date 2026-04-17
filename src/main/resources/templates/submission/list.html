@@ -14,7 +14,7 @@
             <h1 class="text-3xl font-bold text-slate-900">제출 목록</h1>
             <p class="text-slate-500 mt-2">해당 코스 과제의 제출 내역입니다.</p>
         </div>
-        <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
+        <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId}, role='INSTRUCTOR')}"
            class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
             과제 상세
         </a>
@@ -49,13 +49,14 @@
             <tr th:each="submission : ${submissionList}" class="border-t border-slate-200">
                 <td class="px-6 py-4" th:text="${submission.submissionId}">1</td>
                 <td class="px-6 py-4" th:text="${submission.enrollmentId}">10</td>
-                <td class="px-6 py-4" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-04-20 10:00</td>
+                <td class="px-6 py-4"
+                    th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-04-20 10:00</td>
                 <td class="px-6 py-4">
                     <span th:if="${submission.score == null}">미채점</span>
                     <span th:unless="${submission.score == null}" th:text="${submission.score}">95</span>
                 </td>
                 <td class="px-6 py-4">
-                    <a th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId})}"
+                    <a th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId}, role='INSTRUCTOR')}"
                        class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
                         상세
                     </a>

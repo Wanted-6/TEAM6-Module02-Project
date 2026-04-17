@@ -509,8 +509,8 @@
             </a>
         </section>
 
-        <section th:if="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <a th:href="@{/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+        <section th:if="${dashboardRole == 'INSTRUCTOR'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <a th:href="@{/courses(role='INSTRUCTOR')}" class="menu-card rounded-[26px] border border-line bg-white p-6">
                 <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
                     <span class="material-symbols-outlined text-3xl">menu_book</span>
                 </div>
@@ -540,6 +540,40 @@
                 </div>
                 <h2 class="text-xl font-extrabold">강사 캘린더</h2>
                 <p class="mt-2 text-sm leading-6 text-slate-600">강의 일정과 메모를 캘린더 중심으로 관리합니다.</p>
+            </a>
+        </section>
+
+        <section th:if="${dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <a th:href="@{/admin/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
+                    <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+                </div>
+                <h2 class="text-xl font-extrabold">강의 승인 관리</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">코스 목록을 보고 승인, 반려, 삭제 처리를 관리합니다.</p>
+            </a>
+
+            <a th:href="@{/instructor/grades}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef6f4] text-mint">
+                    <span class="material-symbols-outlined text-3xl">fact_check</span>
+                </div>
+                <h2 class="text-xl font-extrabold">성적 관리</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">전체 성적 관리 화면으로 이동합니다.</p>
+            </a>
+
+            <a th:href="@{/board/list}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f0f1ff] text-[#5f67a8]">
+                    <span class="material-symbols-outlined text-3xl">forum</span>
+                </div>
+                <h2 class="text-xl font-extrabold">게시판</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">공지와 게시판을 확인합니다.</p>
+            </a>
+
+            <a th:href="@{/instructor/calendar}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-accent">
+                    <span class="material-symbols-outlined text-3xl">calendar_month</span>
+                </div>
+                <h2 class="text-xl font-extrabold">관리 캘린더</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">주요 일정과 메모를 확인합니다.</p>
             </a>
         </section>
 
