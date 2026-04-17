@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/courses")
@@ -21,12 +23,15 @@ public class CourseController {
     public ModelAndView findAllCourses(@RequestParam(required = false) String keyword,
                                        @RequestParam(required = false) String category,
                                        @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                       Principal principal,
                                        ModelAndView mv) {
         if (!"INSTRUCTOR".equals(role)) {
             throw new IllegalArgumentException("강사만 코스 목록을 조회할 수 있습니다.");
         }
 
-        mv.addObject("courseList", courseService.findAllCourses(keyword, category));
+        String loginId = principal.getName();
+
+        mv.addObject("courseList", courseService.findMyInstructorCourses(loginId, keyword, category));
         mv.addObject("keyword", keyword);
         mv.addObject("category", category);
         mv.addObject("role", role);
