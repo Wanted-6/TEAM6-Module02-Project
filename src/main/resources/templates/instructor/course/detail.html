@@ -8,85 +8,107 @@
 </head>
 <body class="bg-slate-50 text-slate-800">
 <div class="max-w-5xl mx-auto px-6 py-10">
+
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-3xl font-bold text-slate-900">코스 상세</h1>
-            <p class="text-slate-500 mt-2">코스의 상세 정보를 확인합니다.</p>
+            <p class="text-slate-500 mt-2">코스 정보와 관리 기능을 확인합니다.</p>
         </div>
-        <div class="flex gap-3">
-            <a href="/courses" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
-            <a th:href="@{/courses/{courseId}/modify(courseId=${course.courseId})}"
-               class="px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">수정</a>
-        </div>
+        <a th:href="@{/courses(role='INSTRUCTOR')}"
+           class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+            목록
+        </a>
     </div>
 
-    <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
-    <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}"
+         class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3"
+         th:text="${errorMessage}"></div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-2xl font-bold text-slate-900" th:text="${course.title}">코스명</h2>
+    <div th:if="${successMessage}"
+         class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3"
+         th:text="${successMessage}"></div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-8 space-y-8">
+
+            <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-8">
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                    <img th:if="${course.thumbnailImage != null and !#strings.isEmpty(course.thumbnailImage)}"
+                         th:src="@{|/${course.thumbnailImage}|}"
+                         alt="코스 썸네일"
+                         class="w-full h-72 object-cover">
+
+                    <div th:unless="${course.thumbnailImage != null and !#strings.isEmpty(course.thumbnailImage)}"
+                         class="w-full h-72 flex items-center justify-center text-slate-400 text-sm">
+                        등록된 썸네일이 없습니다.
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 text-xs rounded-full"
+                              th:classappend="${course.isOpen} ? ' bg-blue-100 text-blue-700' : ' bg-slate-200 text-slate-600'"
+                              th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'">
+                        </span>
+
+                        <span class="px-3 py-1 text-xs rounded-full bg-amber-100 text-amber-700"
+                              th:text="${course.approvalStatus} ?: 'PENDING'">
+                        </span>
+                    </div>
+
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-900 mb-2"
+                            th:text="${course.title}">코스명</h2>
+                        <p class="text-slate-500"
+                           th:text="${course.category}">카테고리</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="p-4 rounded-xl bg-slate-50">
+                            <p class="text-slate-500 mb-1">정원</p>
+                            <p class="font-medium" th:text="|${course.capacity}명|">30명</p>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50">
+                            <p class="text-slate-500 mb-1">공개 여부</p>
+                            <p class="font-medium" th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'">CLOSED</p>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50">
+                            <p class="text-slate-500 mb-1">시작일</p>
+                            <p class="font-medium" th:text="${course.startDate}">2026-04-01</p>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-slate-50">
+                            <p class="text-slate-500 mb-1">종료일</p>
+                            <p class="font-medium" th:text="${course.endDate}">2026-06-30</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <span class="px-3 py-1 text-sm rounded-full"
-                  th:classappend="${course.isOpen} ? ' bg-blue-100 text-blue-700' : ' bg-slate-200 text-slate-600'"
-                  th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'"></span>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-
-            <div class="p-4 rounded-xl bg-slate-50">
-                <p class="text-slate-500 mb-1">카테고리</p>
-                <p class="font-medium" th:text="${course.category}"></p>
+            <div class="p-5 rounded-2xl bg-slate-50">
+                <p class="text-sm text-slate-500 mb-2">코스 설명</p>
+                <p class="whitespace-pre-line text-slate-800"
+                   th:text="${course.description}">코스 설명</p>
             </div>
 
-            <div class="p-4 rounded-xl bg-slate-50">
-                <p class="text-slate-500 mb-1">정원</p>
-                <p class="font-medium" th:text="|${course.capacity}명|"></p>
+            <div class="flex flex-wrap gap-3 pt-2">
+                <a th:href="@{/courses/{courseId}/modify(courseId=${course.courseId}, role='INSTRUCTOR')}"
+                   class="px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
+                    수정
+                </a>
+
+                <a th:href="@{/courses/{courseId}/sections(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100">
+                    섹션 관리
+                </a>
+
+                <a th:href="@{/courses/{courseId}/students(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                    수강생 목록
+                </a>
             </div>
-
-            <div class="p-4 rounded-xl bg-slate-50">
-                <p class="text-slate-500 mb-1">기간</p>
-                <p class="font-medium">
-                    <span th:text="${course.startDate}"></span>
-                    <span> ~ </span>
-                    <span th:text="${course.endDate}"></span>
-                </p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-50">
-                <p class="text-slate-500 mb-1">승인 상태</p>
-                <p class="font-medium" th:text="${course.approvalStatus} ?: 'PENDING'"></p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-50">
-                <p class="text-slate-500 mb-1">검토 관리자 ID</p>
-                <p class="font-medium" th:text="${course.reviewedBy} ?: '-'"></p>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-50 md:col-span-2"
-                 th:if="${course.rejectReason != null and !#strings.isEmpty(course.rejectReason)}">
-                <p class="text-slate-500 mb-2">반려 사유</p>
-                <p th:text="${course.rejectReason}"></p>
-            </div>
-
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-50">
-            <p class="text-slate-500 mb-2">설명</p>
-            <p class="leading-7" th:text="${course.description}"></p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-50">
-            <p class="text-slate-500 mb-2">썸네일</p>
-            <p th:text="${course.thumbnailImage} ?: '등록된 썸네일이 없습니다.'"></p>
-        </div>
-
-        <div class="flex flex-wrap gap-3 pt-2">
-            <a th:href="@{/courses/{courseId}/sections(courseId=${course.courseId})}"
-               class="px-4 py-2 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100">섹션 관리</a>
-            <a th:href="@{/courses/{courseId}/students(courseId=${course.courseId})}"
-               class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">수강생 목록</a>
 
         </div>
     </div>

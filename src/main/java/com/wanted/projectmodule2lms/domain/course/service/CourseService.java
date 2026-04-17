@@ -101,6 +101,29 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+    public List<CourseDTO> findMyInstructorCourses(String instructorLoginId, String keyword, String category) {
+
+        Member instructor = memberRepository.findByLoginId(instructorLoginId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
+
+        if (instructor.getRole() != MemberRole.INSTRUCTOR) {
+            throw new IllegalArgumentException("강사만 코스 목록을 조회할 수 있습니다.");
+        }
+
+        String safeKeyword = StringUtils.hasText(keyword) ? keyword.trim() : null;
+        String rawCategory = StringUtils.hasText(category) ? category.trim() : null;
+        final String safeCategory = (rawCategory != null && isValidCategory(rawCategory)) ? rawCategory : null;
+
+        List<Course> courseList = courseRepository.findAllByInstructorIdOrderByCourseIdDesc(instructor.getMemberId());
+
+        return courseList.stream()
+                .filter(course -> course.getApprovalStatus() != CourseApprovalStatus.DELETED)
+                .filter(course -> safeKeyword == null || course.getTitle().contains(safeKeyword))
+                .filter(course -> safeCategory == null || safeCategory.equals(course.getCategory()))
+                .map(course -> modelMapper.map(course, CourseDTO.class))
+                .collect(Collectors.toList());
+    }
+
     public CourseDTO findCourseById(Integer courseId) {
         Course foundCourse = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
@@ -306,6 +329,7 @@ public class CourseService {
                 .map(course -> modelMapper.map(course, CourseDTO.class))
                 .collect(Collectors.toList());
     }
+
     public CourseDTO findMyCourseDetail(Integer memberId, Integer courseId) {
 
         enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
@@ -405,5 +429,4 @@ public class CourseService {
                 reviewerName
         );
     }
-
 }
