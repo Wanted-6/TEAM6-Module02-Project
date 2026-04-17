@@ -29,7 +29,7 @@ public class StudentCalendarController {
     @ResponseBody
     public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
         return calendarService.findStudentCalendarEvents(memberId.intValue());
     }
@@ -40,7 +40,7 @@ public class StudentCalendarController {
     public List<?> getMemosByDate(@LoginMemberId Long memberId,
                                   @RequestParam String date) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
         return calendarService.findMemosByDate(memberId.intValue(), date);
     }
@@ -51,7 +51,7 @@ public class StudentCalendarController {
     public String createMemo(@LoginMemberId Long memberId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
         calendarService.createMemo(memberId.intValue(), dto);
         return "ok";
@@ -64,7 +64,7 @@ public class StudentCalendarController {
                              @PathVariable Integer memoId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
         calendarService.updateMemo(memberId.intValue(), memoId, dto);
         return "ok";
@@ -76,7 +76,7 @@ public class StudentCalendarController {
     public String deleteMemo(@LoginMemberId Long memberId,
                              @PathVariable Integer memoId) {
         if (memberId == null) {
-            throw new IllegalStateException("·Î±×ÀÎ »ç¿ëÀÚ Á¤º¸¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            throw new IllegalStateException("ï¿½Î±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.");
         }
         calendarService.deleteMemo(memberId.intValue(), memoId);
         return "ok";
