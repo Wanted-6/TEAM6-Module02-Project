@@ -1,8 +1,11 @@
 package com.wanted.projectmodule2lms.domain.member.model.controller;
 
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.dto.SignupDTO;
+import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.service.MemberService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class MemberController {
 
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     @GetMapping("/signup")
     public void signup(){ }
@@ -48,6 +52,55 @@ public class MemberController {
             rttr.addFlashAttribute("message", "회원가입이 완료되었습니다. 로그인해 주세요.");
             return "redirect:/auth/login"; // 새로고침 버그 방지를 위해 반드시 redirect!
         }
+    }
+
+    @GetMapping("/edit-password")
+    public String editPasswordForm(@LoginMemberId Long memberId, Model model) {
+
+        if (memberId == null) {
+            return "redirect:/auth/login";
+        }
+        return "member/edit-password";
+    }
+
+    @AuditLog
+    @PostMapping("/edit-password")
+    public String updatePassword(@LoginMemberId Long memberId, @RequestParam("newPassword") String newPassword) {
+
+        if(memberId == null) {
+            return "redirect:/auth/login";
+        }
+
+        memberService.changeRegularPassword(memberId, newPassword);
+
+        return "redirect:/";
+    }
+
+    @GetMapping("verify-code")
+    public String verifyCodeForm(@LoginMemberId Long memberId) {
+        if (memberId == null) return "redirect:/auth/login";
+        return "member/verify-code";
+    }
+
+    // 강사가 입력한 승인 코드 확인
+    @AuditLog
+    @PostMapping("/verify-code")
+    public String processVerifyCode(@LoginMemberId Long memberId, @RequestParam("code") String inputCode, RedirectAttributes rttr) {
+        if (memberId == null) return "redirect:/auth/login";
+
+        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+
+        if (inputCode.equals(member.getApprovalCode())) {
+            member.verifyApprovalCode();
+            memberRepository.save(member);
+
+            rttr.addFlashAttribute("message", "강사 인증이 완료되었습니다.");
+            return "redirect:/";
+        } else {
+            rttr.addFlashAttribute("error", "승인 코드가 올바르지 않습니다.");
+            return "redirect:/member/verify-code";
+        }
+
     }
 
 }

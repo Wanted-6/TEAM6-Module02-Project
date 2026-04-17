@@ -53,12 +53,54 @@ public class Member {
     @Column(name = "is_account_locked", nullable = false)
     private Boolean accountLocked = false;
 
+    @Column(name = "is_temp_password")
+    private boolean isTempPassword = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", length = 20)
+    private ApprovalStatus approvalStatus;
+
+    @Column(name = "approval_code", length = 10)
+    private String approvalCode;
+
+    @Builder.Default
+    @Column(name = "is_verified", nullable = false)
+    private Boolean isVerified = false; // 승인 코드 입력 완료 여부
+
+    @Column(name = "reject_reason", columnDefinition = "TEXT")
+    private String rejectReason; // 반려 사유
+
+    @Column(name = "grad_cert_path")
+    private String gradCertPath; // 졸업증명서 경로
+
+    @Column(name = "career_cert_path")
+    private String careerCertPath; // 경력증명서 경로
+
+
+
+    public void changeToTempPassword(String encodedPassword) {
+        this.password = encodedPassword;
+        this.isTempPassword = true;
+    }
+
+    public void changeRegularPassword(String encodedPassword) {
+        this.password = encodedPassword;
+        this.isTempPassword = false;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
 
         if (this.status == null) {
             this.status = MemberStatus.ACTIVE;
+            if (this.role == MemberRole.INSTRUCTOR && this.approvalStatus == null) {
+                this.approvalStatus = ApprovalStatus.PENDING; // 강사 무조건 대기
+                this.isVerified = false;
+            } else if (this.role != MemberRole.INSTRUCTOR && this.approvalStatus == null) {
+                this.approvalStatus = ApprovalStatus.APPROVED; // 학생 바로 승인
+                this.isVerified = true;
+            }
         }
     }
 
@@ -116,4 +158,26 @@ public class Member {
     public void changeStatus(MemberStatus status) {
         this.status = status;
     }
+
+    // [관리자용] 강사 승인 처리 및 승인 코드 발급
+    public void approveInstructor(String code){
+        this.approvalStatus = ApprovalStatus.APPROVED;
+        this.approvalCode = code;
+        this.rejectReason = null;
+    }
+
+    // [관리자용] 강사 반려 처리
+    public void rejectInstructor(String reason){
+        this.approvalStatus = ApprovalStatus.REJECTED;
+        this.rejectReason = reason;
+        this.approvalCode = null;
+    }
+
+    // [강사용] 최초 로그인 시 승인 코드로 인증하기
+    public void verifyApprovalCode() {
+        this.isVerified = true;
+        this.approvalCode = null;
+    }
+
+
 }
