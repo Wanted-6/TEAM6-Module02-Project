@@ -94,16 +94,6 @@
             <p class="text-sm text-slate-500 mb-4" th:text="${course.category}">카테고리</p>
             <p class="text-sm text-slate-700 min-h-[48px]" th:text="${course.description}">설명</p>
 
-            <div class="mt-5 space-y-1 text-sm text-slate-600">
-                <p th:text="|정원: ${course.capacity}명|"></p>
-                <p th:text="|시작일: ${course.startDate}|"></p>
-                <p th:text="|종료일: ${course.endDate}|"></p>
-            </div>
-
-            <div class="mt-6 flex items-center justify-between">
-                <span class="text-sm font-medium text-blue-700">상세보기</span>
-                <span class="text-blue-700">→</span>
-            </div>
         </a>
     </div>
 

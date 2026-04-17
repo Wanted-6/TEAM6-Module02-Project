@@ -8,6 +8,8 @@ import com.wanted.projectmodule2lms.domain.attendance.model.dto.AttendanceCheckR
 import com.wanted.projectmodule2lms.domain.attendance.model.dto.AttendancePageDTO;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.Attendance;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceStatus;
+import com.wanted.projectmodule2lms.domain.certificate.model.dao.CertificateRepository;
+import com.wanted.projectmodule2lms.domain.certificate.model.entity.Certificate;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -48,6 +50,43 @@ public class AttendanceService {
     private final CourseService courseService;
     private final AssignmentRepository assignmentRepository;
     private final GradeRepository gradeRepository;
+    private final CertificateRepository certificateRepository;
+
+    public Integer calculateTotalScore(Integer memberId, Integer courseId) {
+        Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
+                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+
+        Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                .orElse(null);
+
+        long totalSectionCount = sectionRepository.countByCourseId(courseId);
+        List<Attendance> attendanceList = attendanceRepository.findByEnrollmentId(enrollment.getEnrollmentId());
+        int attendanceScore = calculateAttendanceScore(totalSectionCount, attendanceList);
+
+        int assignmentScore = 0;
+        int examScore = 0;
+        int attitudeScore = 0;
+
+        if (grade != null) {
+            if (grade.getAssignmentScore() != null) {
+                assignmentScore = grade.getAssignmentScore().intValue();
+            }
+
+            if (grade.getExamScore() != null) {
+                examScore = grade.getExamScore().intValue();
+            }
+
+            if (grade.getAttitudeScore() != null) {
+                attitudeScore = grade.getAttitudeScore().intValue();
+            }
+        }
+
+        int weightedAssignmentScore = calculateWeightedScore(assignmentScore, ASSIGNMENT_MAX_SCORE);
+        int weightedExamScore = calculateWeightedScore(examScore, EXAM_MAX_SCORE);
+        int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
+
+        return attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
+    }
 
     public AttendancePageDTO findAttendancePage(Integer memberId, Integer courseId, Integer sectionId) {
         CourseDTO course = courseService.findMyCourseDetail(memberId, courseId);
@@ -62,7 +101,12 @@ public class AttendanceService {
 
         Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
                 .orElse(null);
-
+        Certificate certificate = certificateRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                .orElse(null);
+        String certificateStatus = "NONE";
+        if (certificate != null) {
+            certificateStatus = certificate.getStatus().name();
+        }
         long totalSectionCount = sectionRepository.countByCourseId(courseId);
         List<Attendance> attendanceList = attendanceRepository.findByEnrollmentId(enrollment.getEnrollmentId());
         Map<Integer, String> attendanceStatusMap = buildAttendanceStatusMap(attendanceList);
@@ -89,7 +133,7 @@ public class AttendanceService {
         int weightedAssignmentScore = calculateWeightedScore(assignmentScore, ASSIGNMENT_MAX_SCORE);
         int weightedExamScore = calculateWeightedScore(examScore, EXAM_MAX_SCORE);
         int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
-        int totalScore = attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
+        int totalScore = calculateTotalScore(memberId, courseId);
 
         return new AttendancePageDTO(
                 memberId,
@@ -108,7 +152,8 @@ public class AttendanceService {
                 EXAM_MAX_SCORE,
                 weightedAttitudeScore,
                 ATTITUDE_MAX_SCORE,
-                totalScore
+                totalScore,
+                certificateStatus
         );
 
     }

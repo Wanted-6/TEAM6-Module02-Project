@@ -8,7 +8,15 @@ import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 
@@ -17,13 +25,15 @@ import java.util.List;
 @RequestMapping("/instructor/calendar")
 public class InstructorCalendarController {
 
+    private static final String LOGIN_MEMBER_REQUIRED = "Login member id is required.";
+
     private final CalenderService calendarService;
 
     @AuditLog
     @GetMapping
     public String showInstructorCalendarPage(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
@@ -36,7 +46,7 @@ public class InstructorCalendarController {
     @ResponseBody
     public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
@@ -49,20 +59,20 @@ public class InstructorCalendarController {
     public List<?> getMemosByDate(@LoginMemberId Long memberId,
                                   @RequestParam String date) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
         return calendarService.findMemosByDate(instructorId, date);
     }
 
-
+    @AuditLog
     @PostMapping
     @ResponseBody
     public String createMemo(@LoginMemberId Long memberId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
@@ -70,14 +80,14 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-
+    @AuditLog
     @PutMapping("/{memoId}")
     @ResponseBody
     public String updateMemo(@LoginMemberId Long memberId,
                              @PathVariable Integer memoId,
                              @ModelAttribute CalendarMemoCreateDTO dto) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 
@@ -85,13 +95,13 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-
+    @AuditLog
     @DeleteMapping("/{memoId}")
     @ResponseBody
     public String deleteMemo(@LoginMemberId Long memberId,
                              @PathVariable Integer memoId) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
         Integer instructorId = memberId.intValue();
 

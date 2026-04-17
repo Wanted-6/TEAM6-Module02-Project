@@ -1,6 +1,5 @@
 package com.wanted.projectmodule2lms.domain.auth.config;
 
-
 import com.wanted.projectmodule2lms.domain.auth.handler.AuthFailHandler;
 import com.wanted.projectmodule2lms.domain.auth.handler.AuthSuccessHandler;
 import com.wanted.projectmodule2lms.domain.auth.model.service.LoginLogService;
@@ -59,37 +58,30 @@ public class SecurityConfig {
                                          SessionRegistry sessionRegistry) throws Exception {
 
         http.authorizeHttpRequests(auth -> {
+<<<<<<< HEAD
                     // 1. 누구나 접근 가능한 URL 설정
                     auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**").permitAll();
 
                     // 2. 권한별 URL 접근 제어 (HTML에서 설정한 3가지 Role 기준)
 
                     // 관리자 전용
+=======
+                    auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**", "/error").permitAll();
+>>>>>>> 6c01c8db3e1688f341c4d9b2d0ffcaaf727f223d
                     auth.requestMatchers("/admin/**").hasAnyAuthority("ADMIN");
-
-                    // 강사 및 관리자 전용 (강의 관리 페이지 등)
                     auth.requestMatchers("/instructor/**").hasAnyAuthority("INSTRUCTOR", "ADMIN");
-
-                    // 일반 회원 페이지 (마이 학습실, 정보 수정 등은 로그인한 3가지 권한 모두 접근 가능)
                     auth.requestMatchers("/member/**").hasAnyAuthority("STUDENT", "INSTRUCTOR", "ADMIN");
-
-                    // 3. 그 외 요청들은 로그인을 완료해야 접근 가능
                     auth.anyRequest().authenticated();
-
                 }).formLogin(login -> {
                     login.loginPage("/auth/login");
-
                     login.usernameParameter("memberId");
                     login.passwordParameter("pass");
-
                     login.successHandler(authSuccessHandler);
                     login.failureHandler(authFailHandler);
-
                 }).rememberMe(rememberMe -> {
                     rememberMe.rememberMeParameter("remember-me");
                     rememberMe.tokenValiditySeconds(86400);
                     rememberMe.key("remember-me-secret-key");
-
                 }).logout(logout -> {
                     logout.logoutUrl("/auth/logout");
                     logout.deleteCookies("JSESSIONID");
@@ -97,12 +89,14 @@ public class SecurityConfig {
                     logout.invalidateHttpSession(true);
                     logout.clearAuthentication(true);
                     logout.logoutSuccessUrl("/");
-
                 }).sessionManagement(session -> {
                     session.maximumSessions(1).sessionRegistry(sessionRegistry);
                     session.invalidSessionUrl("/");
-                })
-                .csrf(csrf -> csrf.disable());
+                }).exceptionHandling(exception -> exception.accessDeniedHandler((request, response, accessDeniedException) -> {
+                    if (!response.isCommitted()) {
+                        response.sendRedirect("/");
+                    }
+                })).csrf(csrf -> csrf.disable());
 
         return http.build();
     }
