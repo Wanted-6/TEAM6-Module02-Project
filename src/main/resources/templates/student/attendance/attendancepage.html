@@ -224,7 +224,7 @@
                         <span th:text="|${attendancePage.totalScore}점 / 100점|">80점 / 100점</span>
                     </div>
 
-                    <div th:if="${attendancePage.totalScore >= 80}">
+                    <div th:if="${attendancePage.totalScore >= 80 and attendancePage.certificateStatus == 'NONE'}">
                         <a class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
                            th:href="@{/student/certificate/request(courseId=${attendancePage.courseId})}">
                             <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
@@ -232,7 +232,30 @@
                         </a>
                     </div>
 
-                    <button th:unless="${attendancePage.totalScore >= 80}"
+                    <button th:if="${attendancePage.certificateStatus == 'REQUESTED'}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">hourglass_top</span>
+                        승인 대기
+                    </button>
+
+                    <a th:if="${attendancePage.certificateStatus == 'APPROVED'}"
+                       class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
+                       th:href="@{/student/certificate(courseId=${attendancePage.courseId})}">
+                        <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
+                        수료증 발급
+                    </a>
+
+                    <button th:if="${attendancePage.certificateStatus == 'REVOKED'}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">block</span>
+                        수료증 회수됨
+                    </button>
+
+                    <button th:if="${attendancePage.totalScore < 80}"
                             class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
                             type="button"
                             disabled>

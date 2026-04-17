@@ -273,7 +273,7 @@
             </a>
         </section>
 
-        <section th:if="${dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <section th:if="${dashboardRole == 'ADMIN'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             <a th:href="@{/admin/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
                 <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
                     <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
@@ -296,6 +296,14 @@
                 </div>
                 <h2 class="text-xl font-extrabold">게시판</h2>
                 <p class="mt-2 text-sm leading-6 text-slate-600">공지와 게시판을 확인합니다.</p>
+            </a>
+
+            <a th:href="@{/admin/certificates}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4eb] text-[#c56a2d]">
+                    <span class="material-symbols-outlined text-3xl">workspace_premium</span>
+                </div>
+                <h2 class="text-xl font-extrabold">수료증 승인</h2>
+                <p class="mt-2 text-sm leading-6 text-slate-600">학생이 신청한 수료증 목록을 보고 승인 대기 상태를 확인합니다.</p>
             </a>
         </section>
 
