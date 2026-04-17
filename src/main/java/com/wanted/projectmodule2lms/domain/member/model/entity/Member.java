@@ -1,5 +1,6 @@
 package com.wanted.projectmodule2lms.domain.member.model.entity;
 
+import com.wanted.projectmodule2lms.domain.profile.dto.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -76,6 +77,18 @@ public class Member {
     @Column(name = "career_cert_path")
     private String careerCertPath; // 경력증명서 경로
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Profile profile;
+
+    public void updatePhone(String phone){
+        if (phone != null && !phone.isBlank()){
+            this.phone = phone;
+        }
+    }
+
+    public void setProfile(Profile profile){
+        this.profile = profile;
+    }
 
 
     public void changeToTempPassword(String encodedPassword) {

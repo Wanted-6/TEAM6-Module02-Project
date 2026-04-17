@@ -6,12 +6,17 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.service.MemberService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/member")
@@ -101,6 +106,60 @@ public class MemberController {
             return "redirect:/member/verify-code";
         }
 
+    }
+
+    @GetMapping("/mypage")
+    public String myPage(@LoginMemberId Long memberId, Model model) {
+        if (memberId == null) {
+            return "redirect:/auth/login";
+        }
+
+        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+        model.addAttribute("member", member);
+
+        return "member/mypage";
+    }
+
+    @AuditLog
+    @PostMapping("/profile/update")
+    public String updateProfile(@LoginMemberId Long memberId,
+                                @RequestParam("bio") String bio,
+                                @RequestParam(value = "profileImage", required = false) MultipartFile file,
+                                RedirectAttributes rttr) throws IOException {
+        String profileImageUrl = null;
+        if (file != null && !file.isEmpty()) {
+            String savePath = "C:/lab/uploads/";
+            File dir = new File(savePath);
+            if (!dir.exists()) dir.mkdirs();
+
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            file.transferTo(new File(savePath + fileName));
+            profileImageUrl = "/uploads/" + fileName;
+        }
+
+        memberService.updateProfile(memberId, bio, profileImageUrl);
+        rttr.addFlashAttribute("message", "프로필이 저장되었습니다.");
+        return "redirect:/member/mypage";
+    }
+
+    @AuditLog
+    @PostMapping("/phone/update")
+    public String updatePhone(@LoginMemberId Long memberId, @RequestParam("phone") String phone, RedirectAttributes rttr) {
+        try {
+            memberService.updatePhone(memberId, phone);
+            rttr.addFlashAttribute("message", "전화번호가 변경되었습니다.");
+        } catch (IllegalArgumentException e) {
+            rttr.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/member/mypage";
+    }
+
+    @AuditLog
+    @PostMapping("/delete")
+    public String deleteMember(@LoginMemberId Long memberId, HttpSession session) {
+        memberService.deleteMember(memberId);
+        session.invalidate();
+        return "redirect:/";
     }
 
 }
