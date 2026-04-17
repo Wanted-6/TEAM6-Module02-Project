@@ -22,6 +22,10 @@ public class CourseController {
                                        @RequestParam(required = false) String category,
                                        @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                        ModelAndView mv) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 코스 목록을 조회할 수 있습니다.");
+        }
+
         mv.addObject("courseList", courseService.findAllCourses(keyword, category));
         mv.addObject("keyword", keyword);
         mv.addObject("category", category);
@@ -34,6 +38,10 @@ public class CourseController {
     public ModelAndView findCourseById(@PathVariable Integer courseId,
                                        @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                        ModelAndView mv) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 코스 상세를 조회할 수 있습니다.");
+        }
+
         mv.addObject("course", courseService.findCourseById(courseId));
         mv.addObject("role", role);
         mv.setViewName("instructor/course/detail");
