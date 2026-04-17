@@ -24,4 +24,8 @@ public class AttendanceDTO {
     private LocalDateTime recordedAt;
     private Boolean isManual;
     private String note;
+    private String certificateStatus;
+    private Boolean canRequestCertificate;
+    private Boolean canIssueCertificate;
+    private Integer totalScore;
 }

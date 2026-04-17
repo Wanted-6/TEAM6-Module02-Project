@@ -1,6 +1,8 @@
 package com.wanted.projectmodule2lms.domain.course.controller;
 
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
+import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class StudentCourseController {
 
     private final CourseService courseService;
+    private final SectionRepository sectionRepository;
 
     @GetMapping
     public ModelAndView findMyCourses(
@@ -29,7 +32,7 @@ public class StudentCourseController {
 
         mv.addObject("memberId", memberId);
         mv.addObject("courseList", courseService.findMyCourses(Math.toIntExact(memberId)));
-        mv.setViewName("student/course/list");
+        mv.setViewName("student/course/my-classroom");
         return mv;
     }
 
@@ -44,9 +47,23 @@ public class StudentCourseController {
             return mv;
         }
 
-        mv.addObject("memberId", memberId);
-        mv.addObject("course", courseService.findMyCourseDetail(Math.toIntExact(memberId), courseId));
-        mv.setViewName("student/course/detail");
+        courseService.findMyCourseDetail(Math.toIntExact(memberId), courseId);
+
+        Section section = sectionRepository.findByCourseIdAndSectionOrder(courseId, 1)
+                .orElseGet(() -> {
+                    java.util.List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
+                    if (sectionList.isEmpty()) {
+                        return null;
+                    }
+                    return sectionList.get(0);
+                });
+
+        if (section == null) {
+            mv.setViewName("redirect:/student/courses");
+            return mv;
+        }
+
+        mv.setViewName("redirect:/student/attendance/" + courseId + "/" + section.getSectionId());
         return mv;
     }
 }

@@ -164,6 +164,52 @@ public class GradeService {
         return gradeDTOList;
     }
 
+    public List<GradeDTO> findGradesByInstructorIdAndCourseId(Integer instructorId, Integer courseId) {
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
+
+        if (!course.getInstructorId().equals(instructorId)) {
+            throw new IllegalArgumentException("담당 강의만 조회할 수 있습니다.");
+        }
+
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
+        List<GradeDTO> gradeDTOList = new ArrayList<>();
+
+        for (Enrollment enrollment : enrollments) {
+            Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                    .orElse(null);
+
+            if (grade == null) {
+                continue;
+            }
+
+            String studentName = memberRepository.findById(enrollment.getMemberId())
+                    .map(member -> member.getName())
+                    .orElse("이름 없음");
+
+            String completionStatus = getCompletionStatus(grade);
+
+            GradeDTO gradeDTO = new GradeDTO(
+                    grade.getGradeId(),
+                    grade.getEnrollmentId(),
+                    enrollment.getCourseId(),
+                    studentName,
+                    course.getTitle(),
+                    grade.getAttendanceScore(),
+                    grade.getAssignmentScore(),
+                    grade.getExamScore(),
+                    grade.getAttitudeScore(),
+                    grade.getTotalScore(),
+                    completionStatus
+            );
+
+            gradeDTOList.add(gradeDTO);
+        }
+
+        return gradeDTOList;
+    }
+
     public GradeDTO findGradeByEnrollmentIdForInstructor(Integer instructorId, Integer enrollmentId) {
 
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
