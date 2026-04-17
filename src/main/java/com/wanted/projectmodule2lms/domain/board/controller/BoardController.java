@@ -9,6 +9,8 @@ import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -83,8 +85,9 @@ public class BoardController {
     @GetMapping("/section-qna")
     public String sectionQnaListPage(@RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) Integer courseId,
+                                     @LoginMemberId Long loginMemberId,
                                      Model model) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
         List<BoardDTO> boardList;
 
@@ -121,8 +124,9 @@ public class BoardController {
     public String boardRegistPage(@RequestParam(defaultValue = "FREE") BoardType type,
                                   @RequestParam(required = false) Integer courseId,
                                   @RequestParam(required = false) Integer sectionId,
+                                  @LoginMemberId Long loginMemberId,
                                   Model model) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
 
         List<Course> courses = (currentMemberId != null && currentRole != null)
@@ -145,10 +149,12 @@ public class BoardController {
         return "board/regist";
     }
 
+    @AuditLog
     @PostMapping("/regist")
-    public String registBoard(@ModelAttribute BoardDTO boardDTO,
+    public String registBoard(@LoginMemberId Long loginMemberId,
+                              @ModelAttribute BoardDTO boardDTO,
                               RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
 
         try {
@@ -170,10 +176,12 @@ public class BoardController {
         return "board/modify";
     }
 
+    @AuditLog
     @PostMapping("/modify")
-    public String modifyBoard(@ModelAttribute BoardDTO boardDTO,
+    public String modifyBoard(@LoginMemberId Long loginMemberId,
+                              @ModelAttribute BoardDTO boardDTO,
                               RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
 
         try {
@@ -193,10 +201,12 @@ public class BoardController {
         return "board/delete";
     }
 
+    @AuditLog
     @PostMapping("/delete")
-    public String deleteBoard(@RequestParam Integer postId,
+    public String deleteBoard(@LoginMemberId Long loginMemberId,
+                              @RequestParam Integer postId,
                               RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = getCurrentMemberId();
+        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
         BoardDTO board = boardService.findBoardById(postId);
         try {
