@@ -64,7 +64,7 @@ public class SecurityConfig {
 
                     // 2. 권한별 URL 접근 제어 (HTML에서 설정한 3가지 Role 기준)
 
-                    // 관리자 전용 (여기서 anyRequest를 뺐습니다!)
+                    // 관리자 전용
                     auth.requestMatchers("/admin/**").hasAnyAuthority("ADMIN");
 
                     // 강사 및 관리자 전용 (강의 관리 페이지 등)
