@@ -12,6 +12,7 @@ import java.util.UUID;
 public class AdminService {
 
     private final MemberRepository memberRepository;
+    private final MailService mailService;
 
     //강사 승인 및 코드 발급
     @Transactional
@@ -25,8 +26,7 @@ public class AdminService {
         // 엔티티의 메서드 호출해서 상태 변경함
         member.approveInstructor(approvalCode);
 
-        // TODO: 여기서 발급된 approvalCode를 강사의 이메일로 전송하는 로직 추가!
-        // emailService.sendApprovalCode(member.getEmail(), approvalCode);
+       mailService.sendApprovalEmail(member.getEmail(), approvalCode);
 
         return approvalCode;
     }
@@ -39,7 +39,6 @@ public class AdminService {
 
         member.rejectInstructor(reason);
 
-        // TODO: 여기서 반려 사유(reason)를 강사의 이메일로 전송하는 로직 추가!
-        // emailService.sendRejectEmail(member.getEmail(), reason);
+       mailService.sendRejectEmail(member.getEmail(), reason);
     }
 }
