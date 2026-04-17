@@ -6,6 +6,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
     <style>
         .calendar-layout {
             display: flex;
@@ -25,6 +26,7 @@
             padding-left: 20px;
             background-color: #fff8dc;
         }
+
         .panel-box {
             margin-bottom: 20px;
         }
@@ -47,16 +49,20 @@
             margin-top: 10px;
             padding: 8px 14px;
         }
-        /* 오늘 날짜 강조 */
-        .fc-day-today {
-            background-color: #fff3cd !important; /* 연한 노란색 */
-            border: 2px solid #ffc107 !important; /* 강조 테두리 */
+
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: #fff3cd !important;
         }
 
-        /* 오늘 날짜 숫자 강조 */
-        .fc-day-today .fc-daygrid-day-number {
-            font-weight: bold;
-            color: #d97706;
+        .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-frame {
+            background-color: #fff3cd !important;
+            border: 2px solid #ffc107 !important;
+            border-radius: 6px;
+        }
+
+        .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+            font-weight: 800;
+            color: #d97706 !important;
         }
 
         .dday-item {
@@ -86,10 +92,31 @@
             background-color: #f3f4f6;
             color: #374151;
         }
+
+        .memo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .memo-text {
+            flex: 1;
+            white-space: pre-wrap;
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .memo-actions button {
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
-<h2>📅 나의 학습 캘린더</h2>
+<h2>학생 캘린더</h2>
 
 <div class="calendar-layout">
     <div class="calendar-area">
@@ -117,9 +144,8 @@
 
         <div class="panel-box">
             <h4>D-day</h4>
-            <div id="ddayList">임박한 시험 일정이 표시됩니다.</div>
+            <div id="ddayList">임박한 마감 일정이 표시됩니다.</div>
         </div>
-
     </div>
 </div>
 
@@ -144,32 +170,40 @@
         return Math.floor(diffMs / (1000 * 60 * 60 * 24));
     }
 
-    function isExamEvent(event) {
-        return event.title && event.title.includes('시험 마감');
+    function normalizeDate(dateValue) {
+        return String(dateValue).slice(0, 10);
     }
 
-    function getExamColor(diffDays) {
-        if (diffDays === 3) return '#facc15'; // 노랑
-        if (diffDays === 2) return '#fb923c'; // 주황
-        if (diffDays === 1) return '#ef4444'; // 빨강
-        return '#c4b5fd'; // 기본 시험 마감색
+    function isDeadlineEvent(event) {
+        if (!event) return false;
+
+        const eventId = event.id || '';
+        return eventId.startsWith('exam-') || eventId.startsWith('assignment-');
     }
 
-    function applyExamDeadlineColors(events) {
+    function getDeadlineColor(diffDays) {
+        if (diffDays === 3) return '#facc15';
+        if (diffDays === 2) return '#fb923c';
+        if (diffDays === 1 || diffDays === 0) return '#ef4444';
+        return '#c4b5fd';
+    }
+
+    function applyDeadlineColors(events) {
         const todayStr = getTodayString();
 
         return events.map(event => {
-            let updatedEvent = { ...event };
+            const updatedEvent = { ...event };
+            const eventDate = normalizeDate(updatedEvent.start);
 
-            // 기존 기능 유지: 시험 마감일 색상 적용
-            if (isExamEvent(event)) {
-                const diffDays = getDateDiff(todayStr, event.start);
-                updatedEvent.color = getExamColor(diffDays);
+            updatedEvent.start = eventDate;
+
+            if (isDeadlineEvent(updatedEvent)) {
+                const diffDays = getDateDiff(todayStr, eventDate);
+                updatedEvent.color = getDeadlineColor(diffDays);
             }
 
-            // 추가 기능: 오늘보다 이전 일정은 회색 처리
-            if (event.start < todayStr) {
-                updatedEvent.color = '#9ca3af'; // Tailwind Gray-400
+            if (eventDate < todayStr) {
+                updatedEvent.color = '#9ca3af';
             }
 
             return updatedEvent;
@@ -182,21 +216,25 @@
 
         const todayStr = getTodayString();
 
-        const imminentExamEvents = allEvents
-            .filter(event => isExamEvent(event))
-            .map(event => ({
-                ...event,
-                diffDays: getDateDiff(todayStr, event.start)
-            }))
+        const imminentDeadlineEvents = allEvents
+            .filter(event => isDeadlineEvent(event))
+            .map(event => {
+                const eventDate = normalizeDate(event.start);
+                return {
+                    ...event,
+                    start: eventDate,
+                    diffDays: getDateDiff(todayStr, eventDate)
+                };
+            })
             .filter(event => event.diffDays >= 0 && event.diffDays <= 3)
             .sort((a, b) => a.diffDays - b.diffDays);
 
-        if (imminentExamEvents.length === 0) {
-            ddayList.innerHTML = '<div class="panel-item">임박한 시험 일정 없음</div>';
+        if (imminentDeadlineEvents.length === 0) {
+            ddayList.innerHTML = '<div class="panel-item">임박한 마감 일정 없음</div>';
             return;
         }
 
-        imminentExamEvents.forEach(event => {
+        imminentDeadlineEvents.forEach(event => {
             let label = '';
             let className = 'dday-default';
 
@@ -228,7 +266,7 @@
         fetch('/student/calendar/events')
             .then(response => response.json())
             .then(data => {
-                allEvents = applyExamDeadlineColors(data);
+                allEvents = applyDeadlineColors(data);
 
                 calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
@@ -246,7 +284,10 @@
                 });
 
                 calendar.render();
-                renderDdayList(); // D-day 표시
+                renderDdayList();
+            })
+            .catch(error => {
+                console.error('캘린더 초기 로딩 오류:', error);
             });
 
         document.getElementById('saveMemoBtn').addEventListener('click', function () {
@@ -258,9 +299,10 @@
         const scheduleList = document.getElementById('scheduleList');
         scheduleList.innerHTML = '';
 
-        // 메모를 제외한 일정만 필터링
+        const normalizedDate = normalizeDate(date);
+
         const dayEvents = allEvents.filter(event =>
-            event.start === date && !event.title.startsWith('[메모]')
+            normalizeDate(event.start) === normalizedDate && !event.title.startsWith('[메모]')
         );
 
         if (dayEvents.length === 0) {
@@ -273,68 +315,17 @@
         });
     }
 
-    // function loadMemos(date) {
-    //     fetch('/student/calendar/memos?date=' + date)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             renderMemoList(data);
-    //         })
-    //         .catch(error => {
-    //             console.error('메모 조회 오류:', error);
-    //         });
-    // }
     function loadMemos(date) {
         fetch('/student/calendar/memos?date=' + date)
             .then(response => response.json())
             .then(data => {
-                console.log('메모 조회 결과:', data);
                 renderMemoList(data);
             })
             .catch(error => {
                 console.error('메모 조회 오류:', error);
             });
     }
-    // function saveMemo() {
-    //     const content = document.getElementById('memoContent').value.trim();
-    //
-    //     if (!selectedDate) {
-    //         alert('먼저 날짜를 선택하세요.');
-    //         return;
-    //     }
-    //
-    //     if (!content) {
-    //         alert('메모 내용을 입력하세요.');
-    //         return;
-    //     }
-    //
-    //     const formData = new URLSearchParams();
-    //     formData.append('content', content);
-    //     formData.append('memoDate', selectedDate);
-    //
-    //     fetch('/student/calendar', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/x-www-form-urlencoded'
-    //         },
-    //         body: formData
-    //     })
-    //         .then(response => {
-    //             if (!response.ok) {
-    //                 throw new Error('메모 저장 실패');
-    //             }
-    //             return response.text();
-    //         })
-    //         .then(() => {
-    //             document.getElementById('memoContent').value = '';
-    //
-    //             loadMemos(selectedDate);
-    //             refreshCalendarEvents();
-    //         })
-    //         .catch(error => {
-    //             console.error(error);
-    //             alert('메모 저장 중 오류가 발생했습니다.');
-    //         });
-    // }
+
     function saveMemo() {
         const content = document.getElementById('memoContent').value.trim();
 
@@ -386,39 +377,28 @@
                     : '메모 저장 중 오류가 발생했습니다.');
             });
     }
+
     function refreshCalendarEvents() {
         fetch('/student/calendar/events')
             .then(response => response.json())
             .then(data => {
-                allEvents = applyExamDeadlineColors(data);
+                allEvents = applyDeadlineColors(data);
 
                 calendar.removeAllEvents();
                 calendar.addEventSource(allEvents);
 
-                renderDayEvents(selectedDate);
+                if (selectedDate) {
+                    renderDayEvents(selectedDate);
+                    loadMemos(selectedDate);
+                }
+
                 renderDdayList();
             })
             .catch(error => {
                 console.error('캘린더 새로고침 오류:', error);
             });
     }
-    // function renderMemoList(memos) {
-    //     const memoList = document.getElementById('memoList');
-    //     memoList.innerHTML = '';
-    //
-    //     if (!memos || memos.length === 0) {
-    //         memoList.innerHTML = '<div class="panel-item">메모 없음</div>';
-    //         return;
-    //     }
-    //
-    //     memos.forEach(memo => {
-    //         memoList.innerHTML += `
-    //         <div class="panel-item">
-    //             ${memo.content}
-    //         </div>
-    //     `;
-    //     });
-    // }
+
     function renderMemoList(memos) {
         const memoList = document.getElementById('memoList');
         memoList.innerHTML = '';
@@ -462,11 +442,13 @@
             memoList.appendChild(item);
         });
     }
+
     function startEditMemo(memoId, content) {
         editingMemoId = memoId;
         document.getElementById('memoContent').value = content;
         document.getElementById('saveMemoBtn').innerText = '수정';
     }
+
     function deleteMemo(memoId) {
         if (!confirm('메모를 삭제하시겠습니까?')) {
             return;
@@ -495,36 +477,6 @@
                 console.error(error);
                 alert('메모 삭제 중 오류가 발생했습니다.');
             });
-    }
-    function isPastDate(dateStr) {
-        const todayStr = getTodayString();
-        return dateStr < todayStr;
-    }
-
-    function applyEventColors(events) {
-        const todayStr = getTodayString();
-
-        return events.map(event => {
-            // 오늘보다 이전 일정이면 무조건 회색
-            if (event.start < todayStr) {
-                return {
-                    ...event,
-                    color: '#9ca3af'   // 회색
-                };
-            }
-
-            // 시험 일정이면 D-day 기준 색상 적용
-            if (isExamEvent(event)) {
-                const diffDays = getDateDiff(todayStr, event.start);
-                return {
-                    ...event,
-                    color: getExamColor(diffDays)
-                };
-            }
-
-            // 그 외 일정은 원래 색 유지
-            return event;
-        });
     }
 </script>
 </body>
