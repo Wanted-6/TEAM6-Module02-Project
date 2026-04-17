@@ -1,5 +1,8 @@
 package com.wanted.projectmodule2lms.domain.grade.model.service;
 
+import com.wanted.projectmodule2lms.domain.attendance.model.dao.AttendanceRepository;
+import com.wanted.projectmodule2lms.domain.attendance.model.entity.Attendance;
+import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceStatus;
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +27,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GradeService {
 
+    private static final BigDecimal PERFECT_ATTENDANCE_SCORE = new BigDecimal("100.00");
+    private static final BigDecimal ABSENT_PENALTY = new BigDecimal("10.00");
+    private static final BigDecimal LATE_PENALTY = new BigDecimal("5.00");
+
     private final MemberRepository memberRepository;
+    private final AttendanceRepository attendanceRepository;
     private final GradeRepository gradeRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
@@ -87,7 +96,7 @@ public class GradeService {
         Grade grade = gradeRepository.findByEnrollmentId(dto.getEnrollmentId())
                 .orElseThrow(() -> new IllegalArgumentException("성적 정보가 존재하지 않습니다."));
 
-        BigDecimal attendanceScore = getTemporaryAttendanceScore();
+        BigDecimal attendanceScore = calculateAttendanceScore(dto.getEnrollmentId());
         BigDecimal assignmentScore = dto.getAssignmentScore();
         BigDecimal examScore = dto.getExamScore();
         BigDecimal attitudeScore = dto.getAttitudeScore();
@@ -198,8 +207,32 @@ public class GradeService {
         }
     }
 
-    private BigDecimal getTemporaryAttendanceScore() {
-        return new BigDecimal("100.00");
+    private BigDecimal calculateAttendanceScore(Integer enrollmentId) {
+        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollmentId);
+
+        BigDecimal totalPenalty = attendances.stream()
+                .map(this::calculatePenalty)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal attendanceScore = PERFECT_ATTENDANCE_SCORE.subtract(totalPenalty);
+
+        if (attendanceScore.compareTo(BigDecimal.ZERO) < 0) {
+            attendanceScore = BigDecimal.ZERO;
+        }
+
+        return attendanceScore.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calculatePenalty(Attendance attendance) {
+        if (attendance.getStatus() == AttendanceStatus.ABSENT) {
+            return ABSENT_PENALTY;
+        }
+
+        if (attendance.getStatus() == AttendanceStatus.LATE) {
+            return LATE_PENALTY;
+        }
+
+        return BigDecimal.ZERO;
     }
 
     private BigDecimal calculateTotalScore(
@@ -211,7 +244,8 @@ public class GradeService {
         return attendanceScore.multiply(new BigDecimal("0.25"))
                 .add(assignmentScore.multiply(new BigDecimal("0.25")))
                 .add(examScore.multiply(new BigDecimal("0.30")))
-                .add(attitudeScore.multiply(new BigDecimal("0.20")));
+                .add(attitudeScore.multiply(new BigDecimal("0.20")))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
 
