@@ -458,19 +458,29 @@
                     </p>
                 </div>
 
-                <a th:if="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'}"
-                   th:href="@{/instructor/calendar}"
-                   class="inline-flex items-center gap-2 self-start rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
-                    <span class="material-symbols-outlined text-base">calendar_month</span>
-                    전체 캘린더 보기
-                </a>
+                <div class="flex flex-col gap-3">
 
-                <a th:if="${dashboardRole == 'STUDENT'}"
-                   th:href="@{/student/calendar}"
-                   class="inline-flex items-center gap-2 self-start rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
-                    <span class="material-symbols-outlined text-base">calendar_month</span>
-                    전체 캘린더 보기
-                </a>
+                    <a th:if="${dashboardRole == 'INSTRUCTOR' or dashboardRole == 'ADMIN'}"
+                       th:href="@{/instructor/calendar}"
+                       class="inline-flex w-full justify-center items-center gap-2 rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                        <span class="material-symbols-outlined text-base">calendar_month</span>
+                        전체 캘린더 보기
+                    </a>
+
+                    <a th:if="${dashboardRole == 'STUDENT'}"
+                       th:href="@{/student/calendar}"
+                       class="inline-flex w-full justify-center items-center gap-2 rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                        <span class="material-symbols-outlined text-base">calendar_month</span>
+                        전체 캘린더 보기
+                    </a>
+
+                    <a th:href="@{/member/mypage}"
+                       class="inline-flex w-full justify-center items-center gap-2 rounded-full border border-line px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                        <span class="material-symbols-outlined text-base">person</span>
+                        마이페이지
+                    </a>
+
+                </div>
             </div>
         </section>
 

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - 64Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { headline: ['Manrope', 'sans-serif'], body: ['Noto Sans KR', 'sans-serif'] },
+                    colors: { brand: '#2b3f8f', brandSoft: '#edf2ff', ink: '#1b2540', line: '#dbe3f1', paper: '#f6f8fc' },
+                    boxShadow: { soft: '0 18px 40px rgba(43, 63, 143, 0.08)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background: radial-gradient(circle at top left, rgba(43, 63, 143, 0.08), transparent 28%), linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="text-ink">
+
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
+        <div class="flex items-center gap-3">
+            <span class="hidden text-sm font-medium text-slate-600 sm:block">
+                <strong class="text-brand" th:text="${memberName} ?: ${#authentication.name}">사용자</strong>님, 환영합니다.
+            </span>
+            <form th:action="@{/auth/logout}" th:method="post" class="inline">
+                <button type="submit" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">로그아웃</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+
+    <div th:if="${message}" class="mb-6 rounded-2xl bg-brandSoft px-6 py-4 text-sm font-bold text-brand shadow-sm">
+        <span class="material-symbols-outlined mr-2 align-middle text-lg">check_circle</span>
+        <span th:text="${message}">성공 메시지</span>
+    </div>
+    <div th:if="${error}" class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-bold text-red-600 shadow-sm">
+        <span class="material-symbols-outlined mr-2 align-middle text-lg">error</span>
+        <span th:text="${error}">에러 메시지</span>
+    </div>
+
+    <div class="mb-10 flex items-end justify-between">
+        <div>
+            <p class="mb-2 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-brand">
+                <span class="material-symbols-outlined text-lg">manage_accounts</span> Account Settings
+            </p>
+            <h1 class="font-headline text-3xl font-extrabold tracking-tight sm:text-4xl">마이페이지</h1>
+            <p class="mt-2 text-slate-500">내 프로필과 계정 정보를 안전하게 관리하세요.</p>
+        </div>
+    </div>
+
+    <section class="mb-8 overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
+        <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+            <h2 class="flex items-center gap-2 text-xl font-extrabold text-ink"><span class="material-symbols-outlined text-brand">id_card</span> 프로필 설정</h2>
+        </div>
+        <div class="p-8">
+            <form action="/member/profile/update" method="post" enctype="multipart/form-data">
+                <div class="flex flex-col gap-8 md:flex-row md:items-start">
+
+                    <div class="flex flex-col items-center">
+                        <div class="group relative h-36 w-36 overflow-hidden rounded-full border-4 border-white bg-brandSoft shadow-lg transition-all hover:shadow-xl">
+                            <div id="defaultProfileIcon" class="flex h-full w-full items-center justify-center text-brand" th:classappend="${member.profile?.profileImage != null ? 'hidden' : ''}">
+                                <span class="material-symbols-outlined text-7xl">person</span>
+                            </div>
+                            <img id="profilePreview" th:src="${member.profile?.profileImage != null ? member.profile.profileImage : ''}" class="h-full w-full object-cover" th:classappend="${member.profile?.profileImage == null ? 'hidden' : ''}" alt="프로필 이미지">
+                            <label class="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/40 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                                <span class="material-symbols-outlined mb-1 text-3xl">photo_camera</span>
+                                <span class="text-xs font-bold">사진 변경</span>
+                                <input type="file" id="profileImageInput" name="profileImage" class="hidden" accept="image/*">
+                            </label>
+                        </div>
+                        <p class="mt-4 text-sm font-bold text-slate-700" th:text="${member.name} ?: ${#authentication.name}">이름</p>
+                    </div>
+
+                    <div class="flex-1">
+                        <label class="mb-2 block text-sm font-bold text-slate-700">한 줄 소개글</label>
+                        <textarea name="bio" rows="4" th:text="${member.profile?.bio}" class="w-full resize-none rounded-2xl border border-line bg-slate-50 p-4 text-sm text-ink transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft"></textarea>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button type="submit" class="flex items-center gap-2 rounded-2xl bg-brand px-8 py-3 text-sm font-bold text-white transition-all hover:bg-[#223374] active:scale-95">
+                        <span class="material-symbols-outlined text-lg">save</span> 프로필 저장하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="mb-8 overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
+        <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+            <h2 class="flex items-center gap-2 text-xl font-extrabold text-ink"><span class="material-symbols-outlined text-brand">lock_person</span> 계정 및 보안</h2>
+        </div>
+        <div class="p-8">
+
+            <div class="mb-8 max-w-md">
+                <label class="mb-2 block text-sm font-bold text-slate-700">로그인 이메일</label>
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">mail</span></div>
+                    <input type="email" th:value="${member.email}" readonly class="w-full cursor-not-allowed rounded-2xl border border-line bg-slate-100 py-3.5 pl-11 pr-4 text-sm text-slate-500 focus:outline-none">
+                </div>
+                <p class="mt-1.5 text-xs text-slate-500">이메일은 로그인 아이디로 사용되어 변경할 수 없습니다.</p>
+            </div>
+
+            <hr class="my-8 border-line">
+
+            <form action="/member/phone/update" method="post" class="mb-8 max-w-md">
+                <label class="mb-2 block text-sm font-bold text-slate-700">전화번호 변경</label>
+                <div class="flex items-start gap-3">
+                    <div class="relative flex-1">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">smartphone</span></div>
+                        <input type="text" name="phone" id="phoneInput" th:value="${member.phone}" maxlength="13" class="w-full rounded-2xl border border-line bg-slate-50 py-3.5 pl-11 pr-4 text-sm transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft">
+                    </div>
+                    <button type="submit" class="rounded-2xl bg-slate-800 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-slate-700 active:scale-95">번호 저장</button>
+                </div>
+            </form>
+
+            <hr class="my-8 border-line">
+
+            <form action="/member/edit-password" method="post" id="passwordForm">
+                <div>
+                    <h3 class="mb-4 text-sm font-bold text-slate-700">비밀번호 변경</h3>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">key</span></div>
+                            <input type="password" name="newPassword" id="newPassword" placeholder="새 비밀번호 입력" class="w-full rounded-2xl border border-line bg-slate-50 py-3.5 pl-11 pr-4 text-sm transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft">
+                        </div>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">password</span></div>
+                            <input type="password" id="confirmPassword" placeholder="새 비밀번호 확인" class="w-full rounded-2xl border border-line bg-slate-50 py-3.5 pl-11 pr-4 text-sm transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft">
+                        </div>
+                    </div>
+                    <p id="passwordMessage" class="mt-2 text-xs font-bold"></p>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button type="submit" class="flex items-center gap-2 rounded-2xl bg-ink px-8 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-95">
+                        <span class="material-symbols-outlined text-lg">update</span> 비밀번호 업데이트
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <form action="/member/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까? 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.');">
+        <div class="mt-12 flex flex-col items-center justify-center rounded-3xl border border-red-100 bg-red-50/50 p-6 sm:flex-row sm:justify-between">
+            <div>
+                <h3 class="font-bold text-red-800">계정 삭제</h3>
+                <p class="mt-1 text-sm text-red-600/80">탈퇴 시 모든 학습 데이터와 수강 내역이 영구적으로 삭제됩니다.</p>
+            </div>
+            <button type="submit" class="mt-4 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-600 transition-all hover:bg-red-50 sm:mt-0">
+                회원 탈퇴 진행
+            </button>
+        </div>
+    </form>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. 프로필 이미지 미리보기 기능
+        const profileImageInput = document.getElementById('profileImageInput');
+        const profilePreview = document.getElementById('profilePreview');
+        const defaultProfileIcon = document.getElementById('defaultProfileIcon');
+
+        if (profileImageInput) {
+            profileImageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        if (profilePreview) {
+                            profilePreview.src = event.target.result;
+                            profilePreview.classList.remove('hidden');
+                        }
+                        if (defaultProfileIcon) {
+                            defaultProfileIcon.classList.add('hidden');
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // 2. 전화번호 자동 하이픈 기능
+        const phoneInput = document.getElementById('phoneInput');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function (e) {
+                let val = e.target.value.replace(/[^0-9]/g, '');
+                let res = '';
+                if (val.length < 4) res = val;
+                else if (val.length < 7) res = val.substr(0, 3) + '-' + val.substr(3);
+                else if (val.length < 11) res = val.substr(0, 3) + '-' + val.substr(3, 3) + '-' + val.substr(6);
+                else res = val.substr(0, 3) + '-' + val.substr(3, 4) + '-' + val.substr(7);
+                e.target.value = res;
+            });
+        }
+
+        // 3. 비밀번호 검사 기능
+        const passwordForm = document.getElementById('passwordForm');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const messageBox = document.getElementById('passwordMessage');
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
+
+        function validatePassword() {
+            const pwd = newPassword.value;
+            const confirmPwd = confirmPassword.value;
+            if (!pwd && !confirmPwd) { messageBox.textContent = ''; return false; }
+            if (!passwordRegex.test(pwd)) {
+                messageBox.textContent = '비밀번호는 영문, 숫자, 특수문자 조합 8~16자여야 합니다.';
+                messageBox.className = 'mt-2 text-xs font-bold text-red-500';
+                return false;
+            }
+            if (pwd !== confirmPwd) {
+                messageBox.textContent = '비밀번호가 일치하지 않습니다.';
+                messageBox.className = 'mt-2 text-xs font-bold text-red-500';
+                return false;
+            }
+            messageBox.textContent = '사용 가능한 비밀번호입니다.';
+            messageBox.className = 'mt-2 text-xs font-bold text-green-600';
+            return true;
+        }
+
+        if (newPassword && confirmPassword) {
+            newPassword.addEventListener('input', validatePassword);
+            confirmPassword.addEventListener('input', validatePassword);
+        }
+
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', function (e) {
+                if (!newPassword.value) { e.preventDefault(); alert('변경할 비밀번호를 입력해주세요.'); newPassword.focus(); return; }
+                if (!validatePassword()) { e.preventDefault(); alert('비밀번호 조건을 확인해주세요.'); }
+            });
+        }
+    });
+</script>
+</body>
+</html>

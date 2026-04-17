@@ -5,6 +5,7 @@ import com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO;
 import com.wanted.projectmodule2lms.domain.member.model.dto.SignupDTO;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.domain.profile.dto.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,16 +55,6 @@ public class MemberService {
                     .careerCertPath(savedCareerPath)
                     .build();
 
-//            // 첨부파일 확인 로직
-//            if ("INSTRUCTOR".equals(signupDTO.getMemberRole())) {
-//                if (gradCert != null && !gradCert.isEmpty()) {
-//                    System.out.println("졸업증명서 업로드 대기 중: " + gradCert.getOriginalFilename());
-//                }
-//                if (careerCert != null && !careerCert.isEmpty()) {
-//                    System.out.println("경력증명서 업로드 대기 중: " + careerCert.getOriginalFilename());
-//                }
-//            }
-
             Member savedMember = memberRepository.save(member);
             return savedMember.getMemberId();
 
@@ -76,7 +67,6 @@ public class MemberService {
     public LoginMemberDTO findByUsername(String username) {
         Optional<Member> memberOptional = memberRepository.findByLoginId(username);
 
-        // Entity -> DTO 변환도 직접 매핑 (DTO 생성자나 빌더 활용)
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             LoginMemberDTO loginMemberDTO = new LoginMemberDTO();
@@ -97,31 +87,16 @@ public class MemberService {
         return null;
     }
 
-//    @Transactional
-//    public void incrementLoginFailCount(String username) {
-//        Optional<Member> memberOptional = memberRepository.findByLoginId(username);
-//
-//        if (memberOptional.isPresent()) {
-//            Member member = memberOptional.get();
-//
-//            member.increaseLoginFailCount();
-//
-//            if (member.getLoginFailCount() >= 5) {
-//                member.lockAccount(); // 5회 이상이면 계정 잠금
-//            }
-//        }
-//    }
-
     @Transactional
     public int incrementLoginFailCount(String username) {
         // 엔티티를 직접 가져온다고 가정 (레포지토리 메서드명은 네 코드에 맞게 수정해!)
         Member member = memberRepository.findByLoginId(username).orElse(null);
 
         if (member != null) {
-            member.increaseLoginFailCount(); // 숫자 1 올리기 (+ null 방어)
-            return member.getLoginFailCount(); // 방금 올라간 그 숫자를 바로 던져줌!
+            member.increaseLoginFailCount();
+            return member.getLoginFailCount();
         }
-        return 0; // 회원이 없으면 0
+        return 0;
     }
 
     @Transactional
@@ -135,10 +110,8 @@ public class MemberService {
     }
 
     public int getLoginFailCount(String username) {
-        // 기존에 만들어둔 findByUsername으로 회원 정보 가져오기
         LoginMemberDTO member = findByUsername(username);
 
-        // 회원이 존재하고 실패 횟수가 null이 아니면 그 값을 반환, 아니면 0 반환
         if (member != null && member.getLoginFailCount() != null) {
             return member.getLoginFailCount();
         }
@@ -167,13 +140,13 @@ public class MemberService {
 
         if (member.isPresent()) {
             String loginId = member.get().getLoginId();
-            // 아이디 일부분 마스킹 하기
+            // 아이디 일부분 마스킹
             return maskLoginId(loginId);
         }
         return null;  // 못 찾았을 경우
     }
 
-    // 아이디 마스킹 처리하기
+    // 아이디 마스킹 처리
     private String maskLoginId(String loginId){
         if (loginId.length() <= 3){
             return loginId.substring(0, 1) + "**";
@@ -219,18 +192,49 @@ public class MemberService {
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
 
-            // 덮어쓰기 방지를 위해 파일 이름 앞 무작위 영문자(UUID) 붙임
             String storedFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             File targetFile = new File(dir, storedFileName);
 
-            file.transferTo(targetFile); // 실제 컴퓨터 하드디스크에 파일 복사!
-
-            // 나중에 HTML에서 다운로드 링크로 쓸 수 있는 주소 반환
+            file.transferTo(targetFile);
             return "/uploads/" + storedFileName;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Transactional
+    public void updateProfile(Long memberId, String bio, String profileImage) {
+        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+        Profile profile = member.getProfile();
+
+        if (profile == null) {
+            profile = new Profile(member, profileImage, bio);
+            member.setProfile(profile);
+        } else {
+            profile.updateBio(bio);
+            // 새로운 이미지가 들어왔을 때만 경로 업데이트
+            if (profileImage != null) {
+                profile.updateProfileImage(profileImage);
+            }
+        }
+    }
+
+    @Transactional
+    public void updatePhone(Long memberId, String phone) {
+        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+
+        // 내 번호 그대로면 무시, 타인이 사용 중이면 에러
+        if (member.getPhone() != null && member.getPhone().equals(phone)) return;
+        if (memberRepository.existsByPhone(phone)) {
+            throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
+        }
+        member.updatePhone(phone);
+    }
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        memberRepository.deleteById(Math.toIntExact(memberId));
     }
 
 }
