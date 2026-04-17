@@ -5,7 +5,8 @@ import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dto.EnrollmentCreateDTO;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.service.EnrollmentService;
-import com.wanted.projectmodule2lms.global.annotation.LoginMemberId; // ⭐ 1. 우리가 만든 스티커 임포트!
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,8 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.wanted.projectmodule2lms.global.util.SecurityUtil;
-
 
 @Controller
 @RequestMapping("/student/enrollments")
@@ -26,24 +25,19 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
     private final CourseService courseService;
 
+    @AuditLog
     @GetMapping("/courses")
     public String findOpenCourses(
             @LoginMemberId Long memberId,
             @RequestParam(required = false) String category,
             Model model) {
 
-//        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-//        if (currentMemberId == null) {
-//            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
-//        }
-//        Integer memberId = currentMemberId.intValue();
-
         if (memberId == null) {
             return "redirect:/auth/login";
         }
 
         List<CourseDTO> courseList = courseService.findOpenCourses();
-        if (category != null && !category.isBlank() && !category.equals("전체")) {
+        if (category != null && !category.isBlank() && !category.equals("��ü")) {
             courseList = courseList.stream()
                     .filter(course -> category.equals(course.getCategory()))
                     .toList();
@@ -63,20 +57,12 @@ public class EnrollmentController {
         return "student/enrollment/list";
     }
 
+    @AuditLog
     @GetMapping("/courses/{courseId}")
     public String findCourseDetail(
             @LoginMemberId Long memberId,
             @PathVariable Integer courseId,
             Model model) {
-
-//        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-//        if (currentMemberId == null) {
-//            throw new IllegalStateException("로그인 사용자 정보를 찾을 수 없습니다.");
-//        }
-//        Integer memberId = currentMemberId.intValue();
-//        if (memberId == null) {
-//            return "redirect:/auth/login";
-//        }
 
         if (memberId == null) {
             return "redirect:/auth/login";
@@ -91,6 +77,7 @@ public class EnrollmentController {
         return "student/enrollment/detail";
     }
 
+
     @PostMapping
     public String enrollCourse(
             @LoginMemberId Long memberId,
@@ -103,7 +90,7 @@ public class EnrollmentController {
 
         try {
             enrollmentService.enrollCourse(Math.toIntExact(memberId), request.getCourseId());
-            rttr.addFlashAttribute("successMessage", "수강신청이 완료되었습니다.");
+            rttr.addFlashAttribute("successMessage", "������û�� �Ϸ�Ǿ����ϴ�.");
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>수강생 성적 목록</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f7fb;
+            color: #222;
+        }
+
+        .page-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+
+        h2 {
+            margin: 0 0 20px;
+            font-size: 40px;
+        }
+
+        .page-desc {
+            margin: 0 0 20px;
+            color: #666;
+        }
+
+        .table-wrapper {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            overflow-x: auto;
+            padding: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #d9d9d9;
+            padding: 12px 14px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            white-space: nowrap;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-link {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .edit-link {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .manage-link {
+            background-color: #ecfdf5;
+            color: #047857;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+    <h2>수강생 성적 목록</h2>
+    <p class="page-desc">임시 버튼으로 학생 통합 관리 화면에 바로 들어갈 수 있다.</p>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>학생 이름</th>
+                <th>강의명</th>
+                <th>출석 점수</th>
+                <th>과제 점수</th>
+                <th>시험 점수</th>
+                <th>태도 점수</th>
+                <th>총점</th>
+                <th>이수 여부</th>
+                <th>성적 관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="grade : ${grades}">
+                <td th:text="${grade.studentName}">김학생</td>
+                <td th:text="${grade.courseTitle}">Spring Boot 입문</td>
+                <td th:text="${grade.attendanceScore}">90.00</td>
+                <td th:text="${grade.assignmentScore}">95.00</td>
+                <td th:text="${grade.examScore}">88.00</td>
+                <td th:text="${grade.attitudeScore}">92.00</td>
+                <td th:text="${grade.totalScore}">91.05</td>
+                <td th:text="${grade.completionStatus}">수료</td>
+                <td>
+                    <div class="button-group">
+                        <a class="action-link edit-link"
+                           th:href="@{/instructor/grades/edit(enrollmentId=${grade.enrollmentId})}">
+                            성적 등록/수정
+                        </a>
+                        <a class="action-link manage-link"
+                           th:href="@{/instructor/grades/manage(courseId=${grade.courseId})}">
+                            관리 화면
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

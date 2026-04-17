@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>학생 명단 및 관리</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #222;
+        }
+
+        .page-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .title-group h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        .title-group p {
+            margin: 0;
+            color: #666;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .course-badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background-color: #e8f0ff;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        .back-link {
+            display: inline-block;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background-color: #334155;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1450px;
+        }
+
+        th, td {
+            border: 1px solid #e1e1e1;
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        td {
+            background-color: #fff;
+            font-size: 14px;
+        }
+
+        .student-col {
+            min-width: 120px;
+            font-weight: bold;
+        }
+
+        .email-col {
+            min-width: 200px;
+        }
+
+        .summary-col {
+            min-width: 180px;
+        }
+
+        .score-col {
+            min-width: 100px;
+        }
+
+        .section-box {
+            min-width: 150px;
+        }
+
+        .attendance-select {
+            width: 100%;
+            min-width: 120px;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            background-color: #fff;
+        }
+
+        .status-present {
+            background-color: #e8f7ec;
+            color: #166534;
+        }
+
+        .status-late {
+            background-color: #fff7db;
+            color: #a16207;
+        }
+
+        .status-absent {
+            background-color: #fdecec;
+            color: #b91c1c;
+        }
+
+        .status-unchecked {
+            background-color: #eef2f7;
+            color: #475569;
+        }
+
+        .status-not-open {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .save-message {
+            min-height: 22px;
+            margin: 0 0 16px;
+            font-weight: bold;
+            color: #0f766e;
+        }
+
+        .save-message.error {
+            color: #b91c1c;
+        }
+
+        .empty-message {
+            padding: 24px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="top-bar">
+        <div class="title-group">
+            <h1>학생 명단 및 관리</h1>
+            <p>한 화면에서 학생 성적과 섹션별 출결 상태를 함께 관리할 수 있다.</p>
+        </div>
+        <div class="top-actions">
+            <div class="course-badge" th:text="|코스 ID: ${courseId}|">코스 ID: 1</div>
+            <a class="back-link" th:href="@{/instructor/grades}">성적 목록으로 돌아가기</a>
+        </div>
+    </div>
+
+    <p class="save-message" id="saveMessage"></p>
+
+    <div class="table-wrapper" th:if="${studentList != null and !#lists.isEmpty(studentList)}">
+        <table>
+            <thead>
+            <tr>
+                <th class="student-col">학생 이름</th>
+                <th class="email-col">이메일</th>
+                <th>진도율</th>
+                <th class="summary-col">출결 요약</th>
+                <th class="score-col">과제 점수</th>
+                <th class="score-col">시험 점수</th>
+                <th class="score-col">태도 점수</th>
+                <th th:each="section : ${studentList[0].sectionAttendanceList}"
+                    class="section-box"
+                    th:text="${section.sectionTitle}">
+                    섹션명
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student : ${studentList}">
+                <td class="student-col" th:text="${student.studentName}">김학생</td>
+                <td class="email-col" th:text="${student.email}">student@test.com</td>
+                <td th:text="|${student.progressRate}%|">50%</td>
+                <td class="summary-col" th:text="${student.attendanceSummary}">출석 3 / 지각 1 / 결석 0</td>
+                <td class="score-col" th:text="${student.assignmentScore}">95.0</td>
+                <td class="score-col" th:text="${student.examScore}">88.0</td>
+                <td class="score-col" th:text="${student.attitudeScore}">92.0</td>
+                <td th:each="sectionAttendance : ${student.sectionAttendanceList}" class="section-box">
+                    <select class="attendance-select"
+                            th:attr="data-enrollment-id=${student.enrollmentId},data-section-id=${sectionAttendance.sectionId}"
+                            th:data-current-status="${sectionAttendance.status}"
+                            th:classappend="${sectionAttendance.status == 'PRESENT'} ? ' status-present' :
+                                            (${sectionAttendance.status == 'LATE'} ? ' status-late' :
+                                            (${sectionAttendance.status == 'ABSENT'} ? ' status-absent' :
+                                            (${sectionAttendance.status == 'NOT_OPEN'} ? ' status-not-open' : ' status-unchecked'))}">
+                        <option value="" th:selected="${sectionAttendance.status == 'UNCHECKED'}">미체크</option>
+                        <option value="" th:selected="${sectionAttendance.status == 'NOT_OPEN'}">오픈 전</option>
+                        <option value="PRESENT" th:selected="${sectionAttendance.status == 'PRESENT'}">출석</option>
+                        <option value="LATE" th:selected="${sectionAttendance.status == 'LATE'}">지각</option>
+                        <option value="ABSENT" th:selected="${sectionAttendance.status == 'ABSENT'}">결석</option>
+                    </select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-wrapper" th:if="${studentList == null or #lists.isEmpty(studentList)}">
+        <div class="empty-message">수강 중인 학생이 없습니다.</div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const saveMessage = document.getElementById("saveMessage");
+        const selects = document.querySelectorAll(".attendance-select");
+
+        function applyStatusClass(select, status) {
+            select.classList.remove("status-present", "status-late", "status-absent", "status-unchecked", "status-not-open");
+
+            if (status === "PRESENT") {
+                select.classList.add("status-present");
+                return;
+            }
+
+            if (status === "LATE") {
+                select.classList.add("status-late");
+                return;
+            }
+
+            if (status === "ABSENT") {
+                select.classList.add("status-absent");
+                return;
+            }
+
+            if (status === "NOT_OPEN") {
+                select.classList.add("status-not-open");
+                return;
+            }
+
+            select.classList.add("status-unchecked");
+        }
+
+        selects.forEach(function (select) {
+            select.addEventListener("change", async function () {
+                const enrollmentId = select.dataset.enrollmentId;
+                const sectionId = select.dataset.sectionId;
+                const status = select.value;
+                const previousStatus = select.dataset.currentStatus || "";
+
+                applyStatusClass(select, status === "" ? "UNCHECKED" : status);
+
+                if (status === "") {
+                    select.dataset.currentStatus = "";
+                    saveMessage.textContent = "미체크 상태는 화면 표시용이며 저장하지 않았다.";
+                    saveMessage.classList.remove("error");
+                    return;
+                }
+
+                try {
+                    const response = await fetch("/instructor/grades/manage/attendance", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                        },
+                        body: new URLSearchParams({
+                            enrollmentId: enrollmentId,
+                            sectionId: sectionId,
+                            status: status
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("save failed");
+                    }
+
+                    select.dataset.currentStatus = status;
+                    saveMessage.textContent = "출결 상태를 저장했다.";
+                    saveMessage.classList.remove("error");
+                } catch (error) {
+                    select.value = previousStatus;
+                    applyStatusClass(select, previousStatus === "" ? "UNCHECKED" : previousStatus);
+                    saveMessage.textContent = "출결 저장에 실패했다.";
+                    saveMessage.classList.add("error");
+                }
+            });
+        });
+    })();
+</script>
+</body>
+</html>
