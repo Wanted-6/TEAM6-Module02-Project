@@ -45,7 +45,7 @@ dependencies {
     implementation("org.springframework:spring-aop:5.3.39")
 
     // 메일 전송
-    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 tasks.named('test') {
