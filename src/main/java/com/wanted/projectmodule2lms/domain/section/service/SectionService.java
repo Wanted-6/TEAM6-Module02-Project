@@ -224,5 +224,4 @@ public class SectionService {
 
         course.changeExamDueDate(lastSection.getOpenDate().plusDays(3));
     }
-
 }

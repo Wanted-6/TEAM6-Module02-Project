@@ -17,74 +17,94 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    /* 전체 코스 조회 */
     @GetMapping
     public ModelAndView findAllCourses(@RequestParam(required = false) String keyword,
                                        @RequestParam(required = false) String category,
+                                       @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                        ModelAndView mv) {
         mv.addObject("courseList", courseService.findAllCourses(keyword, category));
         mv.addObject("keyword", keyword);
         mv.addObject("category", category);
+        mv.addObject("role", role);
         mv.setViewName("instructor/course/list");
         return mv;
     }
 
-    /* 코스 상세 조회 */
     @GetMapping("/{courseId}")
-    public ModelAndView findCourseById(@PathVariable Integer courseId, ModelAndView mv) {
+    public ModelAndView findCourseById(@PathVariable Integer courseId,
+                                       @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                       ModelAndView mv) {
         mv.addObject("course", courseService.findCourseById(courseId));
+        mv.addObject("role", role);
         mv.setViewName("instructor/course/detail");
         return mv;
     }
 
-    /* 코스 등록 페이지 */
     @GetMapping("/regist")
-    public String registPage() {
+    public String registPage(@RequestParam(defaultValue = "INSTRUCTOR") String role) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
+        }
         return "instructor/course/regist";
     }
 
-    /* 코스 등록 */
     @PostMapping("/regist")
-    public String registCourse(@ModelAttribute CourseCreateDTO createDTO,
+    public String registCourse(@RequestParam(defaultValue = "INSTRUCTOR") String role,
+                               @ModelAttribute CourseCreateDTO createDTO,
                                @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                                RedirectAttributes rttr) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
+        }
+
         try {
             Integer courseId = courseService.registCourse(createDTO, thumbnailFile);
             rttr.addFlashAttribute("successMessage", "코스가 등록되었습니다.");
-            return "redirect:/courses/" + courseId;
+            return "redirect:/courses/" + courseId + "?role=INSTRUCTOR";
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/courses/regist";
+            return "redirect:/courses/regist?role=INSTRUCTOR";
         } catch (Exception e) {
             rttr.addFlashAttribute("errorMessage", "코스 등록 중 오류가 발생했습니다.");
-            return "redirect:/courses/regist";
+            return "redirect:/courses/regist?role=INSTRUCTOR";
         }
     }
 
-    /* 코스 수정 페이지 */
     @GetMapping("/{courseId}/modify")
-    public ModelAndView modifyPage(@PathVariable Integer courseId, ModelAndView mv) {
+    public ModelAndView modifyPage(@PathVariable Integer courseId,
+                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                   ModelAndView mv) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
+        }
+
         mv.addObject("course", courseService.findCourseById(courseId));
+        mv.addObject("role", role);
         mv.setViewName("instructor/course/modify");
         return mv;
     }
 
-    /* 코스 수정 */
     @PostMapping("/{courseId}/modify")
     public String modifyCourse(@PathVariable Integer courseId,
+                               @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                               @RequestParam String instructorLoginId,
                                @ModelAttribute CourseUpdateDTO updateDTO,
                                @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                                RedirectAttributes rttr) {
+        if (!"INSTRUCTOR".equals(role)) {
+            throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
+        }
+
         try {
-            courseService.modifyCourse(courseId, updateDTO, thumbnailFile);
+            courseService.modifyCourse(courseId, instructorLoginId, updateDTO, thumbnailFile);
             rttr.addFlashAttribute("successMessage", "코스가 수정되었습니다.");
-            return "redirect:/courses/" + courseId;
+            return "redirect:/courses/" + courseId + "?role=INSTRUCTOR";
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/courses/" + courseId + "/modify";
+            return "redirect:/courses/" + courseId + "/modify?role=INSTRUCTOR";
         } catch (Exception e) {
             rttr.addFlashAttribute("errorMessage", "코스 수정 중 오류가 발생했습니다.");
-            return "redirect:/courses/" + courseId + "/modify";
+            return "redirect:/courses/" + courseId + "/modify?role=INSTRUCTOR";
         }
     }
 
@@ -95,5 +115,4 @@ public class CourseController {
         mv.setViewName("instructor/course/students");
         return mv;
     }
-
 }
