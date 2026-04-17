@@ -49,7 +49,7 @@ public class AttendanceService {
         CourseDTO course = courseService.findMyCourseDetail(memberId, courseId);
         SectionDTO section = sectionService.findMySectionDetail(memberId, courseId, sectionId);
         List<SectionDTO> sectionList = sectionService.findMySections(memberId, courseId);
-        AssignmentDTO assignment = assignmentRepository.findFirstBySectionIdOrderByAssignmentIdAsc(sectionId)
+        AssignmentDTO assignment = assignmentRepository.findByCourseId(courseId)
                 .map(this::toAssignmentDTO)
                 .orElse(null);
 
@@ -182,7 +182,7 @@ public class AttendanceService {
     private AssignmentDTO toAssignmentDTO(Assignment assignment) {
         return new AssignmentDTO(
                 assignment.getAssignmentId(),
-                assignment.getSectionId(),
+                assignment.getCourseId(),
                 assignment.getTitle(),
                 assignment.getDescription(),
                 assignment.getAttachmentFile(),
