@@ -19,8 +19,8 @@ public class Assignment {
     @Column(name = "assignment_id")
     private Integer assignmentId;
 
-    @Column(name = "section_id", nullable = false)
-    private Integer sectionId;
+    @Column(name = "course_id", nullable = false)
+    private Integer courseId;
 
     @Column(name = "title", nullable = false)
     private String title;

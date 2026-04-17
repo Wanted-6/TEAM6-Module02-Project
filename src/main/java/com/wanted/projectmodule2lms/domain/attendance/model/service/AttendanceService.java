@@ -182,7 +182,7 @@ public class AttendanceService {
     private AssignmentDTO toAssignmentDTO(Assignment assignment) {
         return new AssignmentDTO(
                 assignment.getAssignmentId(),
-                assignment.getSectionId(),
+                assignment.getCourseId(),
                 assignment.getTitle(),
                 assignment.getDescription(),
                 assignment.getAttachmentFile(),
