@@ -8,7 +8,9 @@ import java.util.Optional;
 
 public interface AssignmentRepository extends JpaRepository<Assignment, Integer> {
 
-    Optional<Assignment> findFirstBySectionIdOrderByAssignmentIdAsc(Integer sectionId);
+    Optional<Assignment> findByCourseId(Integer courseId);
+
+    Optional<Assignment> findFirstByCourseIdOrderByAssignmentIdAsc(Integer courseId);
 
     List<Assignment> findByCourseIdIn(List<Integer> courseIds);
 }

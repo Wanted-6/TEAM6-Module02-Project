@@ -11,10 +11,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AssignmentDTO {
+public class AssignmentUpdateDTO {
 
-    private Integer assignmentId;
-    private Integer courseId;
     private String title;
     private String description;
     private String attachmentFile;

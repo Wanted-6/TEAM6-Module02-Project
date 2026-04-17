@@ -14,6 +14,7 @@ import java.util.Map;
 public class AttendancePageDTO {
 
     private Integer memberId;
+    private Integer enrollmentId;
     private Integer courseId;
     private CourseDTO course;
     private SectionDTO section;

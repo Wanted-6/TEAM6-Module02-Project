@@ -53,12 +53,6 @@ public class CalenderService {
 
             List<Section> sections = sectionRepository.findByCourseIdIn(courseIds);
 
-            Map<Integer, Section> sectionMap = sections.stream()
-                    .collect(Collectors.toMap(
-                            Section::getSectionId,
-                            section -> section
-                    ));
-
             List<CalendarEventDTO> sectionEvents = sections.stream()
                     .filter(section -> section.getOpenDate() != null)
                     .map(section -> {
@@ -74,19 +68,12 @@ public class CalenderService {
 
             result.addAll(sectionEvents);
 
-            List<Assignment> assignments = assignmentRepository.findByCourseIdIn(
-                    sections.stream()
-                            .map(Section::getSectionId)
-                            .toList()
-            );
+            List<Assignment> assignments = assignmentRepository.findByCourseIdIn(courseIds);
 
             List<CalendarEventDTO> assignmentEvents = assignments.stream()
                     .filter(assignment -> assignment.getDueDate() != null)
                     .map(assignment -> {
-                        Section section = sectionMap.get(assignment.getCourseId());
-                        String courseTitle = section != null
-                                ? courseTitleMap.getOrDefault(section.getCourseId(), "강의")
-                                : "강의";
+                        String courseTitle = courseTitleMap.getOrDefault(assignment.getCourseId(), "강의");
 
                         return new CalendarEventDTO(
                                 "assignment-" + assignment.getAssignmentId(),
@@ -126,6 +113,7 @@ public class CalenderService {
 
         return result;
     }
+
 
     public List<CalendarEventDTO> findInstructorCalendarEvents(Integer instructorId) {
         List<CalendarEventDTO> result = new ArrayList<>();
