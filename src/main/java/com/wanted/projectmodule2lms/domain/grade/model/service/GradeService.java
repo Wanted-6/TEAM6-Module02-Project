@@ -55,6 +55,7 @@ public class GradeService {
             GradeDTO gradeDTO = new GradeDTO(
                     grade.getGradeId(),
                     grade.getEnrollmentId(),
+                    enrollment.getCourseId(),
                     studentName,
                     courseTitle,
                     grade.getAttendanceScore(),
@@ -136,6 +137,7 @@ public class GradeService {
                 GradeDTO gradeDTO = new GradeDTO(
                         grade.getGradeId(),
                         grade.getEnrollmentId(),
+                        enrollment.getCourseId(),
                         studentName,
                         course.getTitle(),
                         grade.getAttendanceScore(),
@@ -177,6 +179,7 @@ public class GradeService {
         return new GradeDTO(
                 grade.getGradeId(),
                 grade.getEnrollmentId(),
+                enrollment.getCourseId(),
                 studentName,
                 course.getTitle(),
                 grade.getAttendanceScore(),

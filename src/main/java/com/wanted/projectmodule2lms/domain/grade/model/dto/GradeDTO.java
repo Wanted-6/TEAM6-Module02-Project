@@ -15,6 +15,7 @@ public class GradeDTO {
 
     private Integer gradeId;
     private Integer enrollmentId;
+    private Integer courseId;
     private String studentName;
     private String courseTitle;
     private BigDecimal attendanceScore;

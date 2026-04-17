@@ -29,7 +29,7 @@ public class InstructorGradeController {
         Integer instructorId = currentMemberId.intValue();
 
         model.addAttribute("grades", gradeService.findGradesByInstructorId(instructorId));
-        return "instructor/grade/list";
+        return "instructor/grade/list-view";
     }
 
     // 성적 수정 페이지 이동
