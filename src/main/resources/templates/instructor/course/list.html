@@ -15,11 +15,17 @@
         </div>
         <div class="flex gap-3">
             <a href="/main" class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">메인</a>
-            <a href="/courses/regist" class="px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">코스 등록</a>
+
+            <a th:if="${role == 'INSTRUCTOR'}"
+               href="/courses/regist"
+               class="px-4 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
+                코스 등록
+            </a>
         </div>
     </div>
 
     <form action="/courses" method="get" class="mb-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <input type="hidden" name="role" th:value="${role}">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium mb-2">검색어</label>
@@ -45,7 +51,7 @@
                         class="px-5 py-2 rounded-lg bg-blue-700 text-white hover:bg-blue-800">
                     검색
                 </button>
-                <a href="/courses"
+                <a th:href="@{/courses(role=${role})}"
                    class="px-5 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
                     초기화
                 </a>
@@ -92,12 +98,22 @@
             </div>
 
             <div class="mt-6 flex flex-wrap gap-2">
-                <a th:href="@{/courses/{courseId}(courseId=${course.courseId})}"
-                   class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-700 text-sm">상세보기</a>
-                <a th:href="@{/courses/{courseId}/modify(courseId=${course.courseId})}"
-                   class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-sm">수정</a>
-                <a th:href="@{/courses/{courseId}/sections(courseId=${course.courseId})}"
-                   class="px-4 py-2 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm">섹션 관리</a>
+                <a th:href="@{/courses/{courseId}(courseId=${course.courseId}, role=${role})}"
+                   class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-700 text-sm">
+                    상세보기
+                </a>
+
+                <a th:if="${role == 'INSTRUCTOR'}"
+                   th:href="@{/courses/{courseId}/modify(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-sm">
+                    수정
+                </a>
+
+                <a th:if="${role == 'INSTRUCTOR'}"
+                   th:href="@{/courses/{courseId}/sections(courseId=${course.courseId})}"
+                   class="px-4 py-2 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 text-sm">
+                    섹션 관리
+                </a>
             </div>
         </div>
     </div>
