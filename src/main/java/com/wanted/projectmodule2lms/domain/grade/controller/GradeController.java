@@ -23,11 +23,8 @@ public class GradeController {
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-<<<<<<< HEAD
             throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
-=======
             throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
->>>>>>> 6c01c8db3e1688f341c4d9b2d0ffcaaf727f223d
         }
 
         List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());

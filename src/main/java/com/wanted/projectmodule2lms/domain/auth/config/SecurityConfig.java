@@ -58,16 +58,13 @@ public class SecurityConfig {
                                          SessionRegistry sessionRegistry) throws Exception {
 
         http.authorizeHttpRequests(auth -> {
-<<<<<<< HEAD
                     // 1. 누구나 접근 가능한 URL 설정
                     auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**").permitAll();
 
                     // 2. 권한별 URL 접근 제어 (HTML에서 설정한 3가지 Role 기준)
 
                     // 관리자 전용
-=======
                     auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**", "/error").permitAll();
->>>>>>> 6c01c8db3e1688f341c4d9b2d0ffcaaf727f223d
                     auth.requestMatchers("/admin/**").hasAnyAuthority("ADMIN");
                     auth.requestMatchers("/instructor/**").hasAnyAuthority("INSTRUCTOR", "ADMIN");
                     auth.requestMatchers("/member/**").hasAnyAuthority("STUDENT", "INSTRUCTOR", "ADMIN");
