@@ -1,5 +1,7 @@
 package com.wanted.projectmodule2lms.domain.calendar.model.service;
 
+import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
+import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
 import com.wanted.projectmodule2lms.domain.calendar.model.dao.CalendarMemoRepository;
 import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarEventDTO;
 import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreateDTO;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,14 +27,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class CalenderService {
+
+    private final AssignmentRepository assignmentRepository;
     private final CalendarMemoRepository calendarMemoRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final SectionRepository sectionRepository;
 
     public List<CalendarEventDTO> findStudentCalendarEvents(Integer memberId) {
-
-        List<CalendarEventDTO> result = new java.util.ArrayList<>();
+        List<CalendarEventDTO> result = new ArrayList<>();
 
         List<Integer> courseIds = enrollmentRepository.findByMemberId(memberId)
                 .stream()
@@ -64,6 +68,24 @@ public class CalenderService {
 
             result.addAll(sectionEvents);
 
+            List<Assignment> assignments = assignmentRepository.findByCourseIdIn(courseIds);
+
+            List<CalendarEventDTO> assignmentEvents = assignments.stream()
+                    .filter(assignment -> assignment.getDueDate() != null)
+                    .map(assignment -> {
+                        String courseTitle = courseTitleMap.getOrDefault(assignment.getCourseId(), "강의");
+
+                        return new CalendarEventDTO(
+                                "assignment-" + assignment.getAssignmentId(),
+                                courseTitle + " - 과제 마감",
+                                assignment.getDueDate().toLocalDate().toString(),
+                                "#a78bfa"
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            result.addAll(assignmentEvents);
+
             List<CalendarEventDTO> examEvents = courses.stream()
                     .filter(course -> course.getExamDueDate() != null)
                     .map(course -> new CalendarEventDTO(
@@ -89,15 +111,12 @@ public class CalenderService {
 
         result.addAll(memoEvents);
 
-
         return result;
-
-
     }
 
-    public List<CalendarEventDTO> findInstructorCalendarEvents(Integer instructorId) {
 
-        List<CalendarEventDTO> result = new java.util.ArrayList<>();
+    public List<CalendarEventDTO> findInstructorCalendarEvents(Integer instructorId) {
+        List<CalendarEventDTO> result = new ArrayList<>();
 
         List<Course> courses = courseRepository.findByInstructorId(instructorId);
 
@@ -128,6 +147,36 @@ public class CalenderService {
                     .collect(Collectors.toList());
 
             result.addAll(sectionEvents);
+
+            List<Assignment> assignments = assignmentRepository.findByCourseIdIn(courseIds);
+
+            List<CalendarEventDTO> assignmentEvents = assignments.stream()
+                    .filter(assignment -> assignment.getDueDate() != null)
+                    .map(assignment -> {
+                        String courseTitle = courseTitleMap.getOrDefault(assignment.getCourseId(), "강의");
+
+                        return new CalendarEventDTO(
+                                "assignment-" + assignment.getAssignmentId(),
+                                courseTitle + " - 과제 마감",
+                                assignment.getDueDate().toLocalDate().toString(),
+                                "#a78bfa"
+                        );
+                    })
+                    .collect(Collectors.toList());
+
+            result.addAll(assignmentEvents);
+
+            List<CalendarEventDTO> examEvents = courses.stream()
+                    .filter(course -> course.getExamDueDate() != null)
+                    .map(course -> new CalendarEventDTO(
+                            "exam-" + course.getCourseId(),
+                            course.getTitle() + " - 시험 마감",
+                            course.getExamDueDate().toString(),
+                            "#ef4444"
+                    ))
+                    .collect(Collectors.toList());
+
+            result.addAll(examEvents);
         }
 
         List<CalendarEventDTO> memoEvents = calendarMemoRepository.findByMemberId(instructorId)
@@ -141,18 +190,6 @@ public class CalenderService {
                 .collect(Collectors.toList());
 
         result.addAll(memoEvents);
-
-        List<CalendarEventDTO> examEvents = courses.stream()
-                .filter(course -> course.getExamDueDate() != null)
-                .map(course -> new CalendarEventDTO(
-                        "exam-" + course.getCourseId(),
-                        course.getTitle() + " - 시험 마감",
-                        course.getExamDueDate().toString(),
-                        "#ef4444"
-                ))
-                .collect(Collectors.toList());
-
-        result.addAll(examEvents);
 
         return result;
 
