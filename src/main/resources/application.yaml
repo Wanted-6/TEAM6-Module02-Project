@@ -17,6 +17,7 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+
   jpa:
     show-sql: true
     database: mysql
@@ -27,4 +28,5 @@ spring:
       hibernate:
         format_sql: true
 
-
+  config:
+    import: classpath:application-secret.yml

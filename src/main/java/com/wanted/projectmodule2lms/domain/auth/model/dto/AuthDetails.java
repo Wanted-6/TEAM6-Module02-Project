@@ -24,12 +24,11 @@ public class AuthDetails implements UserDetails {
         this.loginMemberDTO = loginMemberDTO;
     }
 
-    // ⭐ 메서드 이름도 User -> Member 로 변경
     public LoginMemberDTO getLoginMemberDTO() {
         return loginMemberDTO;
     }
 
-    // ⭐ 메서드 이름도 User -> Member 로 변경
+
     public void setLoginMemberDTO(LoginMemberDTO loginMemberDTO) {
         this.loginMemberDTO = loginMemberDTO;
     }
@@ -42,7 +41,6 @@ public class AuthDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        // ⭐ getRole() -> getRoleList() 로 변경하여 List를 순회하도록 수정!
         loginMemberDTO.getRoleList().forEach(role -> authorities.add(() -> role));
 
         return authorities;
@@ -64,8 +62,7 @@ public class AuthDetails implements UserDetails {
     // Username : ID 절대 잊지 말것.
     @Override
     public String getUsername() {
-        // ⭐ getUserId() -> getLoginId() 로 변경!
-        return loginMemberDTO.getLoginId();
+         return loginMemberDTO.getLoginId();
     }
 
     /**

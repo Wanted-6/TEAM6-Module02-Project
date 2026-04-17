@@ -21,6 +21,10 @@ public class LoginMemberDTO {
     private String role;           // 기존 userRole (권한 문자열)
     private Integer loginFailCount;    // 로그인 실패 횟수
     private boolean accountLocked; // 기존 isAccountLocked (계정 잠금 여부)
+    private boolean tempPassword;
+    private String approvalStatus;
+    private boolean isVerified;
+    private String rejectReason;
 
     /**
      * (선택사항) Service 계층에서 아이디, 비밀번호, 권한 3개만 넣어서
