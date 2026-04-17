@@ -85,7 +85,7 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-    
+
     @DeleteMapping("/{memoId}")
     @ResponseBody
     public String deleteMemo(@LoginMemberId Long memberId,
