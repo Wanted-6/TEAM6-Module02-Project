@@ -30,3 +30,6 @@ spring:
 
   config:
     import: classpath:application-secret.yml
+
+  thymeleaf:
+    cache: false

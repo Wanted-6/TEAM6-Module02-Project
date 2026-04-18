@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -23,6 +24,10 @@
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background: radial-gradient(circle at top left, rgba(43, 63, 143, 0.08), transparent 28%), linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .sidebar-item.active { background-color: white; color: #2b3f8f; box-shadow: 0 4px 12px rgba(43, 63, 143, 0.08); border-right: 4px solid #2b3f8f; }
     </style>
 </head>
 <body class="text-ink">
@@ -31,9 +36,18 @@
     <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
         <div class="flex items-center gap-3">
-            <span class="hidden text-sm font-medium text-slate-600 sm:block">
-                <strong class="text-brand" th:text="${memberName} ?: ${#authentication.name}">사용자</strong>님, 환영합니다.
-            </span>
+            <div th:if="${member != null}" class="flex items-center gap-2">
+                <div class="h-8 w-8 overflow-hidden rounded-full border border-slate-200">
+                    <img class="profile-sync h-full w-full object-cover"
+                         th:src="${member.profile != null and member.profile.profileImage != null and member.profile.profileImage != '' and member.profile.profileImage != 'default-profile.png'}
+                                 ? '/uploads/' + ${member.profile.profileImage} + '?t=' + ${#dates.createNow().getTime()}
+                                 : '/img/default-profile.png'"
+                         onerror="this.src='/img/default-profile.png'">
+                </div>
+                <span class="hidden text-sm font-medium text-slate-600 sm:block">
+                    <strong class="text-brand" th:text="${member.name}">사용자</strong>님
+                </span>
+            </div>
             <form th:action="@{/auth/logout}" th:method="post" class="inline">
                 <button type="submit" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">로그아웃</button>
             </form>
@@ -41,160 +55,181 @@
     </div>
 </header>
 
-<main class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+<main class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-8 md:flex-row">
 
-    <div th:if="${message}" class="mb-6 rounded-2xl bg-brandSoft px-6 py-4 text-sm font-bold text-brand shadow-sm">
-        <span class="material-symbols-outlined mr-2 align-middle text-lg">check_circle</span>
-        <span th:text="${message}">성공 메시지</span>
-    </div>
-    <div th:if="${error}" class="mb-6 rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm font-bold text-red-600 shadow-sm">
-        <span class="material-symbols-outlined mr-2 align-middle text-lg">error</span>
-        <span th:text="${error}">에러 메시지</span>
-    </div>
+        <aside class="w-full md:w-64 shrink-0">
+            <div class="sticky top-28 space-y-2 rounded-[24px] border border-line bg-slate-50/50 p-3">
+                <button onclick="switchTab('profile')" class="sidebar-item active flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold text-slate-600 transition-all hover:bg-white">
+                    <span class="material-symbols-outlined">id_card</span> 프로필 설정
+                </button>
+                <button onclick="switchTab('account')" class="sidebar-item flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold text-slate-600 transition-all hover:bg-white">
+                    <span class="material-symbols-outlined">lock_person</span> 계정 및 보안
+                </button>
 
-    <div class="mb-10 flex items-end justify-between">
-        <div>
-            <p class="mb-2 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-brand">
-                <span class="material-symbols-outlined text-lg">manage_accounts</span> Account Settings
-            </p>
-            <h1 class="font-headline text-3xl font-extrabold tracking-tight sm:text-4xl">마이페이지</h1>
-            <p class="mt-2 text-slate-500">내 프로필과 계정 정보를 안전하게 관리하세요.</p>
-        </div>
-    </div>
+                <button th:if="${member.role != null and member.role.name() == 'STUDENT'}" onclick="switchTab('grades')" class="sidebar-item flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold text-slate-600 transition-all hover:bg-white">
+                    <span class="material-symbols-outlined">monitoring</span> 성적 분석 차트
+                </button>
+            </div>
+        </aside>
 
-    <section class="mb-8 overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
-        <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5">
-            <h2 class="flex items-center gap-2 text-xl font-extrabold text-ink"><span class="material-symbols-outlined text-brand">id_card</span> 프로필 설정</h2>
-        </div>
-        <div class="p-8">
-            <form action="/member/profile/update" method="post" enctype="multipart/form-data">
-                <div class="flex flex-col gap-8 md:flex-row md:items-start">
+        <div class="flex-1">
 
-                    <div class="flex flex-col items-center">
-                        <div class="group relative h-36 w-36 overflow-hidden rounded-full border-4 border-white bg-brandSoft shadow-lg transition-all hover:shadow-xl">
-                            <div id="defaultProfileIcon" class="flex h-full w-full items-center justify-center text-brand" th:classappend="${member.profile?.profileImage != null ? 'hidden' : ''}">
-                                <span class="material-symbols-outlined text-7xl">person</span>
+            <section id="profile" class="tab-content active overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
+                <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+                    <h2 class="text-xl font-extrabold text-ink">프로필 설정</h2>
+                </div>
+                <div class="p-8">
+                    <form action="/member/profile/update" method="post" enctype="multipart/form-data">
+                        <div class="flex flex-col gap-8 md:flex-row md:items-start">
+                            <div class="flex flex-col items-center">
+                                <div class="group relative h-36 w-36 overflow-hidden rounded-full border-4 border-white bg-brandSoft shadow-lg transition-all hover:shadow-xl">
+                                    <img id="profilePreview" class="profile-sync h-full w-full object-cover"
+                                         th:src="${member.profile != null and member.profile.profileImage != null and member.profile.profileImage != '' and member.profile.profileImage != 'default-profile.png'}
+                                                 ? '/uploads/' + ${member.profile.profileImage} + '?t=' + ${#dates.createNow().getTime()}
+                                                 : '/img/default-profile.png'"
+                                         onerror="this.src='/img/default-profile.png'">
+
+                                    <label class="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/40 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                                        <span class="material-symbols-outlined mb-1 text-3xl">photo_camera</span>
+                                        <span class="text-xs font-bold">사진 변경</span>
+                                        <input type="file" id="profileImageInput" name="profileImage" class="hidden" accept="image/*">
+                                    </label>
+                                </div>
+                                <p class="mt-4 text-sm font-bold text-slate-700" th:text="${member.name}">이름</p>
                             </div>
-                            <img id="profilePreview" th:src="${member.profile?.profileImage != null ? member.profile.profileImage : ''}" class="h-full w-full object-cover" th:classappend="${member.profile?.profileImage == null ? 'hidden' : ''}" alt="프로필 이미지">
-                            <label class="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/40 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
-                                <span class="material-symbols-outlined mb-1 text-3xl">photo_camera</span>
-                                <span class="text-xs font-bold">사진 변경</span>
-                                <input type="file" id="profileImageInput" name="profileImage" class="hidden" accept="image/*">
-                            </label>
+                            <div class="flex-1">
+                                <label class="mb-2 block text-sm font-bold text-slate-700">한 줄 소개글</label>
+                                <textarea name="bio" rows="4" th:text="${member.profile?.bio}" class="w-full resize-none rounded-2xl border border-line bg-slate-50 p-4 text-sm text-ink transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft"></textarea>
+                            </div>
                         </div>
-                        <p class="mt-4 text-sm font-bold text-slate-700" th:text="${member.name} ?: ${#authentication.name}">이름</p>
-                    </div>
-
-                    <div class="flex-1">
-                        <label class="mb-2 block text-sm font-bold text-slate-700">한 줄 소개글</label>
-                        <textarea name="bio" rows="4" th:text="${member.profile?.bio}" class="w-full resize-none rounded-2xl border border-line bg-slate-50 p-4 text-sm text-ink transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft"></textarea>
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-end">
-                    <button type="submit" class="flex items-center gap-2 rounded-2xl bg-brand px-8 py-3 text-sm font-bold text-white transition-all hover:bg-[#223374] active:scale-95">
-                        <span class="material-symbols-outlined text-lg">save</span> 프로필 저장하기
-                    </button>
-                </div>
-            </form>
-        </div>
-    </section>
-
-    <section class="mb-8 overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
-        <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5">
-            <h2 class="flex items-center gap-2 text-xl font-extrabold text-ink"><span class="material-symbols-outlined text-brand">lock_person</span> 계정 및 보안</h2>
-        </div>
-        <div class="p-8">
-
-            <div class="mb-8 max-w-md">
-                <label class="mb-2 block text-sm font-bold text-slate-700">로그인 이메일</label>
-                <div class="relative">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">mail</span></div>
-                    <input type="email" th:value="${member.email}" readonly class="w-full cursor-not-allowed rounded-2xl border border-line bg-slate-100 py-3.5 pl-11 pr-4 text-sm text-slate-500 focus:outline-none">
-                </div>
-                <p class="mt-1.5 text-xs text-slate-500">이메일은 로그인 아이디로 사용되어 변경할 수 없습니다.</p>
-            </div>
-
-            <hr class="my-8 border-line">
-
-            <form action="/member/phone/update" method="post" class="mb-8 max-w-md">
-                <label class="mb-2 block text-sm font-bold text-slate-700">전화번호 변경</label>
-                <div class="flex items-start gap-3">
-                    <div class="relative flex-1">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">smartphone</span></div>
-                        <input type="text" name="phone" id="phoneInput" th:value="${member.phone}" maxlength="13" class="w-full rounded-2xl border border-line bg-slate-50 py-3.5 pl-11 pr-4 text-sm transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft">
-                    </div>
-                    <button type="submit" class="rounded-2xl bg-slate-800 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-slate-700 active:scale-95">번호 저장</button>
-                </div>
-            </form>
-
-            <hr class="my-8 border-line">
-
-            <form action="/member/edit-password" method="post" id="passwordForm">
-                <div>
-                    <h3 class="mb-4 text-sm font-bold text-slate-700">비밀번호 변경</h3>
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div class="relative">
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">key</span></div>
-                            <input type="password" name="newPassword" id="newPassword" placeholder="새 비밀번호 입력" class="w-full rounded-2xl border border-line bg-slate-50 py-3.5 pl-11 pr-4 text-sm transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft">
+                        <div class="mt-8 flex justify-end">
+                            <button type="submit" class="flex items-center gap-2 rounded-2xl bg-brand px-8 py-3 text-sm font-bold text-white transition-all hover:bg-[#223374]">
+                                <span class="material-symbols-outlined text-lg">save</span> 저장하기
+                            </button>
                         </div>
-                        <div class="relative">
-                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400"><span class="material-symbols-outlined text-xl">password</span></div>
-                            <input type="password" id="confirmPassword" placeholder="새 비밀번호 확인" class="w-full rounded-2xl border border-line bg-slate-50 py-3.5 pl-11 pr-4 text-sm transition-all focus:border-brand focus:bg-white focus:outline-none focus:ring-4 focus:ring-brandSoft">
+                    </form>
+                </div>
+            </section>
+
+            <section id="account" class="tab-content overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
+                <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5">
+                    <h2 class="text-xl font-extrabold text-ink">계정 및 보안</h2>
+                </div>
+                <div class="p-8">
+                    <label class="mb-2 block text-sm font-bold text-slate-700">로그인 이메일</label>
+                    <input type="email" th:value="${member.email}" readonly class="mb-8 w-full cursor-not-allowed rounded-2xl border border-line bg-slate-100 py-3.5 px-4 text-sm text-slate-500 outline-none">
+
+                    <form action="/member/phone/update" method="post" class="mb-10">
+                        <label class="mb-2 block text-sm font-bold text-slate-700">전화번호 변경</label>
+                        <div class="flex gap-3">
+                            <input type="text" name="phone" id="phoneInput" th:value="${member.phone}" maxlength="13" class="flex-1 rounded-2xl border border-line bg-slate-50 py-3.5 px-4 text-sm focus:border-brand focus:outline-none">
+                            <button type="submit" class="rounded-2xl bg-slate-800 px-6 text-sm font-bold text-white">저장</button>
                         </div>
+                    </form>
+
+                    <form action="/member/edit-password" method="post" id="passwordForm">
+                        <label class="mb-2 block text-sm font-bold text-slate-700">비밀번호 변경</label>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <input type="password" name="newPassword" id="newPassword" placeholder="새 비밀번호" class="rounded-2xl border border-line bg-slate-50 py-3.5 px-4 text-sm focus:border-brand outline-none">
+                            <input type="password" id="confirmPassword" placeholder="비밀번호 확인" class="rounded-2xl border border-line bg-slate-50 py-3.5 px-4 text-sm focus:border-brand outline-none">
+                        </div>
+                        <p id="passwordMessage" class="mt-2 text-xs font-bold"></p>
+                        <button type="submit" class="mt-6 w-full rounded-2xl bg-brand py-3.5 text-sm font-bold text-white transition-all hover:bg-slate-800">비밀번호 업데이트</button>
+                    </form>
+
+                    <form action="/member/delete" method="post" class="mt-12 border-t pt-8" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+                        <button type="submit" class="text-sm font-bold text-red-500 hover:underline">회원 탈퇴 진행하기</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="grades" th:if="${member.role != null and member.role.name() == 'STUDENT'}" class="tab-content overflow-hidden rounded-[32px] border border-line bg-white shadow-soft">
+                <div class="border-b border-slate-100 bg-slate-50/50 px-8 py-5 flex items-center justify-between">
+                    <h2 class="text-xl font-extrabold text-ink">학습 성취도 분석</h2>
+
+                    <select id="courseSelector" onchange="loadCourseGrade()" class="rounded-xl border border-line bg-white px-4 py-2 text-sm font-bold text-slate-700 outline-none focus:border-brand">
+                        <option th:each="course : ${enrolledCourses}"
+                                th:value="${course['enrollmentId']}"
+                                th:text="${course['courseName']}">과목명</option>
+                    </select>
+                </div>
+
+                <div class="p-10 flex flex-col items-center">
+                    <p class="mb-8 text-center text-slate-500 text-sm leading-relaxed">
+                        출석, 과제, 시험, 태도 점수를 바탕으로 분석한 레이더 차트입니다.<br>
+                        균형 잡힌 오각형에 가까울수록 성실하게 학습하고 있음을 의미합니다!
+                    </p>
+                    <div class="w-full max-w-lg">
+                        <canvas id="gradeRadarChart"></canvas>
                     </div>
-                    <p id="passwordMessage" class="mt-2 text-xs font-bold"></p>
                 </div>
-                <div class="mt-8 flex justify-end">
-                    <button type="submit" class="flex items-center gap-2 rounded-2xl bg-ink px-8 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-95">
-                        <span class="material-symbols-outlined text-lg">update</span> 비밀번호 업데이트
-                    </button>
-                </div>
-            </form>
-        </div>
-    </section>
+            </section>
 
-    <form action="/member/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까? 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.');">
-        <div class="mt-12 flex flex-col items-center justify-center rounded-3xl border border-red-100 bg-red-50/50 p-6 sm:flex-row sm:justify-between">
-            <div>
-                <h3 class="font-bold text-red-800">계정 삭제</h3>
-                <p class="mt-1 text-sm text-red-600/80">탈퇴 시 모든 학습 데이터와 수강 내역이 영구적으로 삭제됩니다.</p>
-            </div>
-            <button type="submit" class="mt-4 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-bold text-red-600 transition-all hover:bg-red-50 sm:mt-0">
-                회원 탈퇴 진행
-            </button>
         </div>
-    </form>
-
+    </div>
 </main>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
 
-        // 1. 프로필 이미지 미리보기 기능
-        const profileImageInput = document.getElementById('profileImageInput');
-        const profilePreview = document.getElementById('profilePreview');
-        const defaultProfileIcon = document.getElementById('defaultProfileIcon');
-
-        if (profileImageInput) {
-            profileImageInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        if (profilePreview) {
-                            profilePreview.src = event.target.result;
-                            profilePreview.classList.remove('hidden');
-                        }
-                        if (defaultProfileIcon) {
-                            defaultProfileIcon.classList.add('hidden');
-                        }
-                    }
-                    reader.readAsDataURL(file);
-                }
-            });
+        const selectedTab = document.getElementById(tabId);
+        if(selectedTab) {
+            selectedTab.classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        // 2. 전화번호 자동 하이픈 기능
+        if(tabId === 'grades') {
+            loadCourseGrade();
+        }
+    }
+
+    // --- 차트 로직 시작 ---
+    async function loadCourseGrade() {
+        const selector = document.getElementById('courseSelector');
+        if(!selector) return;
+        const selectedEnrollmentId = selector.value;
+        if(!selectedEnrollmentId) return;
+
+        try {
+            const response = await fetch(`/api/grades/chart?enrollmentId=${selectedEnrollmentId}`);
+            if (response.ok) {
+                const realGradeData = await response.json();
+                initRadarChart(realGradeData);
+            }
+        } catch (error) {
+            console.error("차트 에러:", error);
+        }
+    }
+
+    let radarChart;
+    function initRadarChart(gradeData) {
+        if(radarChart) radarChart.destroy();
+        const ctx = document.getElementById('gradeRadarChart').getContext('2d');
+        radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['출석', '과제', '시험', '태도', '총점'],
+                datasets: [{
+                    label: '내 학습 점수',
+                    data: [gradeData.attendance, gradeData.assignment, gradeData.exam, gradeData.attitude, gradeData.total],
+                    backgroundColor: 'rgba(43, 63, 143, 0.2)',
+                    borderColor: '#2b3f8f',
+                    pointBackgroundColor: '#2b3f8f'
+                }]
+            },
+            options: {
+                scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+    // --- 차트 로직 끝 ---
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 전화번호 자동 하이픈
         const phoneInput = document.getElementById('phoneInput');
         if (phoneInput) {
             phoneInput.addEventListener('input', function (e) {
@@ -208,42 +243,28 @@
             });
         }
 
-        // 3. 비밀번호 검사 기능
-        const passwordForm = document.getElementById('passwordForm');
-        const newPassword = document.getElementById('newPassword');
-        const confirmPassword = document.getElementById('confirmPassword');
-        const messageBox = document.getElementById('passwordMessage');
-        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
-
-        function validatePassword() {
-            const pwd = newPassword.value;
-            const confirmPwd = confirmPassword.value;
-            if (!pwd && !confirmPwd) { messageBox.textContent = ''; return false; }
-            if (!passwordRegex.test(pwd)) {
-                messageBox.textContent = '비밀번호는 영문, 숫자, 특수문자 조합 8~16자여야 합니다.';
-                messageBox.className = 'mt-2 text-xs font-bold text-red-500';
-                return false;
-            }
-            if (pwd !== confirmPwd) {
-                messageBox.textContent = '비밀번호가 일치하지 않습니다.';
-                messageBox.className = 'mt-2 text-xs font-bold text-red-500';
-                return false;
-            }
-            messageBox.textContent = '사용 가능한 비밀번호입니다.';
-            messageBox.className = 'mt-2 text-xs font-bold text-green-600';
-            return true;
-        }
-
-        if (newPassword && confirmPassword) {
-            newPassword.addEventListener('input', validatePassword);
-            confirmPassword.addEventListener('input', validatePassword);
-        }
-
-        if (passwordForm) {
-            passwordForm.addEventListener('submit', function (e) {
-                if (!newPassword.value) { e.preventDefault(); alert('변경할 비밀번호를 입력해주세요.'); newPassword.focus(); return; }
-                if (!validatePassword()) { e.preventDefault(); alert('비밀번호 조건을 확인해주세요.'); }
+        // 이미지 미리보기 (동기화 버전)
+        const profileImageInput = document.getElementById('profileImageInput');
+        if (profileImageInput) {
+            profileImageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const allProfiles = document.querySelectorAll('.profile-sync');
+                        allProfiles.forEach(img => {
+                            img.src = event.target.result;
+                        });
+                    }
+                    reader.readAsDataURL(file);
+                }
             });
+        }
+
+        // 차트 초기 선택
+        const selector = document.getElementById('courseSelector');
+        if(selector && selector.options.length > 0) {
+            selector.selectedIndex = 0;
         }
     });
 </script>

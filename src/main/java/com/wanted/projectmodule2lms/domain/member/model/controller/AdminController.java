@@ -76,9 +76,9 @@ public class AdminController {
 
     @GetMapping("/instructors")
     public String pendingInstructors(Model model){
-        // 대기중, 강사 인 사람 찾기
-        List<Member> pendingList = memberRepository.findByRoleAndApprovalStatus(MemberRole.INSTRUCTOR, ApprovalStatus.PENDING);
-        model.addAttribute("instructors", pendingList);
+        List<Member> allInstructors = memberRepository.findByRole(MemberRole.INSTRUCTOR);
+
+        model.addAttribute("instructors", allInstructors);
 
         return "admin/instructor-list";
     }
