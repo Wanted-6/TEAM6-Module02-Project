@@ -1,44 +1,217 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>성적 등록</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>성적 수정</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-[#f6f7fb] text-slate-900">
+<div class="min-h-screen">
+    <div class="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-10">
+        <div>
+            <a th:href="@{/main}" class="text-5xl font-extrabold tracking-tight text-[#334a9f] transition hover:text-[#223374]">
+                64Lab
+            </a>
+        </div>
 
-<h2>성적 등록</h2>
+        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[0.25em] text-[#5b63b7]">Grade Edit</p>
+                <h1 class="mt-3 text-4xl font-extrabold tracking-tight">성적 항목 수정</h1>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                    변경할 항목만 선택해서 수정할 수 있습니다. 선택하지 않은 점수는 기존 값을 그대로 유지합니다.
+                </p>
+            </div>
+            <a th:href="@{/instructor/grades}"
+               class="inline-flex items-center justify-center rounded-2xl bg-[#334155] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#1f2937]">
+                성적 목록으로 돌아가기
+            </a>
+        </div>
 
-<form th:action="@{/instructor/grades/edit}" method="post">
-  <input type="hidden" name="enrollmentId" th:value="${grade.enrollmentId}" />
+        <div class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <section class="rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm">
+                <div class="mb-8 flex flex-col gap-4 rounded-[24px] bg-gradient-to-r from-[#e0ecff] via-[#eef4ff] to-[#f8fbff] p-6">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#4f46e5]">
+                            Student
+                        </span>
+                        <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                            Enrollment #[[${grade.enrollmentId}]]
+                        </span>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-900" th:text="${grade.studentName}">김학생</h2>
+                        <p class="mt-2 text-sm font-medium text-slate-600" th:text="${grade.courseTitle}">Spring Boot 입문</p>
+                    </div>
+                </div>
 
-  <p>
-    <label>학생 이름:</label>
-    <span th:text="${grade.studentName}"></span>
-  </p>
+                <form th:action="@{/instructor/grades/edit}" method="post" id="gradeEditForm" class="space-y-5">
+                    <input type="hidden" name="enrollmentId" th:value="${grade.enrollmentId}">
 
-  <p>
-    <label>강의명:</label>
-    <span th:text="${grade.courseTitle}"></span>
-  </p>
+                    <label class="block rounded-[24px] border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" data-target="assignmentScore"
+                                       class="score-toggle mt-1 h-5 w-5 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#93c5fd]">
+                                <div>
+                                    <p class="text-lg font-bold text-slate-900">과제 점수</p>
+                                    <p class="mt-1 text-sm text-slate-500">과제 점수만 선택적으로 수정합니다.</p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl bg-white px-4 py-3 text-right shadow-sm ring-1 ring-slate-200">
+                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Current</p>
+                                <p class="mt-2 text-2xl font-extrabold text-slate-900"
+                                   th:text="${grade.assignmentScore != null ? grade.assignmentScore : '-'}">95.00</p>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <input id="assignmentScore" type="number" name="assignmentScore" step="0.01" min="0" max="100"
+                                   th:value="${grade.assignmentScore}"
+                                   disabled
+                                   class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-lg font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-[#60a5fa] focus:ring-4 focus:ring-[#dbeafe] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
+                        </div>
+                    </label>
 
-  <p>
-    <label>과제 점수:</label>
-    <input type="number" name="assignmentScore" step="0.01" min="0" max="100" required />
-  </p>
+                    <label class="block rounded-[24px] border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" data-target="examScore"
+                                       class="score-toggle mt-1 h-5 w-5 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#93c5fd]">
+                                <div>
+                                    <p class="text-lg font-bold text-slate-900">시험 점수</p>
+                                    <p class="mt-1 text-sm text-slate-500">시험 점수만 선택적으로 수정합니다.</p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl bg-white px-4 py-3 text-right shadow-sm ring-1 ring-slate-200">
+                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Current</p>
+                                <p class="mt-2 text-2xl font-extrabold text-slate-900"
+                                   th:text="${grade.examScore != null ? grade.examScore : '-'}">88.00</p>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <input id="examScore" type="number" name="examScore" step="0.01" min="0" max="100"
+                                   th:value="${grade.examScore}"
+                                   disabled
+                                   class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-lg font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-[#60a5fa] focus:ring-4 focus:ring-[#dbeafe] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
+                        </div>
+                    </label>
 
-  <p>
-    <label>시험 점수:</label>
-    <input type="number" name="examScore" step="0.01" min="0" max="100" required />
-  </p>
+                    <label class="block rounded-[24px] border border-slate-200 bg-slate-50 p-5 transition hover:border-slate-300 hover:bg-white">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" data-target="attitudeScore"
+                                       class="score-toggle mt-1 h-5 w-5 rounded border-slate-300 text-[#1d4ed8] focus:ring-[#93c5fd]">
+                                <div>
+                                    <p class="text-lg font-bold text-slate-900">태도 점수</p>
+                                    <p class="mt-1 text-sm text-slate-500">참여도와 태도 점수만 선택적으로 수정합니다.</p>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl bg-white px-4 py-3 text-right shadow-sm ring-1 ring-slate-200">
+                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Current</p>
+                                <p class="mt-2 text-2xl font-extrabold text-slate-900"
+                                   th:text="${grade.attitudeScore != null ? grade.attitudeScore : '-'}">92.00</p>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <input id="attitudeScore" type="number" name="attitudeScore" step="0.01" min="0" max="100"
+                                   th:value="${grade.attitudeScore}"
+                                   disabled
+                                   class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-lg font-semibold text-slate-900 outline-none transition placeholder:text-slate-300 focus:border-[#60a5fa] focus:ring-4 focus:ring-[#dbeafe] disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
+                        </div>
+                    </label>
 
-  <p>
-    <label>태도 점수:</label>
-    <input type="number" name="attitudeScore" step="0.01" min="0" max="100" required />
-  </p>
+                    <div id="formMessage" class="hidden rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                        최소 한 개 이상의 항목을 선택한 뒤 저장해 주세요.
+                    </div>
 
-  <button type="submit">저장</button>
-  <a th:href="@{/instructor/grades}">취소</a>
-</form>
+                    <div class="flex flex-col gap-3 pt-2 sm:flex-row">
+                        <button type="submit"
+                                class="inline-flex items-center justify-center rounded-2xl bg-[#1d4ed8] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#1e40af]">
+                            선택한 항목 저장
+                        </button>
+                        <a th:href="@{/instructor/grades}"
+                           class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-4 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+                            취소
+                        </a>
+                    </div>
+                </form>
+            </section>
 
+            <aside class="space-y-6">
+                <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                    <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#5b63b7]">Current Scores</p>
+                    <div class="mt-5 grid gap-4">
+                        <div class="rounded-[22px] bg-slate-50 px-5 py-4">
+                            <p class="text-sm font-medium text-slate-500">출석 점수</p>
+                            <p class="mt-2 text-3xl font-extrabold text-slate-900"
+                               th:text="${grade.attendanceScore != null ? grade.attendanceScore : '-'}">100.00</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="rounded-[22px] bg-slate-50 px-5 py-4">
+                                <p class="text-sm font-medium text-slate-500">총점</p>
+                                <p class="mt-2 text-2xl font-extrabold text-slate-900"
+                                   th:text="${grade.totalScore != null ? grade.totalScore : '-'}">91.05</p>
+                            </div>
+                            <div class="rounded-[22px] bg-slate-50 px-5 py-4">
+                                <p class="text-sm font-medium text-slate-500">이수 여부</p>
+                                <p class="mt-2 text-2xl font-extrabold text-slate-900"
+                                   th:text="${grade.completionStatus}">수료</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+                    <p class="text-sm font-bold uppercase tracking-[0.22em] text-[#5b63b7]">Edit Guide</p>
+                    <ul class="mt-5 space-y-3 text-sm leading-6 text-slate-600">
+                        <li>필요한 항목만 체크해서 부분 수정할 수 있습니다.</li>
+                        <li>선택하지 않은 점수는 기존 값을 유지합니다.</li>
+                        <li>출석 점수는 출결 기록 기준으로 자동 계산됩니다.</li>
+                        <li>저장 후 총점과 이수 여부가 함께 다시 계산됩니다.</li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const form = document.getElementById("gradeEditForm");
+        const toggles = document.querySelectorAll(".score-toggle");
+        const message = document.getElementById("formMessage");
+
+        function syncInput(toggle) {
+            const input = document.getElementById(toggle.dataset.target);
+            const enabled = toggle.checked;
+            input.disabled = !enabled;
+
+            if (!enabled) {
+                input.value = input.defaultValue;
+            }
+        }
+
+        toggles.forEach(function (toggle) {
+            syncInput(toggle);
+            toggle.addEventListener("change", function () {
+                syncInput(toggle);
+                message.classList.add("hidden");
+            });
+        });
+
+        form.addEventListener("submit", function (event) {
+            const hasSelection = Array.from(toggles).some(function (toggle) {
+                return toggle.checked;
+            });
+
+            if (!hasSelection) {
+                event.preventDefault();
+                message.classList.remove("hidden");
+            }
+        });
+    })();
+</script>
 </body>
 </html>
+

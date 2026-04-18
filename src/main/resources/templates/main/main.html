@@ -327,7 +327,7 @@
             </a>
         </section>
 
-        <section class="rounded-[30px] border border-line bg-white p-4 shadow-soft sm:p-6 lg:p-8">
+        <section th:if="${dashboardRole != 'ADMIN'}" class="rounded-[30px] border border-line bg-white p-4 shadow-soft sm:p-6 lg:p-8">
             <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h2 class="font-headline text-3xl font-extrabold text-ink"
