@@ -1,5 +1,7 @@
 package com.wanted.projectmodule2lms.domain.grade.model.service;
 
+import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
+import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
 import com.wanted.projectmodule2lms.domain.attendance.model.dao.AttendanceRepository;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.Attendance;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceStatus;
@@ -11,8 +13,12 @@ import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeChartDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeUpdateDTO;
+import com.wanted.projectmodule2lms.domain.grade.model.dto.InstructorGradeDashboardDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
+import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
+import com.wanted.projectmodule2lms.domain.submission.model.dao.SubmissionRepository;
+import com.wanted.projectmodule2lms.domain.submission.model.entity.Submission;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
 import jakarta.transaction.Transactional;
@@ -40,9 +46,11 @@ public class GradeService {
     private final GradeRepository gradeRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
+    private final SectionRepository sectionRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final SubmissionRepository submissionRepository;
 
     public List<GradeDTO> findGradesByMemberId(Integer memberId) {
-
         List<Enrollment> enrollments = enrollmentRepository.findByMemberId(memberId);
         List<GradeDTO> gradeDTOList = new ArrayList<>();
 
@@ -58,11 +66,9 @@ public class GradeService {
                     .orElse(null);
 
             String courseTitle = (course != null) ? course.getTitle() : "과목명 없음";
-
             String studentName = memberRepository.findById(enrollment.getMemberId())
                     .map(member -> member.getName())
                     .orElse("이름 없음");
-
             String completionStatus = getCompletionStatus(grade);
 
             GradeDTO gradeDTO = new GradeDTO(
@@ -87,7 +93,6 @@ public class GradeService {
 
     @Transactional
     public void updateGradeByInstructor(Integer instructorId, GradeUpdateDTO dto) {
-
         Enrollment enrollment = enrollmentRepository.findById(dto.getEnrollmentId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수강 정보입니다."));
 
@@ -161,7 +166,6 @@ public class GradeService {
     }
 
     public List<GradeDTO> findGradesByInstructorId(Integer instructorId) {
-
         List<Course> courses = courseRepository.findByInstructorId(instructorId);
         List<GradeDTO> gradeDTOList = new ArrayList<>();
 
@@ -204,7 +208,6 @@ public class GradeService {
     }
 
     public List<GradeDTO> findGradesByInstructorIdAndCourseId(Integer instructorId, Integer courseId) {
-
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
 
@@ -250,7 +253,6 @@ public class GradeService {
     }
 
     public GradeDTO findGradeByEnrollmentIdForInstructor(Integer instructorId, Integer enrollmentId) {
-
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));
 
@@ -321,6 +323,79 @@ public class GradeService {
         }
 
         return BigDecimal.ZERO;
+    }
+
+    public InstructorGradeDashboardDTO findDashboardSummaryByCourseId(Integer instructorId, Integer courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
+
+        if (!course.getInstructorId().equals(instructorId)) {
+            throw new IllegalArgumentException("해당 강의만 조회할 수 있습니다.");
+        }
+
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
+        int totalStudentCount = enrollments.size();
+        long totalSectionCount = sectionRepository.countByCourseId(courseId);
+
+        if (totalSectionCount == 0) {
+            return new InstructorGradeDashboardDTO(
+                    totalStudentCount,
+                    0,
+                    0,
+                    0,
+                    0
+            );
+        }
+
+        int totalProgressRate = 0;
+        int lateCount = 0;
+        int absentCount = 0;
+
+        for (Enrollment enrollment : enrollments) {
+            List<Attendance> latestAttendances = findLatestAttendancesByEnrollmentId(enrollment.getEnrollmentId());
+            int completedSectionCount = latestAttendances.size();
+            int studentProgressRate = (int) (completedSectionCount * 100 / totalSectionCount);
+            totalProgressRate += studentProgressRate;
+
+            for (Attendance attendance : latestAttendances) {
+                if (attendance.getStatus() == AttendanceStatus.LATE) {
+                    lateCount++;
+                }
+
+                if (attendance.getStatus() == AttendanceStatus.ABSENT) {
+                    absentCount++;
+                }
+            }
+        }
+
+        int averageProgressRate = 0;
+        if (totalStudentCount > 0) {
+            averageProgressRate = totalProgressRate / totalStudentCount;
+        }
+
+        int missingAssignmentStudentCount = 0;
+        Assignment assignment = assignmentRepository.findByCourseId(courseId)
+                .orElse(null);
+
+        if (assignment != null) {
+            for (Enrollment enrollment : enrollments) {
+                Submission submission = submissionRepository.findByAssignmentIdAndEnrollmentId(
+                                assignment.getAssignmentId(), enrollment.getEnrollmentId())
+                        .orElse(null);
+
+                if (submission == null) {
+                    missingAssignmentStudentCount++;
+                }
+            }
+        }
+
+        return new InstructorGradeDashboardDTO(
+                totalStudentCount,
+                averageProgressRate,
+                lateCount,
+                absentCount,
+                missingAssignmentStudentCount
+        );
     }
 
     private BigDecimal calculateTotalScore(

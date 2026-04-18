@@ -47,6 +47,7 @@ public class InstructorGradeController {
 
         if (courseId != null) {
             model.addAttribute("selectedCourseId", courseId);
+            model.addAttribute("dashboard",gradeService.findDashboardSummaryByCourseId(instructorId, courseId));
             model.addAttribute("grades", gradeService.findGradesByInstructorIdAndCourseId(instructorId, courseId));
         } else {
             model.addAttribute("grades", gradeService.findGradesByInstructorId(instructorId));

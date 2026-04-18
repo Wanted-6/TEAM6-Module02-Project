@@ -29,7 +29,7 @@ spring:
         format_sql: true
 
   config:
-    import: classpath:application-secret.yml
+    import: classpath:application.yaml
 
   thymeleaf:
     cache: false
