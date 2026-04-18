@@ -105,9 +105,10 @@ public class CalenderService {
                         "memo-" + memo.getMemoId(),
                         "[메모] " + memo.getContent(),
                         memo.getMemoDate().toString(),
-                        "#C8E6C9"
+                        getMemoColor(memo.getMemoDate())
                 ))
                 .collect(Collectors.toList());
+
 
         result.addAll(memoEvents);
 
@@ -185,9 +186,10 @@ public class CalenderService {
                         "memo-" + memo.getMemoId(),
                         "[메모] " + memo.getContent(),
                         memo.getMemoDate().toString(),
-                        "#C8E6C9"
+                        getMemoColor(memo.getMemoDate())
                 ))
                 .collect(Collectors.toList());
+
 
         result.addAll(memoEvents);
 
@@ -238,4 +240,23 @@ public class CalenderService {
 
         calendarMemoRepository.delete(memo);
     }
+    private String getMemoColor(LocalDate memoDate) {
+        LocalDate today = LocalDate.now();
+        long diffDays = java.time.temporal.ChronoUnit.DAYS.between(today, memoDate);
+
+        if (diffDays < 0) {
+            return "#9ca3af";
+        }
+        if (diffDays == 3) {
+            return "#facc15";
+        }
+        if (diffDays == 2) {
+            return "#fb923c";
+        }
+        if (diffDays == 1 || diffDays == 0) {
+            return "#ef4444";
+        }
+        return "#C8E6C9";
+    }
+
 }

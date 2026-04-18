@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GradeController {
 
-    private static final String LOGIN_MEMBER_REQUIRED = "Login member id is required.";
+    private static final String LOGIN_MEMBER_REQUIRED = "로그인한 사용자 정보가 필요합니다.";
 
     private final GradeService gradeService;
 

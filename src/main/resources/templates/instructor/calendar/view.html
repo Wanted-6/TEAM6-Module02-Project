@@ -204,9 +204,18 @@
                 const todayStr = getTodayString();
 
                 // ✅ 과거 날짜 여부에 따라 색상 결정
-                const memoColor = selectedDate < todayStr
-                    ? '#9ca3af'   // 회색 (과거 일정)
-                    : '#C8E6C9';  // 기존 연두색
+                const diffDays = getDateDiff(todayStr, selectedDate);
+
+                const memoColor = diffDays < 0
+                    ? '#9ca3af'
+                    : diffDays === 3
+                        ? '#facc15'
+                        : diffDays === 2
+                            ? '#fb923c'
+                            : (diffDays === 1 || diffDays === 0)
+                                ? '#ef4444'
+                                : '#C8E6C9';
+
 
                 const newMemoEvent = {
                     id: 'memo-temp-' + Date.now(),
@@ -266,26 +275,45 @@
         const day = String(today.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+    function getDateDiff(todayStr, targetStr) {
+        const today = new Date(todayStr + 'T00:00:00');
+        const target = new Date(targetStr + 'T00:00:00');
+        const diffMs = target - today;
+        return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }
+
 
     function applyExamDeadlineColors(events) {
         const todayStr = getTodayString();
 
         return events.map(event => {
-            let updatedEvent = { ...event };
+            const updatedEvent = { ...event };
+            const eventId = updatedEvent.id || '';
+            const eventDate = String(updatedEvent.start).slice(0, 10);
+            const diffDays = getDateDiff(todayStr, eventDate);
 
-            // 기존 색상 유지 (시험 일정 등)
-            if (event.title && event.title.includes('시험 마감')) {
-                // 기존 로직 유지 – 색상 변경 없음
+            if (eventDate < todayStr) {
+                updatedEvent.color = '#9ca3af';
+                return updatedEvent;
             }
 
-            // 오늘보다 이전 일정은 회색 처리
-            if (event.start < todayStr) {
-                updatedEvent.color = '#9ca3af';
+            if (eventId.startsWith('memo-')) {
+                if (diffDays === 3) {
+                    updatedEvent.color = '#facc15';
+                } else if (diffDays === 2) {
+                    updatedEvent.color = '#fb923c';
+                } else if (diffDays === 1 || diffDays === 0) {
+                    updatedEvent.color = '#ef4444';
+                } else {
+                    updatedEvent.color = '#C8E6C9';
+                }
             }
 
             return updatedEvent;
         });
     }
+
+
 </script>
 </body>
 </html>
