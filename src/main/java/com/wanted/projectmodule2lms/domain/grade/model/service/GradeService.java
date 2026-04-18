@@ -10,6 +10,7 @@ import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
+import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeChartDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeUpdateDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.InstructorGradeDashboardDTO;
@@ -211,7 +212,7 @@ public class GradeService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
 
         if (!course.getInstructorId().equals(instructorId)) {
-            throw new IllegalArgumentException("해당 강의만 조회할 수 있습니다.");
+            throw new IllegalArgumentException("담당 강의만 조회할 수 있습니다.");
         }
 
         List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
@@ -297,7 +298,7 @@ public class GradeService {
     }
 
     private BigDecimal calculateAttendanceScore(Integer enrollmentId) {
-        List<Attendance> attendances = findLatestAttendancesByEnrollmentId(enrollmentId);
+        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollmentId);
 
         BigDecimal totalPenalty = attendances.stream()
                 .map(this::calculatePenalty)
@@ -433,4 +434,22 @@ public class GradeService {
             Comparator.comparing(Attendance::getCheckedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
                     .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
                     .thenComparing(Attendance::getAttendanceId, Comparator.nullsFirst(Comparator.naturalOrder()));
+
+    public GradeChartDTO getChartDataByEnrollmentId(Long enrollmentId) {
+
+        Grade grade = gradeRepository.findByEnrollmentId(enrollmentId.intValue()).orElse(null);
+
+        if (grade == null) {
+            return null;
+        }
+
+        return GradeChartDTO.builder()
+                .attendance(grade.getAttendanceScore() != null ? grade.getAttendanceScore().doubleValue() : 0.0)
+                .assignment(grade.getAssignmentScore() != null ? grade.getAssignmentScore().doubleValue() : 0.0)
+                .exam(grade.getExamScore() != null ? grade.getExamScore().doubleValue() : 0.0)
+                .attitude(grade.getAttitudeScore() != null ? grade.getAttitudeScore().doubleValue() : 0.0)
+                .total(grade.getTotalScore() != null ? grade.getTotalScore().doubleValue() : 0.0)
+                .build();
+    }
+
 }

@@ -29,5 +29,5 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     List<Member> findByMemberIdIn(List<Integer> memberIds);
 
-    List<Member> findByRoleAndApprovalStatus(MemberRole role, ApprovalStatus approvalStatus);
+    List<Member> findByRole(MemberRole role);
 }

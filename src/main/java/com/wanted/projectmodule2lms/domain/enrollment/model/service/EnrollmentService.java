@@ -75,4 +75,8 @@ public class EnrollmentService {
     public boolean isAlreadyEnrolled(Integer memberId, Integer courseId) {
         return enrollmentRepository.existsByMemberIdAndCourseId(memberId, courseId);
     }
+
+    public List<Enrollment> getMyEnrollments(Integer memberId) {
+        return enrollmentRepository.findByMemberId(memberId);
+    }
 }

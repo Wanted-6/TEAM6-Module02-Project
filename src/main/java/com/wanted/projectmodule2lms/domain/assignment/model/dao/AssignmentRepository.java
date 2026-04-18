@@ -13,4 +13,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
     Optional<Assignment> findFirstByCourseIdOrderByAssignmentIdAsc(Integer courseId);
 
     List<Assignment> findByCourseIdIn(List<Integer> courseIds);
+
+    boolean existsByCourseId(Integer courseId);
 }

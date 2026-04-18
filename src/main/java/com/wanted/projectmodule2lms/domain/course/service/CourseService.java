@@ -433,4 +433,11 @@ public class CourseService {
                 reviewerName
         );
     }
+
+
+    public String getCourseNameById(Integer courseId) {
+        return courseRepository.findById(courseId)
+                .map(Course::getTitle)
+                .orElse(null);
+    }
 }
