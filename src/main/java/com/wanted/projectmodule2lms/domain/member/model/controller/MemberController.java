@@ -105,7 +105,6 @@ public class MemberController {
             rttr.addFlashAttribute("error", "승인 코드가 올바르지 않습니다.");
             return "redirect:/member/verify-code";
         }
-
     }
 
     @GetMapping("/mypage")
@@ -132,7 +131,11 @@ public class MemberController {
             File dir = new File(savePath);
             if (!dir.exists()) dir.mkdirs();
 
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // 원본 이름 말고, 확장자(.png 등)만 떼와서 무조건 영어+숫자(UUID)로만 저장!
+            String originalName = file.getOriginalFilename();
+            String extension = originalName.substring(originalName.lastIndexOf("."));
+            String fileName = UUID.randomUUID().toString() + extension;
+
             file.transferTo(new File(savePath + fileName));
             profileImageUrl = "/uploads/" + fileName;
         }
@@ -156,10 +159,18 @@ public class MemberController {
 
     @AuditLog
     @PostMapping("/delete")
-    public String deleteMember(@LoginMemberId Long memberId, HttpSession session) {
-        memberService.deleteMember(memberId);
-        session.invalidate();
-        return "redirect:/";
+    public String deleteMember(@LoginMemberId Long memberId, HttpSession session, RedirectAttributes rttr) {
+        if (memberId == null) return "redirect:/auth/login";
+
+        try {
+            memberService.deleteMember(memberId);
+            session.invalidate();
+            return "redirect:/";
+        } catch (IllegalStateException e) {
+            // 서비스에서 탈퇴 불가 판정이 나오면 마이페이지에 에러를 띄웁니다!
+            rttr.addFlashAttribute("error", e.getMessage());
+            return "redirect:/member/mypage";
+        }
     }
 
 }

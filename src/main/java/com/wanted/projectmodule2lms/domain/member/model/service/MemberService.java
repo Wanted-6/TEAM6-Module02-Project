@@ -5,7 +5,8 @@ import com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO;
 import com.wanted.projectmodule2lms.domain.member.model.dto.SignupDTO;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
-import com.wanted.projectmodule2lms.domain.profile.dto.Profile;
+import com.wanted.projectmodule2lms.domain.profile.dao.ProfileRepository;
+import com.wanted.projectmodule2lms.domain.profile.entity.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
     private final PasswordEncoder encoder;
 
     @Transactional
@@ -55,6 +57,16 @@ public class MemberService {
                     .careerCertPath(savedCareerPath)
                     .build();
 
+//            // 첨부파일 확인 로직
+//            if ("INSTRUCTOR".equals(signupDTO.getMemberRole())) {
+//                if (gradCert != null && !gradCert.isEmpty()) {
+//                    System.out.println("졸업증명서 업로드 대기 중: " + gradCert.getOriginalFilename());
+//                }
+//                if (careerCert != null && !careerCert.isEmpty()) {
+//                    System.out.println("경력증명서 업로드 대기 중: " + careerCert.getOriginalFilename());
+//                }
+//            }
+
             Member savedMember = memberRepository.save(member);
             return savedMember.getMemberId();
 
@@ -67,6 +79,7 @@ public class MemberService {
     public LoginMemberDTO findByUsername(String username) {
         Optional<Member> memberOptional = memberRepository.findByLoginId(username);
 
+        // Entity -> DTO 변환도 직접 매핑 (DTO 생성자나 빌더 활용)
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             LoginMemberDTO loginMemberDTO = new LoginMemberDTO();
@@ -86,6 +99,21 @@ public class MemberService {
         }
         return null;
     }
+
+//    @Transactional
+//    public void incrementLoginFailCount(String username) {
+//        Optional<Member> memberOptional = memberRepository.findByLoginId(username);
+//
+//        if (memberOptional.isPresent()) {
+//            Member member = memberOptional.get();
+//
+//            member.increaseLoginFailCount();
+//
+//            if (member.getLoginFailCount() >= 5) {
+//                member.lockAccount(); // 5회 이상이면 계정 잠금
+//            }
+//        }
+//    }
 
     @Transactional
     public int incrementLoginFailCount(String username) {
@@ -110,8 +138,10 @@ public class MemberService {
     }
 
     public int getLoginFailCount(String username) {
+        // 기존에 만들어둔 findByUsername으로 회원 정보 가져오기
         LoginMemberDTO member = findByUsername(username);
 
+        // 회원이 존재하고 실패 횟수가 null이 아니면 그 값을 반환, 아니면 0 반환
         if (member != null && member.getLoginFailCount() != null) {
             return member.getLoginFailCount();
         }
@@ -164,11 +194,11 @@ public class MemberService {
 
             // 임시 비밀번호 생성 (비밀번호 규칙 지켜서 )
             // 비밀번호 복잡도 검사 통과 위해 '!A1' 강제로 붙임.(비밀번호 조건 통과 위해)
-             String tempPassword = UUID.randomUUID().toString().substring(0, 6) + "!A1";
+            String tempPassword = UUID.randomUUID().toString().substring(0, 6) + "!A1";
 
-             member.changeToTempPassword(encoder.encode(tempPassword));
+            member.changeToTempPassword(encoder.encode(tempPassword));
 
-             // 비밀번호 암호화 후 DB에 넣기
+            // 비밀번호 암호화 후 DB에 넣기
 //            member.changePassword(encoder.encode(tempPassword));
 
             return tempPassword;
@@ -192,6 +222,7 @@ public class MemberService {
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
 
+            // 덮어쓰기 방지를 위해 파일 이름 앞 무작위 영문자(UUID) 붙임
             String storedFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             File targetFile = new File(dir, storedFileName);
 
@@ -205,18 +236,23 @@ public class MemberService {
 
     @Transactional
     public void updateProfile(Long memberId, String bio, String profileImage) {
-        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+        Integer id = Math.toIntExact(memberId);
+        Member member = memberRepository.findById(id).orElseThrow();
+
+        // 주의: 여기서 쓰이는 Profile은 반드시 Entity Profile이어야 합니다!
         Profile profile = member.getProfile();
 
         if (profile == null) {
+            // 프로필이 아예 없으면 새로 만들어서 저장!
             profile = new Profile(member, profileImage, bio);
-            member.setProfile(profile);
+            member.assignProfile(profile); // 👈 아까 Member.java에 만든 메서드 사용
+            profileRepository.save(profile);
         } else {
             profile.updateBio(bio);
-            // 새로운 이미지가 들어왔을 때만 경로 업데이트
             if (profileImage != null) {
                 profile.updateProfileImage(profileImage);
             }
+            profileRepository.save(profile);
         }
     }
 
@@ -224,7 +260,6 @@ public class MemberService {
     public void updatePhone(Long memberId, String phone) {
         Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
 
-        // 내 번호 그대로면 무시, 타인이 사용 중이면 에러
         if (member.getPhone() != null && member.getPhone().equals(phone)) return;
         if (memberRepository.existsByPhone(phone)) {
             throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
@@ -232,9 +267,34 @@ public class MemberService {
         member.updatePhone(phone);
     }
 
+//    @Transactional
+//    public void deleteMember(Long memberId) {
+//        memberRepository.deleteById(Math.toIntExact(memberId));
+//    }
+
+
     @Transactional
     public void deleteMember(Long memberId) {
-        memberRepository.deleteById(Math.toIntExact(memberId));
-    }
+        Integer id = Math.toIntExact(memberId);
+        Member member = memberRepository.findById(id).orElseThrow();
 
+        // 1. 강사 탈퇴 조건 검사
+        if (member.getRole() == MemberRole.INSTRUCTOR) {
+            // TODO: 실제 강사의 진행 중인 강의 조회 로직으로 변경하세요 (CourseRepository 연동 필요)
+            boolean hasActiveCourses = false; // 임시
+            if (hasActiveCourses) {
+                throw new IllegalStateException("진행 중인 강의가 있어 탈퇴할 수 없습니다. 강의 종료 후 다시 시도해 주세요.");
+            }
+        }
+        // 2. 학생 탈퇴 조건 검사
+        else if (member.getRole() == MemberRole.STUDENT) {
+            // TODO: 실제 학생의 수강 내역 조회 로직으로 변경하세요 (EnrollmentRepository 연동 필요)
+            boolean hasActiveEnrollments = false; // 임시
+            if (hasActiveEnrollments) {
+                throw new IllegalStateException("수강 중인 강의가 있어 탈퇴할 수 없습니다. 수강 종료 후 다시 시도해 주세요.");
+            }
+        }
+
+        memberRepository.delete(member);
+    }
 }

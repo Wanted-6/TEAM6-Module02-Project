@@ -1,4 +1,4 @@
-package com.wanted.projectmodule2lms.domain.profile.dto;
+package com.wanted.projectmodule2lms.domain.profile.entity;
 
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import jakarta.persistence.*;
@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Profile {
-
     @Id
     @Column(name = "member_id")
     private Integer memberId;
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "member_id")
@@ -26,19 +26,12 @@ public class Profile {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    // 프로필 초기 설정
     public Profile(Member member, String profileImage, String bio) {
         this.member = member;
         this.profileImage = profileImage;
         this.bio = bio;
     }
 
-    // 수정
-    public void updateBio(String bio) {
-        this.bio = bio;
-    }
-
-    public void updateProfileImage(String profileImage) {
-        this.profileImage = profileImage;
-    }
+    public void updateBio(String bio) { this.bio = bio; }
+    public void updateProfileImage(String profileImage) { this.profileImage = profileImage; }
 }

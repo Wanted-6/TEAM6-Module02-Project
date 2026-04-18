@@ -23,7 +23,6 @@ public class GradeController {
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("�α��� ����� ������ ã�� �� �����ϴ�.");
             throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
 
