@@ -28,7 +28,20 @@
         <div class="meta">
             게시글 번호: <span th:text="${board.postId}">1</span><br>
             게시판 종류: <span th:text="${board.postType}">SECTION_QNA</span><br>
-            작성자: <span th:text="${board.memberName != null ? board.memberName : board.memberId}">박강사</span><br>
+            작성자:
+            <span th:with="writer=${@memberRepository.findById(board.memberId).orElse(null)}"
+                  style="display: inline-flex; align-items: center; gap: 8px; vertical-align: middle;">
+                <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                     th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                     onerror="this.src='/img/default-profile.png'"
+                     alt="프로필"
+                     style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                     src="/img/default-profile.png"
+                     alt="기본프로필"
+                     style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                <span th:text="${board.memberName != null ? board.memberName : board.memberId}">박강사</span>
+            </span><br>
             코스: <span th:text="${board.courseTitle != null ? board.courseTitle : '-'}">Spring Boot 입문</span><br>
             섹션 ID: <span th:text="${board.sectionId != null ? board.sectionId : '-'}">2</span><br>
             비밀글 여부: <span th:text="${board.isSecret} ? 'Y' : 'N'">N</span><br>
@@ -77,7 +90,21 @@
             <tbody>
             <th:block th:each="comment : ${commentList}" th:if="${comment.parentCommentId == null}">
                 <tr>
-                    <td th:text="${comment.memberName != null ? comment.memberName : comment.memberId}">김학생</td>
+                    <td>
+                        <div th:with="writer=${@memberRepository.findById(comment.memberId).orElse(null)}"
+                             style="display: inline-flex; align-items: center; gap: 8px;">
+                            <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                                 th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                                 onerror="this.src='/img/default-profile.png'"
+                                 alt="프로필"
+                                 style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                            <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                                 src="/img/default-profile.png"
+                                 alt="기본프로필"
+                                 style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                            <span th:text="${comment.memberName != null ? comment.memberName : comment.memberId}">김학생</span>
+                        </div>
+                    </td>
                     <td th:text="${comment.content}">댓글 내용</td>
                     <td th:text="${comment.createdAt}">2026-04-15</td>
                     <td>
@@ -105,7 +132,22 @@
                 </tr>
 
                 <tr th:each="reply : ${commentList}" th:if="${reply.parentCommentId == comment.commentId}">
-                    <td th:text="${'ㄴ ' + (reply.memberName != null ? reply.memberName : reply.memberId)}">ㄴ 박강사</td>
+                    <td>
+                        <div th:with="writer=${@memberRepository.findById(reply.memberId).orElse(null)}"
+                             style="display: inline-flex; align-items: center; gap: 8px; padding-left: 10px;">
+                            <span style="color: #888; font-weight: bold;">ㄴ</span>
+                            <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                                 th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                                 onerror="this.src='/img/default-profile.png'"
+                                 alt="프로필"
+                                 style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                            <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                                 src="/img/default-profile.png"
+                                 alt="기본프로필"
+                                 style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                            <span th:text="${reply.memberName != null ? reply.memberName : reply.memberId}">박강사</span>
+                        </div>
+                    </td>
                     <td th:text="${reply.content}">대댓글 내용</td>
                     <td th:text="${reply.createdAt}">2026-04-15</td>
                     <td>

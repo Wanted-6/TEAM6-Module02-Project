@@ -52,7 +52,26 @@
             <tr th:each="board, stat : ${boardList}">
                 <td th:text="${stat.count}">1</td>
                 <td><a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">공지 제목</a></td>
-                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">관리자1</td>
+
+                <td>
+                    <div th:with="writer=${@memberRepository.findById(board.memberId).orElse(null)}"
+                         style="display: inline-flex; align-items: center; gap: 8px;">
+
+                        <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                             th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                             onerror="this.src='/img/default-profile.png'"
+                             alt="프로필"
+                             style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+
+                        <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                             src="/img/default-profile.png"
+                             alt="기본프로필"
+                             style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+
+                        <span th:text="${board.memberName != null ? board.memberName : board.memberId}">관리자1</span>
+                    </div>
+                </td>
+
                 <td th:text="${board.viewCount}">120</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
