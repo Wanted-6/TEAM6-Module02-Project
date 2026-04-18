@@ -1,14 +1,14 @@
 package com.wanted.projectmodule2lms.domain.grade.model.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
+@ToString
 public class GradeUpdateDTO {
 
     private Integer enrollmentId;

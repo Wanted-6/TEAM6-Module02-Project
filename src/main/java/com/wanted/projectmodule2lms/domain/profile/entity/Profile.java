@@ -2,14 +2,14 @@ package com.wanted.projectmodule2lms.domain.profile.entity;
 
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "profile")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Profile {
     @Id
     @Column(name = "member_id")
@@ -34,4 +34,10 @@ public class Profile {
 
     public void updateBio(String bio) { this.bio = bio; }
     public void updateProfileImage(String profileImage) { this.profileImage = profileImage; }
+
+    public void update(String bio, String profileImage) {
+        this.bio = bio;
+        this.profileImage = profileImage;
+    }
+
 }
