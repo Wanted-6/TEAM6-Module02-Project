@@ -8,6 +8,7 @@ import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
+import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeChartDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeUpdateDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
@@ -330,6 +331,23 @@ public class GradeService {
 
     private BigDecimal normalizeScore(BigDecimal score) {
         return score != null ? score : BigDecimal.ZERO;
+    }
+
+    public GradeChartDTO getChartDataByEnrollmentId(Long enrollmentId) {
+
+        Grade grade = gradeRepository.findByEnrollmentId(enrollmentId.intValue()).orElse(null);
+
+        if (grade == null) {
+            return null;
+        }
+
+        return GradeChartDTO.builder()
+                .attendance(grade.getAttendanceScore() != null ? grade.getAttendanceScore().doubleValue() : 0.0)
+                .assignment(grade.getAssignmentScore() != null ? grade.getAssignmentScore().doubleValue() : 0.0)
+                .exam(grade.getExamScore() != null ? grade.getExamScore().doubleValue() : 0.0)
+                .attitude(grade.getAttitudeScore() != null ? grade.getAttitudeScore().doubleValue() : 0.0)
+                .total(grade.getTotalScore() != null ? grade.getTotalScore().doubleValue() : 0.0)
+                .build();
     }
 
 }

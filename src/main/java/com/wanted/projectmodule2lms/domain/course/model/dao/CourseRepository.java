@@ -41,6 +41,8 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             String keyword,
             String category
     );
+
+    boolean existsByInstructorIdAndIsOpenTrue(Integer instructorId);
 }
 
 
