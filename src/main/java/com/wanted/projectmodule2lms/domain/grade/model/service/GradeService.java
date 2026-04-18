@@ -21,9 +21,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -100,9 +101,15 @@ public class GradeService {
                 .orElseThrow(() -> new IllegalArgumentException("성적 정보가 존재하지 않습니다."));
 
         BigDecimal attendanceScore = calculateAttendanceScore(dto.getEnrollmentId());
-        BigDecimal assignmentScore = dto.getAssignmentScore();
-        BigDecimal examScore = dto.getExamScore();
-        BigDecimal attitudeScore = dto.getAttitudeScore();
+        BigDecimal assignmentScore = dto.getAssignmentScore() != null
+                ? dto.getAssignmentScore()
+                : normalizeScore(grade.getAssignmentScore());
+        BigDecimal examScore = dto.getExamScore() != null
+                ? dto.getExamScore()
+                : normalizeScore(grade.getExamScore());
+        BigDecimal attitudeScore = dto.getAttitudeScore() != null
+                ? dto.getAttitudeScore()
+                : normalizeScore(grade.getAttitudeScore());
 
         BigDecimal totalScore = calculateTotalScore(
                 attendanceScore,
@@ -288,7 +295,7 @@ public class GradeService {
     }
 
     private BigDecimal calculateAttendanceScore(Integer enrollmentId) {
-        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollmentId);
+        List<Attendance> attendances = findLatestAttendancesByEnrollmentId(enrollmentId);
 
         BigDecimal totalPenalty = attendances.stream()
                 .map(this::calculatePenalty)
@@ -331,5 +338,25 @@ public class GradeService {
     private BigDecimal normalizeScore(BigDecimal score) {
         return score != null ? score : BigDecimal.ZERO;
     }
+
+    private List<Attendance> findLatestAttendancesByEnrollmentId(Integer enrollmentId) {
+        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollmentId);
+        Map<Integer, Attendance> latestAttendanceBySection = new LinkedHashMap<>();
+
+        for (Attendance attendance : attendances) {
+            Attendance current = latestAttendanceBySection.get(attendance.getSectionId());
+
+            if (current == null || ATTENDANCE_ORDER.compare(attendance, current) > 0) {
+                latestAttendanceBySection.put(attendance.getSectionId(), attendance);
+            }
+        }
+
+        return new ArrayList<>(latestAttendanceBySection.values());
+    }
+
+    private static final Comparator<Attendance> ATTENDANCE_ORDER =
+            Comparator.comparing(Attendance::getCheckedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(Attendance::getAttendanceId, Comparator.nullsFirst(Comparator.naturalOrder()));
 
 }

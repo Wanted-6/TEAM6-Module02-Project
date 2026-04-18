@@ -9,13 +9,16 @@
 <body class="bg-[#f6f7fb] text-slate-900">
 <div class="min-h-screen">
     <div class="mx-auto max-w-7xl px-6 py-10">
+        <div class="mb-8">
+            <a th:href="@{/main}" class="text-5xl font-extrabold tracking-tight text-[#334a9f] transition hover:text-[#223374]">
+                64Lab
+            </a>
+        </div>
         <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
                 <p class="text-sm font-bold uppercase tracking-[0.25em] text-[#5b63b7]">Instructor Courses</p>
                 <h1 class="mt-3 text-4xl font-extrabold tracking-tight">담당 코스 목록</h1>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                    관리할 코스를 선택하면 해당 코스의 성적 목록과 학생 관리 화면으로 이어진다.
-                </p>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">관리할 코스를 선택하면 해당 코스의 성적 목록과 학생 관리 화면으로 이어진다.</p>
             </div>
             <a th:href="@{/main}" class="inline-flex items-center rounded-2xl bg-[#334155] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#1f2937]">
                 메인으로 돌아가기
@@ -36,9 +39,7 @@
                     </div>
 
                     <h2 class="text-2xl font-extrabold leading-tight" th:text="${course.title}">Spring Boot 입문</h2>
-                    <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600" th:text="${course.description}">
-                        코스 설명
-                    </p>
+                    <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600" th:text="${course.description}">코스 설명</p>
 
                     <div class="mt-6 grid grid-cols-2 gap-3 text-sm text-slate-600">
                         <div class="rounded-2xl bg-slate-50 px-4 py-3">

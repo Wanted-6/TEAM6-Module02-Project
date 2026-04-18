@@ -8,6 +8,8 @@ import com.wanted.projectmodule2lms.domain.attendance.model.dto.AttendanceCheckR
 import com.wanted.projectmodule2lms.domain.attendance.model.dto.AttendancePageDTO;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.Attendance;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceStatus;
+import com.wanted.projectmodule2lms.domain.certificate.model.dao.CertificateRepository;
+import com.wanted.projectmodule2lms.domain.certificate.model.entity.Certificate;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -24,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +52,43 @@ public class AttendanceService {
     private final CourseService courseService;
     private final AssignmentRepository assignmentRepository;
     private final GradeRepository gradeRepository;
+    private final CertificateRepository certificateRepository;
+
+    public Integer calculateTotalScore(Integer memberId, Integer courseId) {
+        Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
+                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+
+        Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                .orElse(null);
+
+        long totalSectionCount = sectionRepository.countByCourseId(courseId);
+        List<Attendance> attendanceList = findLatestAttendancesByEnrollmentId(enrollment.getEnrollmentId());
+        int attendanceScore = calculateAttendanceScore(totalSectionCount, attendanceList);
+
+        int assignmentScore = 0;
+        int examScore = 0;
+        int attitudeScore = 0;
+
+        if (grade != null) {
+            if (grade.getAssignmentScore() != null) {
+                assignmentScore = grade.getAssignmentScore().intValue();
+            }
+
+            if (grade.getExamScore() != null) {
+                examScore = grade.getExamScore().intValue();
+            }
+
+            if (grade.getAttitudeScore() != null) {
+                attitudeScore = grade.getAttitudeScore().intValue();
+            }
+        }
+
+        int weightedAssignmentScore = calculateWeightedScore(assignmentScore, ASSIGNMENT_MAX_SCORE);
+        int weightedExamScore = calculateWeightedScore(examScore, EXAM_MAX_SCORE);
+        int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
+
+        return attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
+    }
 
     public AttendancePageDTO findAttendancePage(Integer memberId, Integer courseId, Integer sectionId) {
         CourseDTO course = courseService.findMyCourseDetail(memberId, courseId);
@@ -62,9 +103,14 @@ public class AttendanceService {
 
         Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
                 .orElse(null);
-
+        Certificate certificate = certificateRepository.findByEnrollmentId(enrollment.getEnrollmentId())
+                .orElse(null);
+        String certificateStatus = "NONE";
+        if (certificate != null) {
+            certificateStatus = certificate.getStatus().name();
+        }
         long totalSectionCount = sectionRepository.countByCourseId(courseId);
-        List<Attendance> attendanceList = attendanceRepository.findByEnrollmentId(enrollment.getEnrollmentId());
+        List<Attendance> attendanceList = findLatestAttendancesByEnrollmentId(enrollment.getEnrollmentId());
         Map<Integer, String> attendanceStatusMap = buildAttendanceStatusMap(attendanceList);
         int attendanceScore = calculateAttendanceScore(totalSectionCount, attendanceList);
 
@@ -89,7 +135,7 @@ public class AttendanceService {
         int weightedAssignmentScore = calculateWeightedScore(assignmentScore, ASSIGNMENT_MAX_SCORE);
         int weightedExamScore = calculateWeightedScore(examScore, EXAM_MAX_SCORE);
         int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
-        int totalScore = attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
+        int totalScore = calculateTotalScore(memberId, courseId);
 
         return new AttendancePageDTO(
                 memberId,
@@ -108,7 +154,8 @@ public class AttendanceService {
                 EXAM_MAX_SCORE,
                 weightedAttitudeScore,
                 ATTITUDE_MAX_SCORE,
-                totalScore
+                totalScore,
+                certificateStatus
         );
 
     }
@@ -230,5 +277,25 @@ public class AttendanceService {
                 assignment.getDueDate()
         );
     }
+
+    private List<Attendance> findLatestAttendancesByEnrollmentId(Integer enrollmentId) {
+        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollmentId);
+        Map<Integer, Attendance> latestAttendanceBySection = new LinkedHashMap<>();
+
+        for (Attendance attendance : attendances) {
+            Attendance current = latestAttendanceBySection.get(attendance.getSectionId());
+
+            if (current == null || ATTENDANCE_ORDER.compare(attendance, current) > 0) {
+                latestAttendanceBySection.put(attendance.getSectionId(), attendance);
+            }
+        }
+
+        return new ArrayList<>(latestAttendanceBySection.values());
+    }
+
+    private static final Comparator<Attendance> ATTENDANCE_ORDER =
+            Comparator.comparing(Attendance::getCheckedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(Attendance::getAttendanceId, Comparator.nullsFirst(Comparator.naturalOrder()));
 
 }

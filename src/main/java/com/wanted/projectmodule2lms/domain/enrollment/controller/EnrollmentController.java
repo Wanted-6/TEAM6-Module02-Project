@@ -10,7 +10,12 @@ import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -22,6 +27,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EnrollmentController {
 
+    private static final String ALL_CATEGORY = "\uC804\uCCB4";
+    private static final String ENROLL_SUCCESS_MESSAGE = "Course enrollment completed.";
+
     private final EnrollmentService enrollmentService;
     private final CourseService courseService;
 
@@ -29,6 +37,7 @@ public class EnrollmentController {
     @GetMapping("/courses")
     public String findOpenCourses(
             @LoginMemberId Long memberId,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String category,
             Model model) {
 
@@ -36,18 +45,14 @@ public class EnrollmentController {
             return "redirect:/auth/login";
         }
 
-        List<CourseDTO> courseList = courseService.findOpenCourses();
-        if (category != null && !category.isBlank() && !category.equals("��ü")) {
-            courseList = courseList.stream()
-                    .filter(course -> category.equals(course.getCategory()))
-                    .toList();
-        }
+        List<CourseDTO> courseList = courseService.findOpenCourses(keyword, category);
 
         Set<Integer> enrolledCourseIds = enrollmentService.findEnrollmentsByMemberId(Math.toIntExact(memberId)).stream()
                 .map(Enrollment::getCourseId)
                 .collect(Collectors.toSet());
 
         model.addAttribute("courseList", courseList);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);
         model.addAttribute("enrolledCourseIds", enrolledCourseIds);
 
@@ -77,7 +82,7 @@ public class EnrollmentController {
         return "student/enrollment/detail";
     }
 
-
+    @AuditLog
     @PostMapping
     public String enrollCourse(
             @LoginMemberId Long memberId,
@@ -90,7 +95,7 @@ public class EnrollmentController {
 
         try {
             enrollmentService.enrollCourse(Math.toIntExact(memberId), request.getCourseId());
-            rttr.addFlashAttribute("successMessage", "������û�� �Ϸ�Ǿ����ϴ�.");
+            rttr.addFlashAttribute("successMessage", ENROLL_SUCCESS_MESSAGE);
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }

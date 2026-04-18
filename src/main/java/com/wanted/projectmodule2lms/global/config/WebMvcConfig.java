@@ -13,7 +13,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginMemberIdArgumentResolver loginMemberIdArgumentResolver;
 
-    // 목록에 우리가 만든 해석기 추가
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(loginMemberIdArgumentResolver);

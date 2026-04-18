@@ -47,6 +47,7 @@ public class AuthController {
     public String findIdPage() {
         return "auth/find-id";
     }
+
     @AuditLog
     @PostMapping("/find-id")
     @ResponseBody

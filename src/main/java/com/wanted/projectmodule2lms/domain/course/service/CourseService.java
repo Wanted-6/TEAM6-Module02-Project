@@ -84,13 +84,17 @@ public class CourseService {
     }
 
     public List<CourseDTO> findOpenCourses() {
-        List<Course> courseList = courseRepository.findAllByIsOpenTrueOrderByCourseIdDesc();
+        return findOpenCourses(null, null);
+    }
+
+    public List<CourseDTO> findOpenCourses(String keyword, String category) {
+        List<CourseDTO> courseList = findAllCourses(keyword, category);
 
         return courseList.stream()
-                .filter(course -> course.getApprovalStatus() == CourseApprovalStatus.APPROVED)
+                .filter(course -> CourseApprovalStatus.APPROVED.name().equals(course.getApprovalStatus()))
+                .filter(course -> Boolean.TRUE.equals(course.getIsOpen()))
                 .filter(course -> sectionRepository.countByCourseId(course.getCourseId()) == 8)
-                .map(course -> modelMapper.map(course, CourseDTO.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<CourseDTO> findCoursesByInstructor(Integer instructorId) {

@@ -8,12 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class GradeController {
+
+    private static final String LOGIN_MEMBER_REQUIRED = "Login member id is required.";
 
     private final GradeService gradeService;
 
@@ -21,7 +23,7 @@ public class GradeController {
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
-            throw new IllegalStateException("Login member id is required.");
+            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
         }
 
         List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());
