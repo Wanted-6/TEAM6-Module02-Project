@@ -118,7 +118,7 @@ public class GradeService {
                 attitudeScore
         );
 
-        boolean isPassed = totalScore.compareTo(new BigDecimal("60")) >= 0;
+        boolean isPassed = totalScore.compareTo(new BigDecimal("80")) >= 0;
 
         grade.updateScore(
                 attendanceScore,
@@ -147,7 +147,7 @@ public class GradeService {
                 attitudeScore
         );
 
-        boolean isPassed = totalScore.compareTo(new BigDecimal("60")) >= 0;
+        boolean isPassed = totalScore.compareTo(new BigDecimal("80")) >= 0;
 
         grade.updateScore(
                 attendanceScore,

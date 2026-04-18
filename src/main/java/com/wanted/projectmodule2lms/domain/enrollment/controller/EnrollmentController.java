@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class EnrollmentController {
 
     private static final String ALL_CATEGORY = "\uC804\uCCB4";
-    private static final String ENROLL_SUCCESS_MESSAGE = "Course enrollment completed.";
+    private static final String ENROLL_SUCCESS_MESSAGE = "수강신청이 완료되었습니다.";
 
     private final EnrollmentService enrollmentService;
     private final CourseService courseService;
