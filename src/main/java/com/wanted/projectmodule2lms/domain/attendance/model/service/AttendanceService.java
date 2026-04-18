@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +62,7 @@ public class AttendanceService {
                 .orElse(null);
 
         long totalSectionCount = sectionRepository.countByCourseId(courseId);
-        List<Attendance> attendanceList = attendanceRepository.findByEnrollmentId(enrollment.getEnrollmentId());
+        List<Attendance> attendanceList = findLatestAttendancesByEnrollmentId(enrollment.getEnrollmentId());
         int attendanceScore = calculateAttendanceScore(totalSectionCount, attendanceList);
 
         int assignmentScore = 0;
@@ -108,7 +110,7 @@ public class AttendanceService {
             certificateStatus = certificate.getStatus().name();
         }
         long totalSectionCount = sectionRepository.countByCourseId(courseId);
-        List<Attendance> attendanceList = attendanceRepository.findByEnrollmentId(enrollment.getEnrollmentId());
+        List<Attendance> attendanceList = findLatestAttendancesByEnrollmentId(enrollment.getEnrollmentId());
         Map<Integer, String> attendanceStatusMap = buildAttendanceStatusMap(attendanceList);
         int attendanceScore = calculateAttendanceScore(totalSectionCount, attendanceList);
 
@@ -275,5 +277,25 @@ public class AttendanceService {
                 assignment.getDueDate()
         );
     }
+
+    private List<Attendance> findLatestAttendancesByEnrollmentId(Integer enrollmentId) {
+        List<Attendance> attendances = attendanceRepository.findByEnrollmentId(enrollmentId);
+        Map<Integer, Attendance> latestAttendanceBySection = new LinkedHashMap<>();
+
+        for (Attendance attendance : attendances) {
+            Attendance current = latestAttendanceBySection.get(attendance.getSectionId());
+
+            if (current == null || ATTENDANCE_ORDER.compare(attendance, current) > 0) {
+                latestAttendanceBySection.put(attendance.getSectionId(), attendance);
+            }
+        }
+
+        return new ArrayList<>(latestAttendanceBySection.values());
+    }
+
+    private static final Comparator<Attendance> ATTENDANCE_ORDER =
+            Comparator.comparing(Attendance::getCheckedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
+                    .thenComparing(Attendance::getAttendanceId, Comparator.nullsFirst(Comparator.naturalOrder()));
 
 }
