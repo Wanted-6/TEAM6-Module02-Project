@@ -3,9 +3,13 @@ package com.wanted.projectmodule2lms.domain.submission.service;
 import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
 import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
+import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
+import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.submission.model.dao.SubmissionRepository;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionCreateDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionDTO;
+import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionListDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionScoreDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.entity.Submission;
@@ -31,14 +35,29 @@ public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final AssignmentRepository assignmentRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final MemberRepository memberRepository;
     private final ModelMapper modelMapper;
     private final ResourceLoader resourceLoader;
 
-    public List<SubmissionDTO> findSubmissionsByAssignmentId(Integer assignmentId) {
+    public List<SubmissionListDTO> findSubmissionsByAssignmentId(Integer assignmentId) {
         List<Submission> submissionList = submissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignmentId);
 
         return submissionList.stream()
-                .map(submission -> modelMapper.map(submission, SubmissionDTO.class))
+                .map(submission -> {
+                    Enrollment enrollment = enrollmentRepository.findById(submission.getEnrollmentId())
+                            .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
+
+                    Member member = memberRepository.findById(enrollment.getMemberId())
+                            .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
+
+                    return new SubmissionListDTO(
+                            submission.getSubmissionId(),
+                            member.getName(),
+                            member.getLoginId(),
+                            submission.getSubmittedAt(),
+                            submission.getScore()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
