@@ -1,5 +1,6 @@
 package com.wanted.projectmodule2lms.domain.course.controller;
 
+import com.wanted.projectmodule2lms.domain.assignment.service.AssignmentService;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
@@ -18,6 +19,7 @@ import java.security.Principal;
 public class CourseController {
 
     private final CourseService courseService;
+    private final AssignmentService assignmentService;
 
     @GetMapping
     public ModelAndView findAllCourses(@RequestParam(required = false) String keyword,
@@ -49,6 +51,7 @@ public class CourseController {
 
         mv.addObject("course", courseService.findCourseById(courseId));
         mv.addObject("role", role);
+        mv.addObject("hasAssignment", assignmentService.hasAssignmentByCourseId(courseId));
         mv.setViewName("instructor/course/detail");
         return mv;
     }

@@ -41,6 +41,10 @@ public class AssignmentService {
         return modelMapper.map(foundAssignment, AssignmentDTO.class);
     }
 
+    public boolean hasAssignmentByCourseId(Integer courseId) {
+        return assignmentRepository.existsByCourseId(courseId);
+    }
+
     @Transactional
     public Integer registAssignment(Integer courseId,
                                     AssignmentCreateDTO createDTO,
