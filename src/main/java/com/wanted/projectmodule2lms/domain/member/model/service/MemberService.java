@@ -5,6 +5,8 @@ import com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO;
 import com.wanted.projectmodule2lms.domain.member.model.dto.SignupDTO;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.domain.profile.dao.ProfileRepository;
+import com.wanted.projectmodule2lms.domain.profile.entity.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import java.util.UUID;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
     private final PasswordEncoder encoder;
 
     @Transactional
@@ -118,10 +121,10 @@ public class MemberService {
         Member member = memberRepository.findByLoginId(username).orElse(null);
 
         if (member != null) {
-            member.increaseLoginFailCount(); // 숫자 1 올리기 (+ null 방어)
-            return member.getLoginFailCount(); // 방금 올라간 그 숫자를 바로 던져줌!
+            member.increaseLoginFailCount();
+            return member.getLoginFailCount();
         }
-        return 0; // 회원이 없으면 0
+        return 0;
     }
 
     @Transactional
@@ -167,13 +170,13 @@ public class MemberService {
 
         if (member.isPresent()) {
             String loginId = member.get().getLoginId();
-            // 아이디 일부분 마스킹 하기
+            // 아이디 일부분 마스킹
             return maskLoginId(loginId);
         }
         return null;  // 못 찾았을 경우
     }
 
-    // 아이디 마스킹 처리하기
+    // 아이디 마스킹 처리
     private String maskLoginId(String loginId){
         if (loginId.length() <= 3){
             return loginId.substring(0, 1) + "**";
@@ -191,11 +194,11 @@ public class MemberService {
 
             // 임시 비밀번호 생성 (비밀번호 규칙 지켜서 )
             // 비밀번호 복잡도 검사 통과 위해 '!A1' 강제로 붙임.(비밀번호 조건 통과 위해)
-             String tempPassword = UUID.randomUUID().toString().substring(0, 6) + "!A1";
+            String tempPassword = UUID.randomUUID().toString().substring(0, 6) + "!A1";
 
-             member.changeToTempPassword(encoder.encode(tempPassword));
+            member.changeToTempPassword(encoder.encode(tempPassword));
 
-             // 비밀번호 암호화 후 DB에 넣기
+            // 비밀번호 암호화 후 DB에 넣기
 //            member.changePassword(encoder.encode(tempPassword));
 
             return tempPassword;
@@ -223,9 +226,7 @@ public class MemberService {
             String storedFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             File targetFile = new File(dir, storedFileName);
 
-            file.transferTo(targetFile); // 실제 컴퓨터 하드디스크에 파일 복사!
-
-            // 나중에 HTML에서 다운로드 링크로 쓸 수 있는 주소 반환
+            file.transferTo(targetFile);
             return "/uploads/" + storedFileName;
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,4 +234,67 @@ public class MemberService {
         }
     }
 
+    @Transactional
+    public void updateProfile(Long memberId, String bio, String profileImage) {
+        Integer id = Math.toIntExact(memberId);
+        Member member = memberRepository.findById(id).orElseThrow();
+
+        // 주의: 여기서 쓰이는 Profile은 반드시 Entity Profile이어야 합니다!
+        Profile profile = member.getProfile();
+
+        if (profile == null) {
+            // 프로필이 아예 없으면 새로 만들어서 저장!
+            profile = new Profile(member, profileImage, bio);
+            member.assignProfile(profile); // 👈 아까 Member.java에 만든 메서드 사용
+            profileRepository.save(profile);
+        } else {
+            profile.updateBio(bio);
+            if (profileImage != null) {
+                profile.updateProfileImage(profileImage);
+            }
+            profileRepository.save(profile);
+        }
+    }
+
+    @Transactional
+    public void updatePhone(Long memberId, String phone) {
+        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+
+        if (member.getPhone() != null && member.getPhone().equals(phone)) return;
+        if (memberRepository.existsByPhone(phone)) {
+            throw new IllegalArgumentException("이미 사용 중인 전화번호입니다.");
+        }
+        member.updatePhone(phone);
+    }
+
+//    @Transactional
+//    public void deleteMember(Long memberId) {
+//        memberRepository.deleteById(Math.toIntExact(memberId));
+//    }
+
+
+    @Transactional
+    public void deleteMember(Long memberId) {
+        Integer id = Math.toIntExact(memberId);
+        Member member = memberRepository.findById(id).orElseThrow();
+
+        // 1. 강사 탈퇴 조건 검사
+        if (member.getRole() == MemberRole.INSTRUCTOR) {
+            // TODO: 실제 강사의 진행 중인 강의 조회 로직으로 변경하세요 (CourseRepository 연동 필요)
+            boolean hasActiveCourses = false; // 임시
+            if (hasActiveCourses) {
+                throw new IllegalStateException("진행 중인 강의가 있어 탈퇴할 수 없습니다. 강의 종료 후 다시 시도해 주세요.");
+            }
+        }
+        // 2. 학생 탈퇴 조건 검사
+        else if (member.getRole() == MemberRole.STUDENT) {
+            // TODO: 실제 학생의 수강 내역 조회 로직으로 변경하세요 (EnrollmentRepository 연동 필요)
+            boolean hasActiveEnrollments = false; // 임시
+            if (hasActiveEnrollments) {
+                throw new IllegalStateException("수강 중인 강의가 있어 탈퇴할 수 없습니다. 수강 종료 후 다시 시도해 주세요.");
+            }
+        }
+
+        memberRepository.delete(member);
+    }
 }
