@@ -37,6 +37,7 @@ public class EnrollmentController {
     @GetMapping("/courses")
     public String findOpenCourses(
             @LoginMemberId Long memberId,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String category,
             Model model) {
 
@@ -44,18 +45,14 @@ public class EnrollmentController {
             return "redirect:/auth/login";
         }
 
-        List<CourseDTO> courseList = courseService.findOpenCourses();
-        if (category != null && !category.isBlank() && !category.equals(ALL_CATEGORY)) {
-            courseList = courseList.stream()
-                    .filter(course -> category.equals(course.getCategory()))
-                    .toList();
-        }
+        List<CourseDTO> courseList = courseService.findOpenCourses(keyword, category);
 
         Set<Integer> enrolledCourseIds = enrollmentService.findEnrollmentsByMemberId(Math.toIntExact(memberId)).stream()
                 .map(Enrollment::getCourseId)
                 .collect(Collectors.toSet());
 
         model.addAttribute("courseList", courseList);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);
         model.addAttribute("enrolledCourseIds", enrolledCourseIds);
 
