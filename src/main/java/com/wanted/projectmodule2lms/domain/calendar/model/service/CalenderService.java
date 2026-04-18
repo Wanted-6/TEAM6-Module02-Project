@@ -61,8 +61,10 @@ public class CalenderService {
                                 "section-" + section.getSectionId(),
                                 courseTitle + " - " + section.getTitle(),
                                 section.getOpenDate().toString(),
-                                "#3b82f6"
+                                "#3b82f6",
+                                section.getCourseId()
                         );
+
                     })
                     .collect(Collectors.toList());
 
@@ -79,8 +81,10 @@ public class CalenderService {
                                 "assignment-" + assignment.getAssignmentId(),
                                 courseTitle + " - 과제 마감",
                                 assignment.getDueDate().toLocalDate().toString(),
-                                "#a78bfa"
+                                "#a78bfa",
+                                assignment.getCourseId()
                         );
+
                     })
                     .collect(Collectors.toList());
 
@@ -92,8 +96,10 @@ public class CalenderService {
                             "exam-" + course.getCourseId(),
                             course.getTitle() + " - 시험 마감",
                             course.getExamDueDate().toString(),
-                            "#ef4444"
+                            "#ef4444",
+                            course.getCourseId()
                     ))
+
                     .collect(Collectors.toList());
 
             result.addAll(examEvents);
@@ -105,8 +111,10 @@ public class CalenderService {
                         "memo-" + memo.getMemoId(),
                         "[메모] " + memo.getContent(),
                         memo.getMemoDate().toString(),
-                        getMemoColor(memo.getMemoDate())
+                        getMemoColor(memo.getMemoDate()),
+                        null
                 ))
+
                 .collect(Collectors.toList());
 
 
@@ -142,8 +150,10 @@ public class CalenderService {
                                 "section-" + section.getSectionId(),
                                 courseTitle + " - " + section.getTitle(),
                                 section.getOpenDate().toString(),
-                                "#16a34a"
+                                "#16a34a",
+                                section.getCourseId()
                         );
+
                     })
                     .collect(Collectors.toList());
 
@@ -160,8 +170,10 @@ public class CalenderService {
                                 "assignment-" + assignment.getAssignmentId(),
                                 courseTitle + " - 과제 마감",
                                 assignment.getDueDate().toLocalDate().toString(),
-                                "#a78bfa"
+                                "#a78bfa",
+                                assignment.getCourseId()
                         );
+
                     })
                     .collect(Collectors.toList());
 
@@ -173,8 +185,10 @@ public class CalenderService {
                             "exam-" + course.getCourseId(),
                             course.getTitle() + " - 시험 마감",
                             course.getExamDueDate().toString(),
-                            "#ef4444"
+                            "#ef4444",
+                            course.getCourseId()
                     ))
+
                     .collect(Collectors.toList());
 
             result.addAll(examEvents);
@@ -186,8 +200,10 @@ public class CalenderService {
                         "memo-" + memo.getMemoId(),
                         "[메모] " + memo.getContent(),
                         memo.getMemoDate().toString(),
-                        getMemoColor(memo.getMemoDate())
+                        getMemoColor(memo.getMemoDate()),
+                        null
                 ))
+
                 .collect(Collectors.toList());
 
 
