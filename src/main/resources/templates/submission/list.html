@@ -32,8 +32,8 @@
         <table class="w-full text-left">
             <thead class="bg-slate-100 text-slate-700">
             <tr>
-                <th class="px-6 py-4">제출 ID</th>
-                <th class="px-6 py-4">수강 ID</th>
+                <th class="px-6 py-4">학생명</th>
+                <th class="px-6 py-4">로그인 ID</th>
                 <th class="px-6 py-4">제출일</th>
                 <th class="px-6 py-4">점수</th>
                 <th class="px-6 py-4">관리</th>
@@ -47,8 +47,8 @@
             </tr>
 
             <tr th:each="submission : ${submissionList}" class="border-t border-slate-200">
-                <td class="px-6 py-4" th:text="${submission.submissionId}">1</td>
-                <td class="px-6 py-4" th:text="${submission.enrollmentId}">10</td>
+                <td class="px-6 py-4" th:text="${submission.studentName}">홍길동</td>
+                <td class="px-6 py-4" th:text="${submission.studentLoginId}">student01</td>
                 <td class="px-6 py-4"
                     th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-04-20 10:00</td>
                 <td class="px-6 py-4">
