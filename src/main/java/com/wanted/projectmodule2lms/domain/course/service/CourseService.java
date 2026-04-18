@@ -1,7 +1,12 @@
 package com.wanted.projectmodule2lms.domain.course.service;
 
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
-import com.wanted.projectmodule2lms.domain.course.model.dto.*;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseAdminDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseInstructorDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseStudentDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.course.model.entity.CourseApprovalStatus;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -21,7 +26,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +47,7 @@ public class CourseService {
     private final ResourceLoader resourceLoader;
 
     private static final Set<String> COURSE_CATEGORIES = Set.of(
-            "인문", "사회", "교육", "공학", "자연", "예체능", "기타"
+            "Backend", "Database", "AI", "Infra", "DevOps", "Data"
     );
 
     public List<CourseDTO> findAllCourses() {
@@ -44,13 +55,8 @@ public class CourseService {
     }
 
     public List<CourseDTO> findAllCourses(String keyword, String category) {
-
-        String safeKeyword = StringUtils.hasText(keyword) ? keyword.trim() : null;
-        String safeCategory = StringUtils.hasText(category) ? category.trim() : null;
-
-        if (safeCategory != null && !isValidCategory(safeCategory)) {
-            safeCategory = null;
-        }
+        String safeKeyword = normalizeKeyword(keyword);
+        String safeCategory = normalizeCategory(category);
 
         List<Course> courseList;
 
@@ -106,7 +112,6 @@ public class CourseService {
     }
 
     public List<CourseDTO> findMyInstructorCourses(String instructorLoginId, String keyword, String category) {
-
         Member instructor = memberRepository.findByLoginId(instructorLoginId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
 
@@ -114,9 +119,8 @@ public class CourseService {
             throw new IllegalArgumentException("강사만 코스 목록을 조회할 수 있습니다.");
         }
 
-        String safeKeyword = StringUtils.hasText(keyword) ? keyword.trim() : null;
-        String rawCategory = StringUtils.hasText(category) ? category.trim() : null;
-        final String safeCategory = (rawCategory != null && isValidCategory(rawCategory)) ? rawCategory : null;
+        String safeKeyword = normalizeKeyword(keyword);
+        String safeCategory = normalizeCategory(category);
 
         List<Course> courseList = courseRepository.findAllByInstructorIdOrderByCourseIdDesc(instructor.getMemberId());
 
@@ -136,7 +140,6 @@ public class CourseService {
     }
 
     public List<CourseStudentDTO> findStudentsByCourseId(Integer courseId) {
-
         List<Enrollment> enrollmentList = enrollmentRepository.findByCourseIdOrderByEnrolledAtAsc(courseId);
 
         if (enrollmentList.isEmpty()) {
@@ -180,7 +183,6 @@ public class CourseService {
 
     @Transactional
     public Integer registCourse(CourseCreateDTO createDTO, MultipartFile thumbnailFile) throws IOException {
-
         Member instructor = memberRepository.findByLoginId(createDTO.getInstructorLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
 
@@ -188,7 +190,8 @@ public class CourseService {
             throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
         }
 
-        if (!isValidCategory(createDTO.getCategory())) {
+        String normalizedCategory = normalizeCategory(createDTO.getCategory());
+        if (normalizedCategory == null) {
             throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
         }
 
@@ -199,7 +202,7 @@ public class CourseService {
                 instructor.getMemberId(),
                 createDTO.getTitle(),
                 createDTO.getDescription(),
-                createDTO.getCategory(),
+                normalizedCategory,
                 thumbnailPath,
                 createDTO.getCapacity(),
                 createDTO.getStartDate(),
@@ -237,7 +240,8 @@ public class CourseService {
             throw new IllegalArgumentException("본인이 등록한 코스만 수정할 수 있습니다.");
         }
 
-        if (!isValidCategory(updateDTO.getCategory())) {
+        String normalizedCategory = normalizeCategory(updateDTO.getCategory());
+        if (normalizedCategory == null) {
             throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
         }
 
@@ -251,7 +255,7 @@ public class CourseService {
         foundCourse.changeCourseInfo(
                 updateDTO.getTitle(),
                 updateDTO.getDescription(),
-                updateDTO.getCategory(),
+                normalizedCategory,
                 thumbnailPath,
                 updateDTO.getCapacity(),
                 updateDTO.getStartDate(),
@@ -313,7 +317,6 @@ public class CourseService {
     }
 
     public List<CourseDTO> findMyCourses(Integer memberId) {
-
         List<Enrollment> enrollmentList = enrollmentRepository.findByMemberId(memberId);
 
         List<Integer> courseIds = enrollmentList.stream()
@@ -335,7 +338,6 @@ public class CourseService {
     }
 
     public CourseDTO findMyCourseDetail(Integer memberId, Integer courseId) {
-
         enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
                 .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
 
@@ -366,8 +368,32 @@ public class CourseService {
         );
     }
 
+    private String normalizeKeyword(String keyword) {
+        return StringUtils.hasText(keyword) ? keyword.trim() : null;
+    }
+
+    private String normalizeCategory(String category) {
+        if (!StringUtils.hasText(category)) {
+            return null;
+        }
+
+        String trimmedCategory = category.trim();
+
+        for (String courseCategory : COURSE_CATEGORIES) {
+            if (courseCategory.equalsIgnoreCase(trimmedCategory)) {
+                return courseCategory;
+            }
+        }
+
+        return null;
+    }
+
     private boolean isValidCategory(String category) {
-        return StringUtils.hasText(category) && COURSE_CATEGORIES.contains(category.trim());
+        return normalizeCategory(category) != null;
+    }
+
+    public List<String> getCourseCategories() {
+        return new ArrayList<>(new LinkedHashSet<>(COURSE_CATEGORIES));
     }
 
     private String saveThumbnailFile(MultipartFile thumbnailFile) throws IOException {

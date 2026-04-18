@@ -64,6 +64,13 @@
             font-weight: 800;
             color: #d97706 !important;
         }
+        #ddayList {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
 
         .dday-item {
             margin-bottom: 8px;
@@ -178,8 +185,12 @@
         if (!event) return false;
 
         const eventId = event.id || '';
-        return eventId.startsWith('exam-') || eventId.startsWith('assignment-');
+        return eventId.startsWith('exam-')
+            || eventId.startsWith('assignment-')
+            || eventId.startsWith('memo-');
     }
+
+
 
     function getDeadlineColor(diffDays) {
         if (diffDays === 3) return '#facc15';
@@ -210,29 +221,129 @@
         });
     }
 
+    // function renderDdayList() {
+    //     const ddayList = document.getElementById('ddayList');
+    //     ddayList.innerHTML = '';
+    //
+    //     const todayStr = getTodayString();
+    //
+    //     const imminentDeadlineEvents = allEvents
+    //         .map(event => {
+    //             const eventId = event.id || '';
+    //             const eventDate = normalizeDate(event.start);
+    //
+    //             return {
+    //                 ...event,
+    //                 id: eventId,
+    //                 start: eventDate,
+    //                 diffDays: getDateDiff(todayStr, eventDate)
+    //             };
+    //         })
+    //         .filter(event =>
+    //             (event.id.startsWith('exam-')
+    //                 || event.id.startsWith('assignment-')
+    //                 || event.id.startsWith('memo-'))
+    //             && event.diffDays >= 0
+    //             && event.diffDays <= 3
+    //         )
+    //         .sort((a, b) => {
+    //             if (a.diffDays !== b.diffDays) {
+    //                 return a.diffDays - b.diffDays;
+    //             }
+    //             return a.start.localeCompare(b.start);
+    //         });
+    //
+    //     if (imminentDeadlineEvents.length === 0) {
+    //         ddayList.innerHTML = '<div class="panel-item">임박한 일정이 없습니다.</div>';
+    //         return;
+    //     }
+    //
+    //     imminentDeadlineEvents.forEach(event => {
+    //         console.log('rendering dday event', event);
+    //         let label = '';
+    //         let className = 'dday-default';
+    //
+    //         if (event.diffDays === 0) {
+    //             label = 'D-Day';
+    //             className = 'dday-red';
+    //         } else if (event.diffDays === 1) {
+    //             label = 'D-1';
+    //             className = 'dday-red';
+    //         } else if (event.diffDays === 2) {
+    //             label = 'D-2';
+    //             className = 'dday-orange';
+    //         } else if (event.diffDays === 3) {
+    //             label = 'D-3';
+    //             className = 'dday-yellow';
+    //         }
+    //
+    //         ddayList.innerHTML += `
+    //         <div class="dday-item ${className}">
+    //             <div>${label}</div>
+    //             <div>${event.title}</div>
+    //             <div>${event.start}</div>
+    //         </div>
+    //     `;
+    //             console.log('dday html after render', ddayList.innerHTML);
+    //
+    //         }
+    //     );
+    //
+    //     console.log('dday child count', ddayList.children.length);
+    //
+    // }
+
     function renderDdayList() {
+        console.log('renderDdayList 실행됨');
+
         const ddayList = document.getElementById('ddayList');
         ddayList.innerHTML = '';
 
         const todayStr = getTodayString();
 
-        const imminentDeadlineEvents = allEvents
-            .filter(event => isDeadlineEvent(event))
-            .map(event => {
-                const eventDate = normalizeDate(event.start);
-                return {
-                    ...event,
-                    start: eventDate,
-                    diffDays: getDateDiff(todayStr, eventDate)
-                };
-            })
-            .filter(event => event.diffDays >= 0 && event.diffDays <= 3)
+        console.log('todayStr', todayStr);
+        console.log('allEvents count', allEvents.length);
+        console.log('allEvents raw', allEvents);
+
+        const memoEvents = allEvents.filter(event => {
+            const eventId = event.id || '';
+            const eventTitle = event.title || '';
+            return eventId.startsWith('memo-') || eventTitle.startsWith('[메모]');
+        });
+
+        console.log('memoEvents only', memoEvents);
+
+        const mappedEvents = allEvents.map(event => {
+            const eventId = event.id || '';
+            const eventTitle = event.title || '';
+            const eventDate = normalizeDate(event.start);
+            const diffDays = getDateDiff(todayStr, eventDate);
+
+            return {
+                ...event,
+                id: eventId,
+                title: eventTitle,
+                start: eventDate,
+                diffDays: diffDays
+            };
+        });
+
+        console.log('mappedEvents', mappedEvents);
+
+        const imminentDeadlineEvents = mappedEvents
+            .filter(event =>
+                (
+                    event.id.startsWith('exam-') ||
+                    event.id.startsWith('assignment-') ||
+                    event.id.startsWith('memo-') ||
+                    event.title.startsWith('[메모]')
+                ) &&
+                event.diffDays >= 0 &&
+                event.diffDays <= 3
+            )
             .sort((a, b) => a.diffDays - b.diffDays);
 
-        if (imminentDeadlineEvents.length === 0) {
-            ddayList.innerHTML = '<div class="panel-item">임박한 마감 일정 없음</div>';
-            return;
-        }
+        console.log('imminentDeadlineEvents', imminentDeadlineEvents);
 
         imminentDeadlineEvents.forEach(event => {
             let label = '';
@@ -253,12 +364,21 @@
             }
 
             ddayList.innerHTML += `
-                <div class="dday-item ${className}">
-                    ${label} : ${event.title} (${event.start})
-                </div>
-            `;
+        <div class="dday-item ${className}">
+            <p class="text-xs font-bold">${label}</p>
+            <p class="mt-1 font-semibold">${event.title}</p>
+            <p class="mt-1 text-xs opacity-80">${event.start}</p>
+        </div>
+    `;
         });
+
+
+        console.log('final dday child count', ddayList.children.length);
+        console.log('final dday html', ddayList.innerHTML);
     }
+
+
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('calendar');

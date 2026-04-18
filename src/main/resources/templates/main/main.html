@@ -88,6 +88,86 @@
             border-radius: 10px;
             padding: 2px 4px;
         }
+
+        .promo-slider {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-track {
+            display: flex;
+            transition: transform 0.9s ease;
+        }
+
+        .promo-slide {
+            min-width: 100%;
+        }
+
+        .promo-visual {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .promo-visual::before,
+        .promo-visual::after {
+            content: '';
+            position: absolute;
+            border-radius: 9999px;
+            opacity: 0.7;
+            z-index: 0;
+        }
+
+        .promo-visual::before {
+            inset: auto -2rem -4rem auto;
+            width: 10rem;
+            height: 10rem;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .promo-visual::after {
+            inset: -3rem auto auto -2rem;
+            width: 8rem;
+            height: 8rem;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .promo-pill {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+            z-index: 1;
+        }
+
+        .promo-pill--one {
+            top: 1.5rem;
+            right: 1.5rem;
+        }
+
+        .promo-pill--two {
+            bottom: 1.5rem;
+            left: 1.5rem;
+        }
+
+        .promo-pill--three {
+            right: 2rem;
+            bottom: 4.5rem;
+        }
+
+        .promo-indicator[data-active="true"] {
+            width: 2.5rem;
+            background: #2b3f8f;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .promo-track {
+                transition: none;
+            }
+        }
     </style>
 </head>
 <body class="text-ink">
@@ -128,21 +208,21 @@
     </div>
 </header>
 
-<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <section th:if="${!loggedIn}" class="rounded-[28px] bg-white/90 px-6 py-8 shadow-soft sm:px-8">
-        <div class="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+<main class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+    <section th:if="${!loggedIn}" class="rounded-[28px] bg-white/90 px-6 py-4 shadow-soft sm:px-8">
+        <div class="max-w-4xl">
             <div>
                 <p class="mb-3 inline-flex rounded-full bg-brandSoft px-4 py-1 text-sm font-semibold text-brand">학습 관리 플랫폼</p>
-                <h1 class="font-headline text-4xl font-extrabold leading-tight text-ink sm:text-5xl">
+                <h1 class="font-headline text-3xl font-extrabold leading-tight text-ink sm:text-4xl">
                     로그인 후
                     <span class="text-brand">학생/강사 전용 메인페이지</span>를
                     이용할 수 있습니다.
                 </h1>
-                <p class="mt-5 max-w-2xl text-base leading-7 text-slate-600">
+                <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600">
                     로그인 전에는 소개 화면만 보이고,
                     로그인 후에는 역할에 따라 상단 메뉴와 중앙 캘린더가 달라집니다.
                 </p>
-                <div class="mt-8 flex flex-wrap gap-3">
+                <div class="mt-4 flex flex-wrap gap-3">
                     <a th:href="@{/auth/login}" class="rounded-full bg-brand px-6 py-3 font-semibold text-white transition hover:bg-[#223374]">
                         로그인
                     </a>
@@ -151,33 +231,232 @@
                     </a>
                 </div>
             </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <div class="rounded-3xl border border-line bg-paper p-5">
-                    <span class="material-symbols-outlined mb-4 text-4xl text-brand">school</span>
-                    <h2 class="text-lg font-bold">학생 메인</h2>
-                    <p class="mt-2 text-sm leading-6 text-slate-600">
-                        수강 신청, 내 강의실, 성적 조회, 학생 캘린더를 메인에서 확인합니다.
-                    </p>
-                </div>
-
-                <div class="rounded-3xl border border-line bg-paper p-5">
-                    <span class="material-symbols-outlined mb-4 text-4xl text-accent">co_present</span>
-                    <h2 class="text-lg font-bold">강사 메인</h2>
-                    <p class="mt-2 text-sm leading-6 text-slate-600">
-                        강의 관리, 성적 관리, 게시판, 강사 캘린더를 메인에서 확인합니다.
-                    </p>
-                </div>
-
-                <div class="rounded-3xl border border-line bg-white p-5 sm:col-span-2">
-                    <h2 class="text-lg font-bold">메인 페이지 구조</h2>
-                    <p class="mt-2 text-sm leading-6 text-slate-600">
-                        위에는 메뉴 카드, 중앙에는 역할별 캘린더가 표시되도록 구성했습니다.
-                    </p>
-                </div>
-            </div>
         </div>
     </section>
+
+    <section th:if="${!loggedIn}" class="mt-4 rounded-[32px] border border-white/70 bg-white/80 p-4 shadow-soft sm:p-5">
+        <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="inline-flex rounded-full bg-brandSoft px-4 py-1 text-sm font-semibold text-brand">64Lab Highlight</p>
+                <h2 class="mt-3 font-headline text-3xl font-extrabold text-ink sm:text-4xl">
+                    스파르타식 학습 관리 LMS, 육포가 함께합니다
+                </h2>
+                <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                    게을러지기 쉬운 온라인 강의를 끝까지 완주하게 만드는 스파르타식 LMS입니다.
+                    출석, 과제, 시험, 태도 평가와 강한 학습 관리로 흐름을 잡아주고,
+                    끝까지 따라온 학습자에게는 수료증으로 확실한 보상도 제공합니다.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2 self-start md:self-auto">
+                <button type="button"
+                        id="promoPrevBtn"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-slate-600 transition hover:border-brand hover:text-brand"
+                        aria-label="이전 배너">
+                    <span class="material-symbols-outlined">west</span>
+                </button>
+                <button type="button"
+                        id="promoNextBtn"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-slate-600 transition hover:border-brand hover:text-brand"
+                        aria-label="다음 배너">
+                    <span class="material-symbols-outlined">east</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="promo-slider rounded-[28px] bg-transparent">
+            <div id="promoTrack" class="promo-track items-stretch">
+                <article class="promo-slide">
+                    <div class="grid min-h-[430px] items-center gap-5 rounded-[26px] bg-gradient-to-br from-[#20326e] via-[#2b3f8f] to-[#4d67d4] p-5 text-white lg:grid-cols-[1.02fr_0.98fr] lg:p-6">
+                        <div class="flex flex-col justify-center gap-5">
+                            <div>
+                                <h3 class="font-headline text-3xl font-extrabold leading-tight sm:text-4xl">
+                                    무료지만 느슨하지 않은,
+                                    <span class="text-white/90">스파르타형 LMS</span>로
+                                    끝까지 완주하게 만듭니다
+                                </h3>
+
+                                <p class="mt-3 max-w-xl text-sm leading-7 text-white/80 sm:text-base">
+                                    게을러지기 쉬운 온라인 강의를 출석, 과제, 시험, 태도까지 꼼꼼하게 관리합니다.
+                                    혼자 듣다 포기하는 수업이 아니라, 끝까지 따라오게 만드는 무료 학습 플랫폼입니다.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 text-sm font-semibold text-white/90">
+                                <span class="rounded-full bg-white/12 px-4 py-2">100% 무료</span>
+                                <span class="rounded-full bg-white/12 px-4 py-2">빡센 학습 관리</span>
+                                <span class="rounded-full bg-white/12 px-4 py-2">완주 중심 운영</span>
+                            </div>
+                        </div>
+
+                        <div class="promo-visual rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur">
+                            <div class="relative z-10 grid gap-4">
+                                <div class="rounded-3xl bg-white/90 p-5 text-ink shadow-xl shadow-slate-950/10">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-brand">Sparta Learning Flow</p>
+                                            <p class="mt-2 text-2xl font-extrabold">무료지만 빡세게</p>
+                                        </div>
+                                        <span class="material-symbols-outlined text-4xl text-brand">school</span>
+                                    </div>
+
+                                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                        <div class="rounded-2xl bg-brandSoft px-4 py-3 text-sm font-semibold text-brand">출석 관리</div>
+                                        <div class="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">과제 점검</div>
+                                        <div class="rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">시험 평가</div>
+                                        <div class="rounded-2xl bg-[#eef6f4] px-4 py-3 text-sm font-semibold text-mint">태도 반영</div>
+                                    </div>
+                                </div>
+
+                                <div class="promo-pill promo-pill--one px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <span class="material-symbols-outlined text-brand">bolt</span>
+                                    무료 수강
+                                </div>
+                                <div class="promo-pill promo-pill--two px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <span class="material-symbols-outlined text-mint">check_circle</span>
+                                    끝까지 가는 루틴
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="promo-slide">
+                    <div class="grid min-h-[430px] items-center gap-5 rounded-[26px] bg-gradient-to-br from-[#fff6e8] via-[#f8e0c0] to-[#f0be7a] p-5 text-ink lg:grid-cols-[1.05fr_0.95fr] lg:p-6">
+                        <div class="flex flex-col justify-center gap-5">
+                            <div>
+                                <h3 class="font-headline text-3xl font-extrabold leading-tight sm:text-4xl">
+                                    온라인이어도
+                                    <span class="text-accent">학교나 학원에 다니는 듯한</span>
+                                    긴장감과 몰입감을 제공합니다
+                                </h3>
+
+                                <p class="mt-3 max-w-xl text-sm leading-7 text-slate-700 sm:text-base">
+                                    최고의 강사진이 출석, 과제, 시험, 태도까지 종합적으로 평가하며 학습 흐름을 잡아줍니다.
+                                    단순히 영상을 보는 플랫폼이 아니라, 꾸준히 따라오도록 밀어주는 관리형 학습 환경입니다.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                <span class="rounded-full bg-white/65 px-4 py-2">강사진 관리</span>
+                                <span class="rounded-full bg-white/65 px-4 py-2">오프라인 같은 몰입감</span>
+                                <span class="rounded-full bg-white/65 px-4 py-2">나태함 방지</span>
+                            </div>
+                        </div>
+
+                        <div class="promo-visual rounded-[28px] border border-white/40 bg-white/45 p-5 backdrop-blur">
+                            <div class="relative z-10 grid gap-4">
+                                <div class="rounded-3xl bg-[#fffaf2] p-5 shadow-xl shadow-amber-950/10">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-accent">Managed Study System</p>
+                                            <p class="mt-2 text-2xl font-extrabold">관리받는 공부</p>
+                                        </div>
+                                        <span class="material-symbols-outlined text-4xl text-accent">co_present</span>
+                                    </div>
+
+                                    <div class="mt-4 grid gap-3">
+                                        <div class="flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-semibold">
+                                            <span>출석 체크 관리</span>
+                                            <span class="rounded-full bg-[#fff4eb] px-3 py-1 text-accent">매 회차 반영</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-semibold">
+                                            <span>과제 제출 점검</span>
+                                            <span class="rounded-full bg-[#eef6f4] px-3 py-1 text-mint">기한 엄수</span>
+                                        </div>
+                                        <div class="flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-semibold">
+                                            <span>시험과 태도 평가</span>
+                                            <span class="rounded-full bg-brandSoft px-3 py-1 text-brand">종합 관리</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="promo-pill promo-pill--one px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <span class="material-symbols-outlined text-accent">dashboard</span>
+                                    운영 업무 통합
+                                </div>
+                                <div class="promo-pill promo-pill--three px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <span class="material-symbols-outlined text-brand">insights</span>
+                                    현황 즉시 확인
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="promo-slide">
+                    <div class="grid min-h-[430px] items-center gap-5 rounded-[26px] bg-gradient-to-br from-[#e8fbf6] via-[#d5f5ec] to-[#9fe2cf] p-5 text-ink lg:grid-cols-[1fr_1fr] lg:p-6">
+                        <div class="flex flex-col justify-center gap-5">
+                            <div>
+                                <h3 class="font-headline text-3xl font-extrabold leading-tight sm:text-4xl">
+                                    일정과 마감, 메모와 성과를 묶어
+                                    학습 몰입도를 끌어올리는 LMS
+                                </h3>
+                                <p class="mt-3 max-w-xl text-sm leading-7 text-slate-700 sm:text-base">
+                                    메인 캘린더와 D-day, 메모 기능을 중심으로 학습자가 해야 할 일을 놓치지 않게 도와주고
+                                    관리자는 전체 흐름을 더 선명하게 파악할 수 있습니다.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3 text-sm font-semibold text-slate-700">
+                                <span class="rounded-full bg-white/70 px-4 py-2">캘린더 중심 관리</span>
+                                <span class="rounded-full bg-white/70 px-4 py-2">마감 일정 강조</span>
+                                <span class="rounded-full bg-white/70 px-4 py-2">개인 메모 지원</span>
+                            </div>
+                        </div>
+
+                        <div class="promo-visual rounded-[28px] border border-white/40 bg-white/45 p-5 backdrop-blur">
+                            <div class="relative z-10 grid gap-4">
+                                <div class="rounded-3xl bg-white p-5 shadow-xl shadow-emerald-950/10">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-mint">Progress Snapshot</p>
+                                            <p class="mt-2 text-2xl font-extrabold">집중 학습 보드</p>
+                                        </div>
+                                        <span class="material-symbols-outlined text-4xl text-mint">calendar_month</span>
+                                    </div>
+
+                                    <div class="mt-4 space-y-3">
+                                        <div class="rounded-2xl bg-[#eef6f4] px-4 py-3">
+                                            <p class="text-xs font-bold text-mint">D-1</p>
+                                            <p class="mt-1 text-sm font-semibold text-slate-800">과제 제출 마감</p>
+                                        </div>
+                                        <div class="rounded-2xl bg-slate-100 px-4 py-3">
+                                            <p class="text-xs font-bold text-slate-500">Memo</p>
+                                            <p class="mt-1 text-sm font-semibold text-slate-800">중간 평가 피드백 정리</p>
+                                        </div>
+                                        <div class="rounded-2xl bg-brandSoft px-4 py-3">
+                                            <p class="text-xs font-bold text-brand">Score</p>
+                                            <p class="mt-1 text-sm font-semibold text-slate-800">학습 성과 흐름 추적</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="promo-pill promo-pill--one px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <span class="material-symbols-outlined text-mint">task_alt</span>
+                                    일정 누락 방지
+                                </div>
+                                <div class="promo-pill promo-pill--two px-4 py-3 text-sm font-semibold text-slate-700">
+                                    <span class="material-symbols-outlined text-brand">notifications_active</span>
+                                    마감 집중도 강화
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-center gap-2" id="promoIndicators" aria-label="프로모션 배너 위치 표시">
+            <button type="button" class="promo-indicator h-2.5 w-8 rounded-full bg-slate-300 transition-all duration-300" data-index="0" data-active="true" aria-label="첫 번째 배너"></button>
+            <button type="button" class="promo-indicator h-2.5 w-8 rounded-full bg-slate-300 transition-all duration-300" data-index="1" data-active="false" aria-label="두 번째 배너"></button>
+            <button type="button" class="promo-indicator h-2.5 w-8 rounded-full bg-slate-300 transition-all duration-300" data-index="2" data-active="false" aria-label="세 번째 배너"></button>
+        </div>
+    </section>
+
+
+
+
 
     <th:block th:if="${loggedIn}">
 
@@ -447,6 +726,42 @@
     let selectedDate = null;
     let editingMemoId = null;
     let calendarInstance = null;
+    let promoIndex = 0;
+    let promoAutoSlide = null;
+
+    function updatePromoIndicators(index) {
+        document.querySelectorAll('.promo-indicator').forEach(indicator => {
+            indicator.dataset.active = String(Number(indicator.dataset.index) === index);
+        });
+    }
+
+    function movePromoSlide(index) {
+        const promoTrack = document.getElementById('promoTrack');
+        if (!promoTrack) return;
+
+        const slides = promoTrack.children.length;
+        promoIndex = (index + slides) % slides;
+        promoTrack.style.transform = `translateX(-${promoIndex * 100}%)`;
+        updatePromoIndicators(promoIndex);
+    }
+
+    function stopPromoAutoSlide() {
+        if (promoAutoSlide) {
+            window.clearInterval(promoAutoSlide);
+            promoAutoSlide = null;
+        }
+    }
+
+    function startPromoAutoSlide() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        stopPromoAutoSlide();
+        promoAutoSlide = window.setInterval(() => {
+            movePromoSlide(promoIndex + 1);
+        }, 5500);
+    }
 
     function getTodayString() {
         const today = new Date();
@@ -471,8 +786,14 @@
         if (!event) return false;
 
         const eventId = event.id || '';
-        return eventId.startsWith('exam-') || eventId.startsWith('assignment-');
+        const eventTitle = event.title || '';
+
+        return eventId.startsWith('exam-')
+            || eventId.startsWith('assignment-')
+            || eventId.startsWith('memo-')
+            || eventTitle.startsWith('[메모]');
     }
+
 
     function getDeadlineColor(diffDays) {
         if (diffDays === 3) return '#facc15';
@@ -776,6 +1097,39 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        const promoTrack = document.getElementById('promoTrack');
+        const promoPrevBtn = document.getElementById('promoPrevBtn');
+        const promoNextBtn = document.getElementById('promoNextBtn');
+
+        if (promoTrack) {
+            if (promoPrevBtn) {
+                promoPrevBtn.addEventListener('click', function () {
+                    movePromoSlide(promoIndex - 1);
+                    startPromoAutoSlide();
+                });
+            }
+
+            if (promoNextBtn) {
+                promoNextBtn.addEventListener('click', function () {
+                    movePromoSlide(promoIndex + 1);
+                    startPromoAutoSlide();
+                });
+            }
+
+            document.querySelectorAll('.promo-indicator').forEach(indicator => {
+                indicator.addEventListener('click', function () {
+                    movePromoSlide(Number(indicator.dataset.index));
+                    startPromoAutoSlide();
+                });
+            });
+
+            promoTrack.addEventListener('mouseenter', stopPromoAutoSlide);
+            promoTrack.addEventListener('mouseleave', startPromoAutoSlide);
+
+            movePromoSlide(0);
+            startPromoAutoSlide();
+        }
+
         if (!loggedIn) return;
 
         const calendarEl = document.getElementById('dashboardCalendar');
