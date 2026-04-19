@@ -2,15 +2,19 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시판 메인</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
 <body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
 <div class="page-wrapper">
     <div class="top-utility">
-        <div class="page-main">
+        <div class="page-main box" style="margin-bottom: 0;">
+            <span class="page-eyebrow">Board Hub</span>
             <h1 class="page-title">게시판 메인</h1>
-            <p class="page-desc">게시판 종류를 선택해서 원하는 목록으로 이동하면 된다.</p>
+            <p class="page-desc">
+                원하는 게시판 종류를 선택해서 공지와 커뮤니티, 질의응답 화면으로 빠르게 이동할 수 있습니다.
+            </p>
         </div>
     </div>
 
@@ -18,25 +22,20 @@
         <h2 class="section-title">게시판 종류</h2>
         <div class="card-grid">
             <a class="feature-card" href="/board/admin-notices">
+                <span class="card-tag">Admin Notice</span>
                 <h3>관리자 공지</h3>
-                <p>관리자가 작성하는 전체 공지 게시판이다.</p>
+                <p>관리자가 작성하는 전체 공지 게시판입니다. 시스템 안내와 공통 공지사항을 확인할 수 있습니다.</p>
             </a>
             <a class="feature-card" href="/board/course-notices">
+                <span class="card-tag">Course Notice</span>
                 <h3>코스 공지</h3>
-                <p>강사가 코스 단위로 작성하는 공지 게시판이다.</p>
+                <p>강사가 코스 단위로 작성하는 공지 게시판입니다. 강의별 중요한 전달사항을 확인할 수 있습니다.</p>
             </a>
             <a class="feature-card" href="/board/free">
+                <span class="card-tag">Community</span>
                 <h3>자유게시판</h3>
-                <p>학생과 강사가 자유롭게 소통하는 게시판이다.</p>
+                <p>학생과 강사가 자유롭게 소통하는 공간입니다. 학습 관련 이야기와 일상 대화를 나눌 수 있습니다.</p>
             </a>
-        </div>
-    </div>
-
-    <div class="box">
-        <h2 class="section-title">바로가기</h2>
-        <div class="button-group">
-            <a class="btn" href="/board/regist?type=FREE" data-role-only="ADMIN,INSTRUCTOR,STUDENT">게시글 등록</a>
-            <a class="btn gray" href="/main">메인으로</a>
         </div>
     </div>
 </div>

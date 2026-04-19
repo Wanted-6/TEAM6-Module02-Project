@@ -1,5 +1,4 @@
 package com.wanted.projectmodule2lms.domain.board.controller;
-
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
@@ -15,11 +14,7 @@ import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -28,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/board")
 public class BoardController {
-
     private final CommentService commentService;
     private final BoardService boardService;
     private final MemberRepository memberRepository;
@@ -111,13 +105,19 @@ public class BoardController {
 
     @GetMapping("/detail")
     public String boardDetailPage(@RequestParam Integer postId, Model model) {
-        boardService.increaseViewCount(postId);
         BoardDTO board = boardService.findBoardById(postId);
         List<CommentDTO> commentList=commentService.findCommentsByPostId(postId);
         model.addAttribute("board", board);
         model.addAttribute("commentList", commentList);
         model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/detail";
+    }
+
+    @PostMapping("/view-count")
+    @ResponseBody
+    public void viewCount(@LoginMemberId Long loginMemberId,
+                          @RequestParam Integer postId) {
+        boardService.increaseViewCount(postId);
     }
 
     @GetMapping("/regist")
