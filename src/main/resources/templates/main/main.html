@@ -825,6 +825,22 @@
             return updatedEvent;
         });
     }
+    function getCourseDetailUrl(courseId) {
+        if (!courseId) {
+            return null;
+        }
+
+        if (isStudentDashboard) {
+            return `/student/courses/${courseId}`;
+        }
+
+        if (isInstructorDashboard) {
+            return `/courses/${courseId}?role=INSTRUCTOR`;
+        }
+
+        return null;
+    }
+
 
     function renderSelectedEvents(events, dateStr) {
         const selectedDateLabel = document.getElementById('selectedDateLabel');
@@ -848,11 +864,18 @@
             return;
         }
 
-        selectedScheduleList.innerHTML = dayEvents.map(event => `
+        selectedScheduleList.innerHTML = dayEvents.map(event => {
+            const courseUrl = getCourseDetailUrl(event.courseId);
+            const titleHtml = courseUrl
+                ? `<a href="${courseUrl}" class="font-semibold text-slate-800 underline-offset-4 hover:text-brand hover:underline">${event.title}</a>`
+                : `<p class="font-semibold text-slate-800">${event.title}</p>`;
+
+            return `
             <div class="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                <p class="font-semibold text-slate-800">${event.title}</p>
+                ${titleHtml}
             </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
     function renderDdayList(events) {
