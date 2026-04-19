@@ -32,6 +32,13 @@
             margin-bottom: 24px;
         }
 
+        .hero-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
         .hero h2 {
             margin: 0 0 10px;
             font-size: 2.6rem;
@@ -42,6 +49,21 @@
             margin: 0;
             color: #5d6780;
             font-size: 1rem;
+        }
+
+        .top-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 11px 18px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid #d7e0ee;
+            box-shadow: 0 10px 28px rgba(31, 45, 83, 0.08);
+            color: #23408b;
+            text-decoration: none;
+            font-weight: 700;
+            white-space: nowrap;
         }
 
         .stats-grid {
@@ -229,6 +251,11 @@
                 font-size: 2rem;
             }
 
+            .hero-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -244,9 +271,14 @@
     <a class="brand-link" th:href="@{/main}">64Lab</a>
 
     <section class="hero">
-        <h2>강사 성적 관리</h2>
-        <p th:if="${selectedCourseId != null}">선택한 코스의 학생 현황과 성적 정보를 한 화면에서 확인합니다.</p>
-        <p th:unless="${selectedCourseId != null}">코스를 선택하면 학생 목록과 요약 통계를 함께 볼 수 있습니다.</p>
+        <div class="hero-top">
+            <div>
+                <h2>강사 성적 관리</h2>
+                <p th:if="${selectedCourseId != null}">선택한 코스의 학생 현황과 성적 정보를 한 화면에서 확인합니다.</p>
+                <p th:unless="${selectedCourseId != null}">코스를 선택하면 학생 목록과 요약 통계를 함께 볼 수 있습니다.</p>
+            </div>
+            <a class="top-link" th:href="@{/instructor/grades/courses}">강의 목록으로</a>
+        </div>
     </section>
 
     <section class="stats-grid" th:if="${dashboard != null}">
