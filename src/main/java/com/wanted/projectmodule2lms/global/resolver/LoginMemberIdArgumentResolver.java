@@ -29,7 +29,7 @@ public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResol
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-        // 1. 시큐리티 세션에서 현재 인증 정보 꺼내기
+        // 시큐리티 세션에서 현재 인증 정보 꺼내기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         System.out.println("========== 디버깅 시작 ==========");

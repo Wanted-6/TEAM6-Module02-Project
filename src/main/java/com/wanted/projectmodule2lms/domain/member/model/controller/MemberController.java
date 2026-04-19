@@ -41,7 +41,6 @@ public class MemberController {
     @GetMapping("/signup")
     public void signup(){ }
 
-    @AuditLog
     @PostMapping("/signup")
     public String signup(@ModelAttribute SignupDTO signupDTO,
                          @RequestParam(value = "gradCert", required = false) MultipartFile gradCert,
@@ -72,7 +71,6 @@ public class MemberController {
         return "member/edit-password";
     }
 
-    @AuditLog
     @PostMapping("/edit-password")
     @ResponseBody
     public ResponseEntity<String> updatePassword(@LoginMemberId Long memberId, @RequestParam("newPassword") String newPassword) {
@@ -93,7 +91,6 @@ public class MemberController {
         return "member/verify-code";
     }
 
-    @AuditLog
     @PostMapping("/verify-code")
     public String processVerifyCode(@LoginMemberId Long memberId, @RequestParam("code") String inputCode, RedirectAttributes rttr) {
         if (memberId == null) return "redirect:/auth/login";
@@ -111,6 +108,7 @@ public class MemberController {
         }
     }
 
+    @AuditLog
     @GetMapping("/mypage")
     public String myPage(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
@@ -136,7 +134,6 @@ public class MemberController {
         return "member/mypage";
     }
 
-    @AuditLog
     @PostMapping("/profile/update")
     public String updateProfile(@LoginMemberId Long memberId,
                                 @RequestParam("bio") String bio,
@@ -149,7 +146,6 @@ public class MemberController {
         return "redirect:/member/mypage";
     }
 
-    @AuditLog
     @PostMapping("/phone/update")
     @ResponseBody
     public ResponseEntity<String> updatePhone(@LoginMemberId Long memberId, @RequestParam("phone") String phone) {
@@ -166,7 +162,6 @@ public class MemberController {
         }
     }
 
-    @AuditLog
     @PostMapping("/delete")
     public String deleteMember(@LoginMemberId Long memberId, HttpSession session, RedirectAttributes rttr) {
         if (memberId == null) return "redirect:/auth/login";

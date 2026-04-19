@@ -1,5 +1,4 @@
 package com.wanted.projectmodule2lms.domain.board.controller;
-
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
@@ -15,11 +14,7 @@ import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -28,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/board")
 public class BoardController {
-
     private final CommentService commentService;
     private final BoardService boardService;
     private final MemberRepository memberRepository;
@@ -52,6 +46,7 @@ public class BoardController {
         return "board/list";
     }
 
+    @AuditLog
     @GetMapping("/course-notices")
     public String courseNoticeListPage(@RequestParam(required = false) String keyword, Model model) {
         List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
@@ -62,6 +57,7 @@ public class BoardController {
         return "board/course-notice-list";
     }
 
+    @AuditLog
     @GetMapping("/admin-notices")
     public String adminNoticeListPage(@RequestParam(required = false) String keyword, Model model) {
         List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
@@ -72,6 +68,7 @@ public class BoardController {
         return "board/admin-notice-list";
     }
 
+    @AuditLog
     @GetMapping("/free")
     public String freeListPage(@RequestParam(required = false) String keyword, Model model) {
         List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
@@ -82,6 +79,7 @@ public class BoardController {
         return "board/free-list";
     }
 
+    @AuditLog
     @GetMapping("/section-qna")
     public String sectionQnaListPage(@RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) Integer courseId,
@@ -109,15 +107,22 @@ public class BoardController {
         return "board/section-qna-list";
     }
 
+    @AuditLog
     @GetMapping("/detail")
     public String boardDetailPage(@RequestParam Integer postId, Model model) {
-        boardService.increaseViewCount(postId);
         BoardDTO board = boardService.findBoardById(postId);
         List<CommentDTO> commentList=commentService.findCommentsByPostId(postId);
         model.addAttribute("board", board);
         model.addAttribute("commentList", commentList);
         model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/detail";
+    }
+
+    @PostMapping("/view-count")
+    @ResponseBody
+    public void viewCount(@LoginMemberId Long loginMemberId,
+                          @RequestParam Integer postId) {
+        boardService.increaseViewCount(postId);
     }
 
     @GetMapping("/regist")
@@ -149,7 +154,6 @@ public class BoardController {
         return "board/regist";
     }
 
-    @AuditLog
     @PostMapping("/regist")
     public String registBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
@@ -176,7 +180,7 @@ public class BoardController {
         return "board/modify";
     }
 
-    @AuditLog
+
     @PostMapping("/modify")
     public String modifyBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
@@ -201,7 +205,7 @@ public class BoardController {
         return "board/delete";
     }
 
-    @AuditLog
+
     @PostMapping("/delete")
     public String deleteBoard(@LoginMemberId Long loginMemberId,
                               @RequestParam Integer postId,

@@ -27,7 +27,6 @@ public class InstructorAttendanceManageController {
         return "instructor/grade/managepage";
     }
 
-    @AuditLog
     @PostMapping("/manage/attendance")
     @ResponseBody
     public ResponseEntity<String> updateAttendance(@LoginMemberId Long loginMemberId,

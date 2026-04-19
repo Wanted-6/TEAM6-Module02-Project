@@ -9,7 +9,6 @@ import lombok.*;
 @ToString
 public class SignupDTO {
 
-//    private String memberId;
     private String memberId;
     private String memberName;
     private String memberPassword;

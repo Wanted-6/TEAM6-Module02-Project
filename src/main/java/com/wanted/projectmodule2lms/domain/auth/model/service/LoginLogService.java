@@ -14,7 +14,6 @@ public class LoginLogService {
 
     private final LoginLogRepository loginLogRepository;
 
-    // 로그인 성공 및 실패 로그 DB에 저장
     @Transactional
     public void saveLoginLog(String loginId, boolean success, String ipAddress){
         LoginLog loginLog = new LoginLog(

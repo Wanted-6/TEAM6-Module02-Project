@@ -1,6 +1,7 @@
 package com.wanted.projectmodule2lms.domain.section.controller;
 
 import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ public class StudentSectionController {
 
     private final SectionService sectionService;
 
+    @AuditLog
     @GetMapping
     public ModelAndView findMySections(@PathVariable Integer courseId,
                                        @RequestParam Integer memberId,
@@ -27,6 +29,7 @@ public class StudentSectionController {
         return mv;
     }
 
+    @AuditLog
     @GetMapping("/{sectionId}")
     public ModelAndView findMySectionDetail(@PathVariable Integer courseId,
                                             @PathVariable Integer sectionId,

@@ -66,7 +66,7 @@ public class InstructorCalendarController {
         return calendarService.findMemosByDate(instructorId, date);
     }
 
-    @AuditLog
+
     @PostMapping
     @ResponseBody
     public String createMemo(@LoginMemberId Long memberId,
@@ -80,7 +80,7 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-    @AuditLog
+
     @PutMapping("/{memoId}")
     @ResponseBody
     public String updateMemo(@LoginMemberId Long memberId,
@@ -95,7 +95,7 @@ public class InstructorCalendarController {
         return "ok";
     }
 
-    @AuditLog
+
     @DeleteMapping("/{memoId}")
     @ResponseBody
     public String deleteMemo(@LoginMemberId Long memberId,

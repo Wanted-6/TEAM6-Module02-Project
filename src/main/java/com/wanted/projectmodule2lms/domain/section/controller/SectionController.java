@@ -3,6 +3,7 @@ package com.wanted.projectmodule2lms.domain.section.controller;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionCreateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class SectionController {
     private final SectionService sectionService;
 
     /* 특정 코스의 섹션 목록 조회 */
+    @AuditLog
     @GetMapping("/courses/{courseId}/sections")
     public ModelAndView findSectionsByCourse(@PathVariable Integer courseId, ModelAndView mv) {
         mv.addObject("courseId", courseId);
@@ -53,6 +55,7 @@ public class SectionController {
     }
 
     /* 섹션 상세 조회 */
+    @AuditLog
     @GetMapping("/sections/{sectionId}")
     public ModelAndView findSectionById(@PathVariable Integer sectionId, ModelAndView mv) {
         mv.addObject("section", sectionService.findSectionById(sectionId));
