@@ -13,28 +13,18 @@ public class SecurityUtil {
 //    사용자가 값을 바꿔서 다른 사람 ID로 글을 등록하는 것처럼 조작할 수 있다.
 //    반면 서버에서 현재 로그인한 사용자를 기준으로 작성자를 정하면, 클라이언트가 작성자 정보를 마음대로 바꿀 수 없다.
 //    @AuthenticationPrincipal AuthDetails authDetails 를 활용해서 로그인 한 사용자의 정보를 꺼내보자.
-//
-//    @PostMapping("/posts")
-//    public String createPost(@AuthenticationPrincipal AuthDetails authDetails, PostRequest request) {
-//        postService.create(request.getTitle(), request.getContent(), authDetails.getUsername());
-//        return "redirect:/posts";
-//    }
 // 회원의 pk가 필요할 때 이거 사용해서 꺼내써야 함.
 
-    /**
-     * 현재 로그인한 사용자의 PK(memberId)를 반환합니다.
-     * @return 로그인한 회원의 memberId (Long), 로그인하지 않은 경우 null
-     */
     public static Long getCurrentMemberId() {
-        // 1. 시큐리티 컨텍스트에서 현재 인증 정보(Authentication) 가져옴.
+        // 시큐리티 컨텍스트에서 현재 인증 정보(Authentication) 가져옴.
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // 2. 인증 정보가 없거나, 비로그인 상태면 null 반환함.
+        // 인증 정보가 없거나, 비로그인 상태면 null 반환함.
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             return null;
         }
 
-        // 3. Principal 객체를 만들어진 DTO로 형변환해서 PK만 빼서 반환.
+        // Principal 객체를 만들어진 DTO로 형변환해서 PK만 빼서 반환.
         Object principal = authentication.getPrincipal();
         if (principal instanceof com.wanted.projectmodule2lms.domain.auth.model.dto.AuthDetails authDetails) {
             com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO loginMember = authDetails.getLoginMemberDTO();
@@ -57,8 +47,6 @@ if (currentMemberId != null) {
 } else {
     System.out.println("로그인한 사용자 없음");
 }
-
-
 * */
 
 

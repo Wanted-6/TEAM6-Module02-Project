@@ -3,6 +3,7 @@ package com.wanted.projectmodule2lms.domain.course.controller;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,7 @@ public class StudentCourseController {
     private final CourseService courseService;
     private final SectionRepository sectionRepository;
 
+    @AuditLog
     @GetMapping
     public ModelAndView findMyCourses(
             @LoginMemberId Long memberId,

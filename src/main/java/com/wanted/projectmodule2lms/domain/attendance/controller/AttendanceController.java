@@ -36,7 +36,6 @@ public class AttendanceController {
         return mv;
     }
 
-    @AuditLog
     @PostMapping("/check")
     @ResponseBody
     public ResponseEntity<AttendanceCheckResponseDTO> checkAttendance(@LoginMemberId Long loginMemberId,

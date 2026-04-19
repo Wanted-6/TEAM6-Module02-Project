@@ -12,6 +12,8 @@ import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +41,6 @@ public class MemberController {
     @GetMapping("/signup")
     public void signup(){ }
 
-    @AuditLog
     @PostMapping("/signup")
     public String signup(@ModelAttribute SignupDTO signupDTO,
                          @RequestParam(value = "gradCert", required = false) MultipartFile gradCert,
@@ -70,14 +71,18 @@ public class MemberController {
         return "member/edit-password";
     }
 
-    @AuditLog
     @PostMapping("/edit-password")
-    public String updatePassword(@LoginMemberId Long memberId, @RequestParam("newPassword") String newPassword) {
-        if(memberId == null) {
-            return "redirect:/auth/login";
+    @ResponseBody
+    public ResponseEntity<String> updatePassword(@LoginMemberId Long memberId, @RequestParam("newPassword") String newPassword) {
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
-        memberService.changeRegularPassword(memberId, newPassword);
-        return "redirect:/";
+        try {
+            memberService.changeRegularPassword(memberId, newPassword);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
+        }
     }
 
     @GetMapping("verify-code")
@@ -86,7 +91,6 @@ public class MemberController {
         return "member/verify-code";
     }
 
-    @AuditLog
     @PostMapping("/verify-code")
     public String processVerifyCode(@LoginMemberId Long memberId, @RequestParam("code") String inputCode, RedirectAttributes rttr) {
         if (memberId == null) return "redirect:/auth/login";
@@ -104,6 +108,7 @@ public class MemberController {
         }
     }
 
+    @AuditLog
     @GetMapping("/mypage")
     public String myPage(@LoginMemberId Long memberId, Model model) {
         if (memberId == null) {
@@ -111,9 +116,6 @@ public class MemberController {
         }
 
         Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
-
-        // ⭐️ [수정 포인트] model.addAttribute("member", member); 를 삭제했습니다.
-        // 이제 GlobalControllerAdvice의 @ModelAttribute("member")가 최신 데이터를 공급합니다.
 
         if (member.getRole() == MemberRole.STUDENT) {
             List<Enrollment> enrollments = enrollmentService.getMyEnrollments(memberId.intValue());
@@ -132,7 +134,6 @@ public class MemberController {
         return "member/mypage";
     }
 
-    @AuditLog
     @PostMapping("/profile/update")
     public String updateProfile(@LoginMemberId Long memberId,
                                 @RequestParam("bio") String bio,
@@ -145,19 +146,22 @@ public class MemberController {
         return "redirect:/member/mypage";
     }
 
-    @AuditLog
     @PostMapping("/phone/update")
-    public String updatePhone(@LoginMemberId Long memberId, @RequestParam("phone") String phone, RedirectAttributes rttr) {
+    @ResponseBody
+    public ResponseEntity<String> updatePhone(@LoginMemberId Long memberId, @RequestParam("phone") String phone) {
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
         try {
             memberService.updatePhone(memberId, phone);
-            rttr.addFlashAttribute("message", "전화번호가 변경되었습니다.");
+            return ResponseEntity.ok("success");
         } catch (IllegalArgumentException e) {
-            rttr.addFlashAttribute("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
         }
-        return "redirect:/member/mypage";
     }
 
-    @AuditLog
     @PostMapping("/delete")
     public String deleteMember(@LoginMemberId Long memberId, HttpSession session, RedirectAttributes rttr) {
         if (memberId == null) return "redirect:/auth/login";
@@ -171,4 +175,5 @@ public class MemberController {
             return "redirect:/member/mypage";
         }
     }
+
 }

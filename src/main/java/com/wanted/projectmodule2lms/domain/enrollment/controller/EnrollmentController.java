@@ -82,7 +82,7 @@ public class EnrollmentController {
         return "student/enrollment/detail";
     }
 
-    @AuditLog
+
     @PostMapping
     public String enrollCourse(
             @LoginMemberId Long memberId,

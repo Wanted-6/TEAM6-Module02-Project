@@ -46,6 +46,7 @@ public class BoardController {
         return "board/list";
     }
 
+    @AuditLog
     @GetMapping("/course-notices")
     public String courseNoticeListPage(@RequestParam(required = false) String keyword, Model model) {
         List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
@@ -56,6 +57,7 @@ public class BoardController {
         return "board/course-notice-list";
     }
 
+    @AuditLog
     @GetMapping("/admin-notices")
     public String adminNoticeListPage(@RequestParam(required = false) String keyword, Model model) {
         List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
@@ -66,6 +68,7 @@ public class BoardController {
         return "board/admin-notice-list";
     }
 
+    @AuditLog
     @GetMapping("/free")
     public String freeListPage(@RequestParam(required = false) String keyword, Model model) {
         List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
@@ -76,6 +79,7 @@ public class BoardController {
         return "board/free-list";
     }
 
+    @AuditLog
     @GetMapping("/section-qna")
     public String sectionQnaListPage(@RequestParam(required = false) String keyword,
                                      @RequestParam(required = false) Integer courseId,
@@ -103,6 +107,7 @@ public class BoardController {
         return "board/section-qna-list";
     }
 
+    @AuditLog
     @GetMapping("/detail")
     public String boardDetailPage(@RequestParam Integer postId, Model model) {
         BoardDTO board = boardService.findBoardById(postId);
@@ -149,7 +154,6 @@ public class BoardController {
         return "board/regist";
     }
 
-    @AuditLog
     @PostMapping("/regist")
     public String registBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
@@ -176,7 +180,7 @@ public class BoardController {
         return "board/modify";
     }
 
-    @AuditLog
+
     @PostMapping("/modify")
     public String modifyBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
@@ -201,7 +205,7 @@ public class BoardController {
         return "board/delete";
     }
 
-    @AuditLog
+
     @PostMapping("/delete")
     public String deleteBoard(@LoginMemberId Long loginMemberId,
                               @RequestParam Integer postId,
