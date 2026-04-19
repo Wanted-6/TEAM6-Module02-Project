@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class BoardService {
+public class    BoardService {
 
     private final BoardRepository boardRepository;
     private final CourseRepository courseRepository;
@@ -519,5 +519,15 @@ public class BoardService {
     public void increaseViewCount(Integer postId) {
         Board board = findActiveBoard(postId);
         board.increasedViewCount();
+    }
+
+    @Transactional
+    public void changeAnswerStatusToAnswered(Integer postId) {
+        Board board = findActiveBoard(postId);
+
+        if (board.getPostType() != BoardType.SECTION_QNA) {
+            return;
+        }
+        board.changeAnswerStatus(AnswerStatus.ANSWERED);
     }
 }
