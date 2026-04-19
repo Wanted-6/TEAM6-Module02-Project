@@ -133,18 +133,25 @@
                         <p class="text-on-surface-variant max-w-xl"
                            th:text="${attendancePage.course.description}">코스 설명</p>
                     </div>
-                    <div class="rounded-xl bg-secondary-container px-4 py-3 text-on-secondary-container min-w-[280px]">
-                        <div class="flex items-center gap-2 font-semibold">
-                            <span class="material-symbols-outlined text-sm">schedule</span>
-                            <span class="text-sm" th:text="${attendancePage.section.openDate}">2026-03-17</span>
-                        </div>
-                        <div class="mt-3 space-y-2">
-                            <label class="block text-xs font-bold uppercase">테스트 기준 일시</label>
-                            <input class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm text-on-surface"
-                                   id="attendanceCheckAtInput"
-                                   type="datetime-local"
-                                   th:value="|${attendancePage.section.openDate}T00:00|"/>
-                            <p class="text-[11px] text-on-surface-variant">이 값을 바꾸면 출석, 지각, 결석 예정 상태를 직접 테스트할 수 있습니다.</p>
+                    <div class="min-w-[280px] space-y-3">
+                        <a th:href="@{/main}"
+                           class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-3 text-sm font-bold text-on-surface shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white">
+                            <span class="material-symbols-outlined mr-2 text-base">home</span>
+                            메인페이지
+                        </a>
+                        <div class="rounded-xl bg-secondary-container px-4 py-3 text-on-secondary-container">
+                            <div class="flex items-center gap-2 font-semibold">
+                                <span class="material-symbols-outlined text-sm">schedule</span>
+                                <span class="text-sm" th:text="${attendancePage.section.openDate}">2026-03-17</span>
+                            </div>
+                            <div class="mt-3 space-y-2">
+                                <label class="block text-xs font-bold uppercase">테스트 기준 일시</label>
+                                <input class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm text-on-surface"
+                                       id="attendanceCheckAtInput"
+                                       type="datetime-local"
+                                       th:value="|${attendancePage.section.openDate}T00:00|"/>
+                                <p class="text-[11px] text-on-surface-variant">이 값을 바꾸면 출석, 지각, 결석 예정 상태를 직접 테스트할 수 있습니다.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
