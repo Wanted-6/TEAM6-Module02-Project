@@ -18,7 +18,7 @@ public class AdminCourseController {
     @AuditLog
     @GetMapping
     public ModelAndView findAllCourses(ModelAndView mv) {
-        mv.addObject("courseList", courseService.findAllCourses());
+        mv.addObject("courseList", courseService.findAdminCourseList());
         mv.setViewName("admin/course/list");
         return mv;
     }

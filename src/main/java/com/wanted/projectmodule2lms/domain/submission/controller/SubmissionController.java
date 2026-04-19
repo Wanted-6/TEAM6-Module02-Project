@@ -8,6 +8,7 @@ import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionScoreDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +64,7 @@ public class SubmissionController {
     @PostMapping("/courses/{courseId}/assignment/submissions")
     public String registSubmission(@PathVariable Integer courseId,
                                    @RequestParam(defaultValue = "STUDENT") String role,
+                                   @LoginMemberId Long memberId,
                                    @ModelAttribute SubmissionCreateDTO createDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
@@ -70,12 +72,23 @@ public class SubmissionController {
             throw new IllegalArgumentException("학생만 과제를 제출할 수 있습니다.");
         }
 
+        if (memberId == null) {
+            return "redirect:/auth/login";
+        }
+
         try {
             AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
-            submissionService.registSubmission(assignment.getAssignmentId(), createDTO, attachmentUpload);
+            Integer enrollmentId = submissionService.findEnrollmentIdByMemberAndCourse(Math.toIntExact(memberId), courseId);
+
+            submissionService.registSubmission(
+                    assignment.getAssignmentId(),
+                    enrollmentId,
+                    createDTO,
+                    attachmentUpload
+            );
+
             rttr.addFlashAttribute("successMessage", "과제가 제출되었습니다.");
-            return "redirect:/courses/" + courseId + "/assignment/submissions/me?enrollmentId="
-                    + createDTO.getEnrollmentId() + "&role=STUDENT";
+            return "redirect:/courses/" + courseId + "/assignment/submissions/me?role=STUDENT";
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/assignment/submissions/regist?role=STUDENT";
@@ -87,14 +100,20 @@ public class SubmissionController {
 
     @GetMapping("/courses/{courseId}/assignment/submissions/me")
     public ModelAndView findMySubmission(@PathVariable Integer courseId,
-                                         @RequestParam Integer enrollmentId,
+                                         @LoginMemberId Long memberId,
                                          @RequestParam(defaultValue = "STUDENT") String role,
                                          ModelAndView mv) {
         if (!"STUDENT".equals(role)) {
             throw new IllegalArgumentException("학생만 본인 제출을 조회할 수 있습니다.");
         }
 
+        if (memberId == null) {
+            mv.setViewName("redirect:/auth/login");
+            return mv;
+        }
+
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
+        Integer enrollmentId = submissionService.findEnrollmentIdByMemberAndCourse(Math.toIntExact(memberId), courseId);
         SubmissionDTO submission = submissionService.findMySubmission(assignment.getAssignmentId(), enrollmentId);
 
         mv.addObject("courseId", courseId);
@@ -154,8 +173,7 @@ public class SubmissionController {
         try {
             submissionService.modifySubmission(submissionId, updateDTO, attachmentUpload);
             rttr.addFlashAttribute("successMessage", "제출물이 수정되었습니다.");
-            return "redirect:/courses/" + courseId + "/assignment/submissions/me?enrollmentId="
-                    + submission.getEnrollmentId() + "&role=STUDENT";
+            return "redirect:/courses/" + courseId + "/assignment/submissions/me?role=STUDENT";
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";

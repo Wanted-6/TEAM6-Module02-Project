@@ -1,12 +1,7 @@
 package com.wanted.projectmodule2lms.domain.course.service;
 
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
-import com.wanted.projectmodule2lms.domain.course.model.dto.CourseAdminDTO;
-import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
-import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
-import com.wanted.projectmodule2lms.domain.course.model.dto.CourseInstructorDTO;
-import com.wanted.projectmodule2lms.domain.course.model.dto.CourseStudentDTO;
-import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.*;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.course.model.entity.CourseApprovalStatus;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -314,6 +309,26 @@ public class CourseService {
 
         foundCourse.changeOpenStatus(false);
         foundCourse.markDeleted(admin.getMemberId());
+    }
+
+    public List<CourseAdminListDTO> findAdminCourseList() {
+        List<Course> courseList = courseRepository.findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus.DELETED);
+
+        return courseList.stream()
+                .map(course -> {
+                    Member instructor = memberRepository.findById(course.getInstructorId())
+                            .orElseThrow(() -> new IllegalArgumentException("강사 정보가 존재하지 않습니다."));
+
+                    return new CourseAdminListDTO(
+                            course.getCourseId(),
+                            course.getTitle(),
+                            instructor.getLoginId(),
+                            instructor.getName(),
+                            course.getApprovalStatus().name(),
+                            course.getIsOpen()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
     public List<CourseDTO> findMyCourses(Integer memberId) {
