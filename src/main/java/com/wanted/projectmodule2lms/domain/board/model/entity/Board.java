@@ -91,6 +91,10 @@ public class Board {
         this.answerStatus = answerStatus;
     }
 
+    public void changeAnswerStatus(AnswerStatus answerStatus) {
+        this.answerStatus = answerStatus;
+    }
+
     public static class Builder {
         private Integer memberId;
         private Integer courseId;
@@ -107,6 +111,8 @@ public class Board {
             this.memberId = memberId;
             return this;
         }
+
+
 
         public Builder courseId(Integer courseId) {
             this.courseId = courseId;
@@ -166,4 +172,6 @@ public class Board {
     public void increasedViewCount() {
         this.viewCount++;
     }
+
+
 }
