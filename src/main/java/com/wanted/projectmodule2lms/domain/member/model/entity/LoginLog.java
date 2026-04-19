@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "login_log") // ⭐ 새로 만든 테이블 이름!
+@Table(name = "login_log")
 @Getter
 public class LoginLog {
 

@@ -154,9 +154,6 @@ public class Member {
                 .build();   // loginFailCount, accountLock 들어가록 함.
     }
 
-    /**
-     * 회원 상태 변경
-     */
     public void changeStatus(MemberStatus status) {
         this.status = status;
     }

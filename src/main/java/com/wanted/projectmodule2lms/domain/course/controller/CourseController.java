@@ -4,6 +4,7 @@ import com.wanted.projectmodule2lms.domain.assignment.service.AssignmentService;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ public class CourseController {
     private final CourseService courseService;
     private final AssignmentService assignmentService;
 
+    @AuditLog
     @GetMapping
     public ModelAndView findAllCourses(@RequestParam(required = false) String keyword,
                                        @RequestParam(required = false) String category,
@@ -41,6 +43,7 @@ public class CourseController {
         return mv;
     }
 
+    @AuditLog
     @GetMapping("/{courseId}")
     public ModelAndView findCourseById(@PathVariable Integer courseId,
                                        @RequestParam(defaultValue = "INSTRUCTOR") String role,
@@ -124,6 +127,7 @@ public class CourseController {
         }
     }
 
+    @AuditLog
     @GetMapping("/{courseId}/students")
     public ModelAndView findCourseStudents(@PathVariable Integer courseId, ModelAndView mv) {
         mv.addObject("courseId", courseId);

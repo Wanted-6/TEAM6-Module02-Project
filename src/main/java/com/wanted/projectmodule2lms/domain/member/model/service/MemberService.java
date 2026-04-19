@@ -205,37 +205,6 @@ public class MemberService {
         }
     }
 
-//    @Transactional
-//    public void updateProfile(Long memberId, String bio, MultipartFile file) throws IOException {
-//        Member member = memberRepository.findById(Math.toIntExact(memberId))
-//                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-//
-//        Profile profile = member.getProfile();
-//        if (profile == null) {
-//            profile = Profile.builder()
-//                    .member(member)
-//                    .bio("")
-//                    .profileImage("/img/default-profile.png")
-//                    .build();
-//            member.assignProfile(profile);
-//        }
-//
-//        String profileImageUrl = profile.getProfileImage();
-//
-//        if (file != null && !file.isEmpty()) {
-//            String savePath = "C:/lab/uploads/";
-//            File dir = new File(savePath);
-//            if (!dir.exists()) dir.mkdirs();
-//
-//            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-//            file.transferTo(new File(savePath + fileName));
-//
-//            profileImageUrl = "/uploads/" + fileName;
-//        }
-//
-//        profile.update(bio, profileImageUrl);
-//    }
-
     @Transactional
     public void updateProfile(Long memberId, String bio, MultipartFile file) throws IOException {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
