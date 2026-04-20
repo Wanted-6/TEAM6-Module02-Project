@@ -17,14 +17,14 @@
     </div>
 
     <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-slate-100 text-slate-700">
             <tr>
-                <th class="px-4 py-3 text-left">코스 ID</th>
                 <th class="px-4 py-3 text-left">제목</th>
-                <th class="px-4 py-3 text-left">강사 ID</th>
+                <th class="px-4 py-3 text-left">강사</th>
                 <th class="px-4 py-3 text-left">상태</th>
                 <th class="px-4 py-3 text-left">공개 여부</th>
                 <th class="px-4 py-3 text-left">관리</th>
@@ -32,14 +32,18 @@
             </thead>
             <tbody>
             <tr th:each="course : ${courseList}" class="border-t border-slate-200 hover:bg-slate-50">
-                <td class="px-4 py-3" th:text="${course.courseId}"></td>
-                <td class="px-4 py-3 font-medium" th:text="${course.title}"></td>
-                <td class="px-4 py-3" th:text="${course.instructorId}"></td>
-                <td class="px-4 py-3" th:text="${course.approvalStatus}"></td>
-                <td class="px-4 py-3" th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'"></td>
+                <td class="px-4 py-3 font-medium" th:text="${course.title}">코스 제목</td>
+                <td class="px-4 py-3">
+                    <span th:text="${course.instructorName}">강사명</span>
+                    <span class="text-slate-500" th:text="| (${course.instructorLoginId})|">(loginId)</span>
+                </td>
+                <td class="px-4 py-3" th:text="${course.approvalStatus}">PENDING</td>
+                <td class="px-4 py-3" th:text="${course.isOpen} ? 'OPEN' : 'CLOSED'">CLOSED</td>
                 <td class="px-4 py-3">
                     <a th:href="@{/admin/courses/{courseId}(courseId=${course.courseId})}"
-                       class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">상세</a>
+                       class="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+                        상세
+                    </a>
                 </td>
             </tr>
             </tbody>
