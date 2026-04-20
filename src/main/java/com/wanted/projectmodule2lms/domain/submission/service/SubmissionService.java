@@ -65,14 +65,29 @@ public class SubmissionService {
         Submission foundSubmission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 제출물이 존재하지 않습니다."));
 
-        return modelMapper.map(foundSubmission, SubmissionDTO.class);
+        return convertToSubmissionDTO(foundSubmission);
     }
 
     public SubmissionDTO findMySubmission(Integer assignmentId, Integer enrollmentId) {
         Submission foundSubmission = submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("제출한 과제가 없습니다."));
 
-        return modelMapper.map(foundSubmission, SubmissionDTO.class);
+        return convertToSubmissionDTO(foundSubmission);
+    }
+
+    private SubmissionDTO convertToSubmissionDTO(Submission submission) {
+        SubmissionDTO dto = modelMapper.map(submission, SubmissionDTO.class);
+
+        Enrollment enrollment = enrollmentRepository.findById(submission.getEnrollmentId())
+                .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
+
+        Member member = memberRepository.findById(enrollment.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
+
+        dto.setStudentName(member.getName());
+        dto.setStudentLoginId(member.getLoginId());
+
+        return dto;
     }
 
     public Integer findEnrollmentIdByMemberAndCourse(Integer memberId, Integer courseId) {
