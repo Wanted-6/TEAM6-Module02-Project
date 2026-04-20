@@ -20,4 +20,5 @@ public class CommentDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String memberName;
+    private String profileImage;
 }

@@ -2,6 +2,7 @@ package com.wanted.projectmodule2lms.domain.board.model.service;
 
 import com.wanted.projectmodule2lms.domain.board.model.dao.BoardRepository;
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
+import com.wanted.projectmodule2lms.domain.board.model.dto.BoardViewDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus;
 import com.wanted.projectmodule2lms.domain.board.model.entity.Board;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
@@ -38,32 +39,32 @@ public class    BoardService {
     private final EnrollmentRepository enrollmentRepository;
     private final ModelMapper modelMapper;
 
-    public List<BoardDTO> findBoardByPostType(BoardType postType) {
-        return toBoardDTOList(boardRepository.findByPostTypeAndIsDeletedFalse(postType));
+    public List<BoardViewDTO> findBoardByPostType(BoardType postType) {
+        return toBoardViewDTOList(boardRepository.findByPostTypeAndIsDeletedFalse(postType));
     }
 
-    public List<BoardDTO> searchBoardByTitle(String title) {
-        return toBoardDTOList(boardRepository.findByTitleContainingAndIsDeletedFalse(title));
+    public List<BoardViewDTO> searchBoardByTitle(String title) {
+        return toBoardViewDTOList(boardRepository.findByTitleContainingAndIsDeletedFalse(title));
     }
 
-    public List<BoardDTO> searchBoardByPostTypeAndTitle(BoardType postType, String title) {
-        return toBoardDTOList(boardRepository.findByPostTypeAndTitleContainingAndIsDeletedFalse(postType, title));
+    public List<BoardViewDTO> searchBoardByPostTypeAndTitle(BoardType postType, String title) {
+        return toBoardViewDTOList(boardRepository.findByPostTypeAndTitleContainingAndIsDeletedFalse(postType, title));
     }
 
-    public List<BoardDTO> findVisibleSectionQna(Integer currentMemberId, MemberRole currentRole, String keyword) {
+    public List<BoardViewDTO> findVisibleSectionQna(Integer currentMemberId, MemberRole currentRole, String keyword) {
         List<Board> boards = (keyword == null || keyword.isBlank())
                 ? boardRepository.findByPostTypeAndIsDeletedFalse(BoardType.SECTION_QNA)
                 : boardRepository.findByPostTypeAndTitleContainingAndIsDeletedFalse(BoardType.SECTION_QNA, keyword);
 
         Set<Integer> allowedCourseIds = getAllowedCourseIdsForSectionQna(currentMemberId, currentRole);
 
-        return toBoardDTOList(boards.stream()
+        return toBoardViewDTOList(boards.stream()
                 .filter(board -> board.getCourseId() != null && allowedCourseIds.contains(board.getCourseId()))
                 .collect(Collectors.toList()));
     }
 
-    public BoardDTO findBoardById(Integer postId) {
-        return toBoardDTO(findActiveBoard(postId));
+    public BoardViewDTO findBoardById(Integer postId) {
+        return toBoardViewDTO(findActiveBoard(postId));
     }
 
     public List<Course> findAllCourses() {
@@ -110,20 +111,9 @@ public class    BoardService {
             throw new IllegalArgumentException("등록 권한이 없습니다.");
         }
 
-        normalizeBoardDTO(boardDTO, currentMemberId, currentRole);
+        BoardDTO normalizedBoardDTO = normalizeBoardDTO(boardDTO, currentMemberId, currentRole);
+        Board board = modelMapper.map(normalizedBoardDTO, Board.class);
 
-        Board board = Board.builder()
-                .memberId(boardDTO.getMemberId())
-                .courseId(boardDTO.getCourseId())
-                .sectionId(boardDTO.getSectionId())
-                .title(boardDTO.getTitle())
-                .content(boardDTO.getContent())
-                .postType(boardDTO.getPostType())
-                .isSecret(boardDTO.getIsSecret())
-                .answerStatus(boardDTO.getAnswerStatus())
-                .viewCount(boardDTO.getViewCount())
-                .isDeleted(boardDTO.getIsDeleted())
-                .build();
 
         boardRepository.save(board);
         return board.getPostId();
@@ -176,38 +166,63 @@ public class    BoardService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
     }
 
-    private void normalizeBoardDTO(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
-        boardDTO.setMemberId(currentMemberId);
-        boardDTO.setViewCount(0);
-        boardDTO.setIsDeleted(false);
+    private BoardDTO normalizeBoardDTO(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
+        Integer memberId = currentMemberId;
+        Integer viewCount = 0;
+        Boolean isDeleted = false;
+
+        Integer courseId = boardDTO.getCourseId();
+        Integer sectionId = boardDTO.getSectionId();
+        Boolean isSecret = boardDTO.getIsSecret();
+        AnswerStatus answerStatus = boardDTO.getAnswerStatus();
+        String title = boardDTO.getTitle();
 
         if (boardDTO.getPostType() == BoardType.ADMIN_NOTICE || boardDTO.getPostType() == BoardType.FREE) {
-            boardDTO.setCourseId(null);
-            boardDTO.setSectionId(null);
-            boardDTO.setIsSecret(false);
-            boardDTO.setAnswerStatus(null);
-            return;
-        }
-
-        if (boardDTO.getPostType() == BoardType.COURSE_NOTICE) {
-            if (boardDTO.getCourseId() == null) {
+            courseId = null;
+            sectionId = null;
+            isSecret = false;
+            answerStatus = null;
+        } else if (boardDTO.getPostType() == BoardType.COURSE_NOTICE) {
+            if (courseId == null) {
                 throw new IllegalArgumentException("코스를 선택해야 합니다.");
             }
-            if (!isInstructorCourse(boardDTO.getCourseId(), currentMemberId)) {
-                throw new IllegalArgumentException("담당 코스에만 공지를 등록할 수 있습니다.");
+            if (!isInstructorCourse(courseId, currentMemberId)) {
+                throw new IllegalArgumentException("해당 코스만 공지를 등록할 수 있습니다.");
             }
-            boardDTO.setSectionId(null);
-            boardDTO.setIsSecret(false);
-            boardDTO.setAnswerStatus(null);
-            return;
+
+            sectionId = null;
+            isSecret = false;
+            answerStatus = null;
+        } else {
+            validateSectionQnaAccess(courseId, sectionId, currentMemberId, currentRole, true);
+            Section section = sectionRepository.findById(sectionId)
+                    .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
+
+            title = formatSectionQnaTitle(section.getTitle(), title);
+            isSecret = Boolean.TRUE.equals(isSecret);
+            answerStatus = AnswerStatus.PENDING;
         }
 
-        validateSectionQnaAccess(boardDTO.getCourseId(), boardDTO.getSectionId(), currentMemberId, currentRole, true);
-        Section section = sectionRepository.findById(boardDTO.getSectionId())
-                .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
-        boardDTO.setTitle(formatSectionQnaTitle(section.getTitle(), boardDTO.getTitle()));
-        boardDTO.setIsSecret(Boolean.TRUE.equals(boardDTO.getIsSecret()));
-        boardDTO.setAnswerStatus(AnswerStatus.PENDING);
+        return new BoardDTO(
+                boardDTO.getPostId(),
+                memberId,
+                boardDTO.getMemberName(),
+                courseId,
+                boardDTO.getCourseTitle(),
+                boardDTO.getCourseInstructorId(),
+                sectionId,
+                boardDTO.getSectionTitle(),
+                title,
+                boardDTO.getContent(),
+                boardDTO.getPostType(),
+                isSecret,
+                answerStatus,
+                viewCount,
+                isDeleted,
+                boardDTO.getCreatedAt(),
+                boardDTO.getUpdatedAt(),
+                boardDTO.getProfileImage()
+        );
     }
 
     private boolean needsCourseId(BoardType postType) {
@@ -365,46 +380,73 @@ public class    BoardService {
         }
     }
 
-    private BoardDTO toBoardDTO(Board board) {
-        return toBoardDTO(
+    private BoardViewDTO toBoardViewDTO(Board board) {
+        return toBoardViewDTO(
                 board,
                 loadMemberNameMap(Collections.singletonList(board)),
+                loadMemberProfileImageMap(Collections.singletonList(board)),
                 loadCourseTitleMap(Collections.singletonList(board)),
                 loadCourseInstructorMap(Collections.singletonList(board)),
                 loadSectionTitleMap(Collections.singletonList(board))
         );
     }
 
-    private List<BoardDTO> toBoardDTOList(List<Board> boards) {
+    private List<BoardViewDTO> toBoardViewDTOList(List<Board> boards) {
         Map<Integer, String> memberNameMap = loadMemberNameMap(boards);
+        Map<Integer, String> memberProfileImageMap = loadMemberProfileImageMap(boards);
         Map<Integer, String> courseTitleMap = loadCourseTitleMap(boards);
         Map<Integer, Integer> courseInstructorMap = loadCourseInstructorMap(boards);
         Map<Integer, String> sectionTitleMap = loadSectionTitleMap(boards);
 
         return boards.stream()
-                .map(board -> toBoardDTO(board, memberNameMap, courseTitleMap, courseInstructorMap, sectionTitleMap))
+                .map(board -> toBoardViewDTO(board, memberNameMap, memberProfileImageMap, courseTitleMap, courseInstructorMap, sectionTitleMap))
                 .collect(Collectors.toList());
     }
 
-    private BoardDTO toBoardDTO(Board board,
-                                Map<Integer, String> memberNameMap,
-                                Map<Integer, String> courseTitleMap,
-                                Map<Integer, Integer> courseInstructorMap,
-                                Map<Integer, String> sectionTitleMap) {
-        BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
-        boardDTO.setMemberName(resolveMemberName(board.getMemberId(), memberNameMap));
+    private BoardViewDTO toBoardViewDTO(Board board,
+                                        Map<Integer, String> memberNameMap,
+                                        Map<Integer, String> memberProfileImageMap,
+                                        Map<Integer, String> courseTitleMap,
+                                        Map<Integer, Integer> courseInstructorMap,
+                                        Map<Integer, String> sectionTitleMap) {
 
+        String memberName = resolveMemberName(board.getMemberId(), memberNameMap);
+        String profileImage = resolveMemberProfileImage(board.getMemberId(), memberProfileImageMap);
+
+        String courseTitle = null;
+        Integer courseInstructorId = null;
         if (board.getCourseId() != null) {
-            boardDTO.setCourseTitle(resolveCourseTitle(board.getCourseId(), courseTitleMap));
-            boardDTO.setCourseInstructorId(resolveCourseInstructorId(board.getCourseId(), courseInstructorMap));
+            courseTitle = resolveCourseTitle(board.getCourseId(), courseTitleMap);
+            courseInstructorId = resolveCourseInstructorId(board.getCourseId(), courseInstructorMap);
         }
 
+        String sectionTitle = null;
         if (board.getSectionId() != null) {
-            boardDTO.setSectionTitle(resolveSectionTitle(board.getSectionId(), sectionTitleMap));
+            sectionTitle = resolveSectionTitle(board.getSectionId(), sectionTitleMap);
         }
 
-        return boardDTO;
+        return new BoardViewDTO(
+                board.getPostId(),
+                board.getMemberId(),
+                memberName,
+                board.getCourseId(),
+                courseTitle,
+                courseInstructorId,
+                board.getSectionId(),
+                sectionTitle,
+                board.getTitle(),
+                board.getContent(),
+                board.getPostType(),
+                board.getIsSecret(),
+                board.getAnswerStatus(),
+                board.getViewCount(),
+                board.getIsDeleted(),
+                board.getCreatedAt(),
+                board.getUpdatedAt(),
+                profileImage
+        );
     }
+
 
     private Map<Integer, String> loadMemberNameMap(List<Board> boards) {
         Set<Integer> memberIds = boards.stream()
@@ -417,6 +459,22 @@ public class    BoardService {
 
         return memberRepository.findAllById(memberIds).stream()
                 .collect(Collectors.toMap(Member::getMemberId, Member::getName));
+    }
+
+    private Map<Integer, String> loadMemberProfileImageMap(List<Board> boards) {
+        Set<Integer> memberIds = boards.stream()
+                .map(Board::getMemberId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (memberIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return memberRepository.findAllById(memberIds).stream()
+                .collect(Collectors.toMap(
+                        Member::getMemberId,
+                        member -> member.getProfile() != null ? member.getProfile().getProfileImage() : null
+                ));
     }
 
     private Map<Integer, String> loadCourseTitleMap(List<Board> boards) {
@@ -472,6 +530,14 @@ public class    BoardService {
         }
 
         return memberName;
+    }
+
+    private String resolveMemberProfileImage(Integer memberId, Map<Integer, String> memberProfileImageMap) {
+        if (memberId == null) {
+            return null;
+        }
+
+        return memberProfileImageMap.get(memberId);
     }
 
     private String resolveCourseTitle(Integer courseId, Map<Integer, String> courseTitleMap) {
