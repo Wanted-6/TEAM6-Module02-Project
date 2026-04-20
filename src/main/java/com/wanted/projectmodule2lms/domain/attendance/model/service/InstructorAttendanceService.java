@@ -58,23 +58,19 @@ public class InstructorAttendanceService {
                 continue;
             }
 
-            InstructorAttendanceManageDTO dto = new InstructorAttendanceManageDTO();
-            dto.setMemberId(member.getMemberId());
-            dto.setEnrollmentId(enrollment.getEnrollmentId());
-            dto.setStudentName(member.getName());
-            dto.setEmail(member.getEmail());
-            dto.setProgressRate(calculateProgressRate(sectionList.size(), attendanceList.size()));
-            dto.setAttendanceSummary(buildAttendanceSummary(attendanceList));
-            dto.setAssignmentScore(
-                    grade != null && grade.getAssignmentScore() != null ? grade.getAssignmentScore().doubleValue() : null
+            InstructorAttendanceManageDTO dto = new InstructorAttendanceManageDTO(
+                    member.getMemberId(),
+                    enrollment.getEnrollmentId(),
+                    member.getName(),
+                    member.getEmail(),
+                    calculateProgressRate(sectionList.size(), attendanceList.size()),
+                    buildAttendanceSummary(attendanceList),
+                    grade != null && grade.getAssignmentScore() != null ? grade.getAssignmentScore().doubleValue() : null,
+                    grade != null && grade.getExamScore() != null ? grade.getExamScore().doubleValue() : null,
+                    grade != null && grade.getAttitudeScore() != null ? grade.getAttitudeScore().doubleValue() : null,
+                    null,
+                    buildSectionAttendanceList(sectionList, attendanceList)
             );
-            dto.setExamScore(
-                    grade != null && grade.getExamScore() != null ? grade.getExamScore().doubleValue() : null
-            );
-            dto.setAttitudeScore(
-                    grade != null && grade.getAttitudeScore() != null ? grade.getAttitudeScore().doubleValue() : null
-            );
-            dto.setSectionAttendanceList(buildSectionAttendanceList(sectionList, attendanceList));
             studentList.add(dto);
         }
 
@@ -154,10 +150,11 @@ public class InstructorAttendanceService {
         List<SectionAttendanceDTO> sectionAttendanceList = new ArrayList<>();
 
         for (Section section : sectionList) {
-            SectionAttendanceDTO sectionAttendanceDTO = new SectionAttendanceDTO();
-            sectionAttendanceDTO.setSectionId(section.getSectionId());
-            sectionAttendanceDTO.setSectionTitle(section.getTitle());
-            sectionAttendanceDTO.setStatus(findAttendanceStatus(section, attendanceList));
+            SectionAttendanceDTO sectionAttendanceDTO = new SectionAttendanceDTO(
+                    section.getSectionId(),
+                    section.getTitle(),
+                    findAttendanceStatus(section, attendanceList)
+            );
             sectionAttendanceList.add(sectionAttendanceDTO);
         }
 
