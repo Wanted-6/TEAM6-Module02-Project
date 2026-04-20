@@ -110,10 +110,10 @@
                 </th:block>
 
                 <th:block th:unless="${enrolledCourseIds.contains(course.courseId)}">
-                    <form th:action="@{/student/enrollments}" method="post">
+                    <form th:action="@{/student/enrollments}" method="post" class="enroll-form">
                         <input type="hidden" name="courseId" th:value="${course.courseId}">
-                        <button type="submit"
-                                class="rounded-lg bg-blue-700 px-4 py-2 text-sm text-white hover:bg-blue-800">
+                        <button type="button"
+                                class="open-enroll-modal rounded-lg bg-blue-700 px-4 py-2 text-sm text-white hover:bg-blue-800">
                             수강신청
                         </button>
                     </form>
@@ -127,8 +127,39 @@
         조회된 강의가 없습니다.
     </div>
 </div>
+
+<div id="enrollConfirmModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
+    <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <h2 class="text-xl font-bold text-slate-900 mb-4">수강 신청 확인</h2>
+        <p class="text-slate-700 leading-7">
+            정말 수강 하시겠습니까?<br>
+            한 번 신청한 강의는 절대 취소 할 수 없습니다. 신중히 선택해 주세요
+        </p>
+
+        <div class="mt-6 flex justify-end gap-3">
+            <button type="button"
+                    id="cancelEnrollBtn"
+                    class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                아니오
+            </button>
+            <button type="button"
+                    id="confirmEnrollBtn"
+                    class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+                예
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     const successMessage = document.getElementById("successMessage");
+    const enrollConfirmModal = document.getElementById("enrollConfirmModal");
+    const confirmEnrollBtn = document.getElementById("confirmEnrollBtn");
+    const cancelEnrollBtn = document.getElementById("cancelEnrollBtn");
+    const openEnrollButtons = document.querySelectorAll(".open-enroll-modal");
+
+    let selectedEnrollForm = null;
 
     if (successMessage) {
         setTimeout(() => {
@@ -136,6 +167,26 @@
             setTimeout(() => successMessage.remove(), 500);
         }, 3000);
     }
+
+    openEnrollButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            selectedEnrollForm = button.closest(".enroll-form");
+            enrollConfirmModal.classList.remove("hidden");
+            enrollConfirmModal.classList.add("flex");
+        });
+    });
+
+    cancelEnrollBtn.addEventListener("click", () => {
+        selectedEnrollForm = null;
+        enrollConfirmModal.classList.add("hidden");
+        enrollConfirmModal.classList.remove("flex");
+    });
+
+    confirmEnrollBtn.addEventListener("click", () => {
+        if (selectedEnrollForm) {
+            selectedEnrollForm.submit();
+        }
+    });
 </script>
 </body>
 </html>
