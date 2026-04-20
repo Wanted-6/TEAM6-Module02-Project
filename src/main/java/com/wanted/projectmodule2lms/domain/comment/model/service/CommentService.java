@@ -70,6 +70,9 @@ public class CommentService {
                 commentDTO.getContent()
         );
         commentRepository.save(comment);
+        if(board.getPostType() == BoardType.SECTION_QNA && currentRole == MemberRole.INSTRUCTOR) {
+            boardService.changeAnswerStatusToAnswered(commentDTO.getPostId());
+        }
     }
 
     @Transactional

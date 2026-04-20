@@ -63,9 +63,14 @@
 </head>
 <body>
 <div style="max-width: 1400px; margin: 24px auto 0; padding: 0 16px;">
-    <a th:href="@{/main}" style="font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; color: #334a9f; text-decoration: none;">
-        64Lab
-    </a>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <a th:href="@{/main}" style="font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; color: #334a9f; text-decoration: none;">
+            64Lab
+        </a>
+        <a th:href="@{/main}" style="display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border-radius: 999px; background: #ffffff; color: #223374; font-weight: 700; text-decoration: none; border: 1px solid rgba(34, 51, 116, 0.14); box-shadow: 0 10px 24px rgba(34, 51, 116, 0.08);">
+            메인페이지
+        </a>
+    </div>
 </div>
 <h2>📅 강의 일정 캘린더</h2>
 

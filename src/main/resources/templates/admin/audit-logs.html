@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 - API 성능 통계</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<div class="max-w-6xl mx-auto py-10 px-4">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-blue-900">시스템 API 성능 모니터링</h1>
+        <a th:href="@{/admin/logs}" class="text-blue-600 hover:underline font-semibold">⬅ 일반 로그인 로그 보기</a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-blue-900 text-white font-medium uppercase tracking-wider">
+            <tr>
+                <th scope="col" class="px-6 py-4">순위</th>
+                <th scope="col" class="px-6 py-4">실행된 메서드 (Method Name)</th>
+                <th scope="col" class="px-6 py-4">총 호출 횟수 (Hits)</th>
+                <th scope="col" class="px-6 py-4">평균 실행 시간 (ms)</th>
+                <th scope="col" class="px-6 py-4 text-center">성능 상태</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+            <tr th:each="stat, iterStat : ${logStats}" class="hover:bg-blue-50 transition-colors">
+                <td class="px-6 py-4 font-bold text-gray-500" th:text="${iterStat.count}">1</td>
+                <td class="px-6 py-4 font-semibold text-gray-800" th:text="${stat.methodName}">MemberController.login()</td>
+                <td class="px-6 py-4 text-blue-600 font-bold" th:text="${stat.callCount} + '회'">150회</td>
+                <td class="px-6 py-4">
+                    <span th:text="${#numbers.formatDecimal(stat.avgExecutionTime, 1, 2)}">45.23</span> ms
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <span th:if="${stat.avgExecutionTime < 100}" class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">양호 (Good)</span>
+                    <span th:if="${stat.avgExecutionTime >= 100 and stat.avgExecutionTime < 500}" class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">보통 (Normal)</span>
+                    <span th:if="${stat.avgExecutionTime >= 500}" class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">병목 주의 (Warning)</span>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(logStats)}">
+                <td colspan="5" class="px-6 py-8 text-center text-gray-500 font-medium">
+                    수집된 API 성능 로그가 없습니다.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

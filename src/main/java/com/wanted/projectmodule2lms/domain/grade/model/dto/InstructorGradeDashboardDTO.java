@@ -15,4 +15,5 @@ public class InstructorGradeDashboardDTO {
     private Integer lateCount;
     private Integer absentCount;
     private Integer missingAssignmentStudentCount;
+    private Integer pendingQuestionCount;
 }

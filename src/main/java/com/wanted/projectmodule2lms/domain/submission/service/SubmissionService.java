@@ -75,18 +75,26 @@ public class SubmissionService {
         return modelMapper.map(foundSubmission, SubmissionDTO.class);
     }
 
+    public Integer findEnrollmentIdByMemberAndCourse(Integer memberId, Integer courseId) {
+        Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 코스의 수강 정보가 없습니다."));
+
+        return enrollment.getEnrollmentId();
+    }
+
     @Transactional
     public Integer registSubmission(Integer assignmentId,
+                                    Integer enrollmentId,
                                     SubmissionCreateDTO createDTO,
                                     MultipartFile attachmentUpload) throws IOException {
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("과제가 존재하지 않습니다."));
 
-        enrollmentRepository.findById(createDTO.getEnrollmentId())
+        enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
 
-        if (submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, createDTO.getEnrollmentId()).isPresent()) {
+        if (submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, enrollmentId).isPresent()) {
             throw new IllegalArgumentException("이미 제출한 과제입니다.");
         }
 
@@ -96,9 +104,13 @@ public class SubmissionService {
             attachmentPath = createDTO.getAttachmentFile();
         }
 
+        if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
+            throw new IllegalArgumentException("마감일이 지나 제출할 수 없습니다.");
+        }
+
         Submission submission = new Submission(
                 assignment.getAssignmentId(),
-                createDTO.getEnrollmentId(),
+                enrollmentId,
                 createDTO.getContent(),
                 attachmentPath,
                 LocalDateTime.now()

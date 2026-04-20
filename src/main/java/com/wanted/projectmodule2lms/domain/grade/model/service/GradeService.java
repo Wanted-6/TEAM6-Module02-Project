@@ -5,6 +5,9 @@ import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
 import com.wanted.projectmodule2lms.domain.attendance.model.dao.AttendanceRepository;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.Attendance;
 import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceStatus;
+import com.wanted.projectmodule2lms.domain.board.model.dao.BoardRepository;
+import com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus;
+import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -49,6 +52,7 @@ public class GradeService {
     private final SectionRepository sectionRepository;
     private final AssignmentRepository assignmentRepository;
     private final SubmissionRepository submissionRepository;
+    private final BoardRepository boardRepository;
 
     public List<GradeDTO> findGradesByMemberId(Integer memberId) {
         List<Enrollment> enrollments = enrollmentRepository.findByMemberId(memberId);
@@ -332,7 +336,11 @@ public class GradeService {
         if (!course.getInstructorId().equals(instructorId)) {
             throw new IllegalArgumentException("해당 강의만 조회할 수 있습니다.");
         }
-
+        int pendingQuestionCount= (int) boardRepository.countByCourseIdAndPostTypeAndAnswerStatusAndIsDeletedFalse(
+                courseId,
+                BoardType.SECTION_QNA,
+                AnswerStatus.PENDING
+        );
         List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
         int totalStudentCount = enrollments.size();
         long totalSectionCount = sectionRepository.countByCourseId(courseId);
@@ -340,6 +348,7 @@ public class GradeService {
         if (totalSectionCount == 0) {
             return new InstructorGradeDashboardDTO(
                     totalStudentCount,
+                    0,
                     0,
                     0,
                     0,
@@ -394,7 +403,8 @@ public class GradeService {
                 averageProgressRate,
                 lateCount,
                 absentCount,
-                missingAssignmentStudentCount
+                missingAssignmentStudentCount,
+                pendingQuestionCount
         );
     }
 

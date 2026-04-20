@@ -13,9 +13,5 @@ import java.lang.annotation.Target;
 
 // 스티커 이름 정의 - (@interface 키워드 사용)
 public @interface AuditLog {
-//
-//    // (선택) 스티커를 붙일 때 추가 정보를 적을 수 있도록. 예) @AuditLog(actionType = "LOGIN")
-//    String actionType() default "SYSTEM";
-//
-//    String targetType() default "SYSTEM";
+
 }

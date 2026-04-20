@@ -2,46 +2,53 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>섹션 Q&amp;A 목록</title>
+    <title>섹션 Q&A 목록</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
 <body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
 <div class="page-wrapper">
     <div class="top-utility">
         <div class="role-panel">
-            <p class="role-label">현재 역할 전환</p>
+            <p class="role-label">현재 로그인 정보</p>
             <div class="role-buttons">
                 <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
                 <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
                 <button class="role-btn" data-role="STUDENT" type="button">학생</button>
             </div>
-            <div class="role-current">현재 로그인: <span class="role-badge" data-current-role th:text="${currentRole}">STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id th:text="${currentMemberId}">1</span></div>
-            <p class="permission-note">비밀 질문은 강사, 관리자, 작성자 학생만 내용을 확인할 수 있습니다.</p>
+            <div class="role-current">
+                현재 역할:
+                <span class="role-badge" data-current-role th:text="${currentRole}">STUDENT</span>
+                / 회원 ID:
+                <span class="role-badge" data-current-member-id th:text="${currentMemberId}">1</span>
+            </div>
+            <p class="permission-note">섹션 Q&A는 학생 질문과 강사 답변을 위한 게시판입니다.</p>
         </div>
         <div class="page-main">
-            <h1 class="page-title">섹션 Q&amp;A 목록</h1>
-            <p class="page-desc">학생 질문과 답변 상태를 확인하는 게시판입니다.</p>
+            <div class="page-eyebrow">Section Q&A</div>
+            <h1 class="page-title">섹션 Q&A</h1>
+            <p class="page-desc">강의 중 궁금한 내용을 질문하고 답변 상태를 함께 확인할 수 있습니다.</p>
         </div>
     </div>
 
     <div class="box">
         <div class="button-group">
-            <a class="btn"
-               th:href="@{/board/regist(type='SECTION_QNA', courseId=${courseId})}"
-               data-role-only="STUDENT">질문 등록</a>
-            <a class="btn gray" href="/board/list">게시판 메인</a>
+            <a class="btn" th:href="@{/board/regist(type='SECTION_QNA', courseId=${courseId})}" data-role-only="STUDENT">질문 등록</a>
+            <a class="btn gray" href="/board/list">게시판 홈</a>
         </div>
     </div>
 
     <div class="box">
         <form class="search-bar" method="get" action="/board/section-qna">
             <input type="hidden" name="courseId" th:value="${courseId}">
-            <input type="text" name="keyword" placeholder="섹션 Q&amp;A 제목 검색" th:value="${keyword}">
+            <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
             <button type="submit" class="btn">검색</button>
-            <a class="btn gray"
-               th:href="@{/board/section-qna(courseId=${courseId})}">초기화</a>
+            <a class="btn gray" th:href="@{/board/section-qna(courseId=${courseId})}">초기화</a>
         </form>
-        <p class="meta">검색어: <span th:text="${keyword != null and !keyword.isBlank() ? keyword : '전체'}">전체</span></p>
+        <p class="meta">
+            검색 기준:
+            <span th:if="${keyword != null and !keyword.isBlank()}" th:text="${keyword}">keyword</span>
+            <span th:unless="${keyword != null and !keyword.isBlank()}">전체</span>
+        </p>
 
         <table class="table">
             <thead>
@@ -54,7 +61,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="board, stat : ${boardList}">
+            <tr th:each="board, stat : ${boardList}"
+                class="post-row"
+                th:attr="data-href=@{/board/detail(postId=${board.postId})}">
                 <td th:text="${stat.count}">1</td>
                 <td>
                     <a th:href="@{/board/detail(postId=${board.postId})}"
@@ -63,16 +72,17 @@
                     </a>
                 </td>
                 <td th:text="${board.isSecret} ? 'Y' : 'N'">Y</td>
-                <td th:text="${board.answerStatus != null ? board.answerStatus : '-'}">PENDING</td>
-                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">김학생</td>
+                <td th:text="${board.answerStatus == T(com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus).PENDING ? '답변대기' : (board.answerStatus == T(com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus).ANSWERED ? '답변완료' : '-')}">답변대기</td>
+                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">학생1</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
-                <td colspan="5">조회된 섹션 Q&amp;A가 없습니다.</td>
+                <td colspan="5">등록된 섹션 Q&A 글이 없습니다.</td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
 <script src="/js/board/role-switcher.js"></script>
+<script src="/js/board/post-row.js"></script>
 </body>
 </html>

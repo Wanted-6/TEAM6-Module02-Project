@@ -4,6 +4,7 @@ import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentCreate
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentUpdateDTO;
 import com.wanted.projectmodule2lms.domain.assignment.service.AssignmentService;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ public class AssignmentController {
     private final AssignmentService assignmentService;
     private final CourseService courseService;
 
+    @AuditLog
     @GetMapping("/courses/{courseId}/assignment")
     public ModelAndView findAssignmentByCourse(@PathVariable Integer courseId,
                                                @RequestParam(defaultValue = "STUDENT") String role,
@@ -66,6 +68,7 @@ public class AssignmentController {
             return "redirect:/courses/" + courseId + "/assignment/regist?role=INSTRUCTOR";
         }
     }
+
 
     @GetMapping("/courses/{courseId}/assignment/modify")
     public ModelAndView modifyPage(@PathVariable Integer courseId,

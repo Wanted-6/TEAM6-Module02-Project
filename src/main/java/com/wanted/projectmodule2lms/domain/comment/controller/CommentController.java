@@ -24,7 +24,7 @@ public class CommentController {
     private final CommentService commentService;
     private final MemberRepository memberRepository;
 
-    @AuditLog
+
     @PostMapping("/regist")
     public String registerComment(@LoginMemberId Long loginMemberId,
                                   @ModelAttribute CommentDTO commentDTO,
@@ -41,7 +41,7 @@ public class CommentController {
         }
     }
 
-    @AuditLog
+
     @PostMapping("/modify")
     public String modifyComment(@LoginMemberId Long loginMemberId,
                                 @ModelAttribute CommentDTO commentDTO,
@@ -58,7 +58,7 @@ public class CommentController {
         }
     }
 
-    @AuditLog
+ 
     @PostMapping("/delete")
     public String deleteComment(@LoginMemberId Long loginMemberId,
                                 @RequestParam Integer commentId,
