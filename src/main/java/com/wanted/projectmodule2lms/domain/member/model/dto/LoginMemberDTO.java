@@ -13,7 +13,6 @@ import java.util.List;
 @ToString
 public class LoginMemberDTO {
 
-    // 세션에 담아둘 핵심 정보들 (User -> Member 용어로 완벽 통일)
     private Integer memberId;
     private String loginId;
     private String name;

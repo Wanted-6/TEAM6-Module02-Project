@@ -1,5 +1,7 @@
 package com.wanted.projectmodule2lms.domain.member.model.controller;
 
+import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
+import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.service.EnrollmentService;
@@ -36,30 +38,27 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final EnrollmentService enrollmentService;
-    private final CourseService courseService;
+    private final CourseRepository courseRepository;
 
     @GetMapping("/signup")
-    public void signup(){ }
+    public void signup() {
+    }
 
     @PostMapping("/signup")
     public String signup(@ModelAttribute SignupDTO signupDTO,
                          @RequestParam(value = "gradCert", required = false) MultipartFile gradCert,
                          @RequestParam(value = "careerCert", required = false) MultipartFile careerCert,
                          Model model, RedirectAttributes rttr) {
-
-        Integer result = memberService.regist(signupDTO, gradCert, careerCert);
-
-        if(result == null) {
-            model.addAttribute("message", "중복 ID를 가진 회원이 존재합니다.");
-            return "member/signup";
-
-        } else if(result == 0) {
-            model.addAttribute("message", "서버에서 오류가 발생하였습니다.");
-            return "member/signup";
-
-        } else {
+        try {
+            memberService.regist(signupDTO, gradCert, careerCert);
             rttr.addFlashAttribute("message", "회원가입이 완료되었습니다. 로그인해 주세요.");
             return "redirect:/auth/login";
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            model.addAttribute("message", e.getMessage());
+            return "member/signup";
+        } catch (Exception e) {
+            model.addAttribute("message", "서버에서 오류가 발생하였습니다.");
+            return "member/signup";
         }
     }
 
@@ -102,13 +101,7 @@ public class MemberController {
 
     @PostMapping("/verify-code")
     public String processVerifyCode(@LoginMemberId Long memberId, @RequestParam("code") String inputCode, RedirectAttributes rttr) {
-        if (memberId == null) return "redirect:/auth/login";
-
-        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
-
-        if (inputCode.equals(member.getApprovalCode())) {
-            member.verifyApprovalCode();
-            memberRepository.save(member);
+        if (memberService.verifyInstructorCode(memberId, inputCode)) {
             rttr.addFlashAttribute("message", "강사 인증이 완료되었습니다.");
             return "redirect:/";
         } else {
@@ -129,11 +122,28 @@ public class MemberController {
         if (member.getRole() == MemberRole.STUDENT) {
             List<Enrollment> enrollments = enrollmentService.getMyEnrollments(memberId.intValue());
 
+            //코드 최적화 전.
+//            List<Map<String, Object>> courseList = enrollments.stream().map(enroll -> {
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("enrollmentId", enroll.getEnrollmentId());
+//                String cName = courseService.getCourseNameById(enroll.getCourseId());
+//                map.put("courseName", cName != null ? cName : "알 수 없는 과목");
+//                return map;
+//            }).collect(Collectors.toList());
+
+            List<Integer> courseIds = enrollments.stream()
+                    .map(Enrollment::getCourseId)
+                    .collect(Collectors.toList());
+
+            List<Course> courses = courseRepository.findAllById(courseIds);
+
+            Map<Integer, String> courseNameMap = courses.stream()
+                    .collect(Collectors.toMap(Course::getCourseId, Course::getTitle));
+
             List<Map<String, Object>> courseList = enrollments.stream().map(enroll -> {
                 Map<String, Object> map = new HashMap<>();
                 map.put("enrollmentId", enroll.getEnrollmentId());
-                String cName = courseService.getCourseNameById(enroll.getCourseId());
-                map.put("courseName", cName != null ? cName : "알 수 없는 과목");
+                map.put("courseName", courseNameMap.getOrDefault(enroll.getCourseId(), "알 수 없는 과목"));
                 return map;
             }).collect(Collectors.toList());
 

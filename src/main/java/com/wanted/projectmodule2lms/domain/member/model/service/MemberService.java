@@ -33,43 +33,36 @@ public class MemberService {
     @Transactional
     public Integer regist(SignupDTO signupDTO, MultipartFile gradCert, MultipartFile careerCert) {
         if (signupDTO.getMemberId() == null || signupDTO.getMemberId().length() < 4) {
-            System.out.println("아이디는 4글자 이상으로 설정해주세요.");
-            return null;
+            throw new IllegalArgumentException("아이디는 4글자 이상으로 설정해주세요.");
         }
 
         deleteRejectedInstructorData(signupDTO.getMemberId(), signupDTO.getMemberEmail(), signupDTO.getMemberPhone());
 
         if (memberRepository.existsByLoginId(signupDTO.getMemberId())) {
-            return null;
+            throw new IllegalStateException("이미 존재하는 아이디입니다.");
         }
 
-        try {
-            String savedGradPath = null;
-            String savedCareerPath = null;
+        String savedGradPath = null;
+        String savedCareerPath = null;
 
-            if ("INSTRUCTOR".equals(signupDTO.getMemberRole())) {
-                savedGradPath = saveFile(gradCert);
-                savedCareerPath = saveFile(careerCert);
-            }
-
-            Member member = Member.builder()
-                    .loginId(signupDTO.getMemberId())
-                    .password(encoder.encode(signupDTO.getMemberPassword()))
-                    .name(signupDTO.getMemberName())
-                    .email(signupDTO.getMemberEmail())
-                    .phone(signupDTO.getMemberPhone())
-                    .role(MemberRole.valueOf(signupDTO.getMemberRole()))
-                    .gradCertPath(savedGradPath)
-                    .careerCertPath(savedCareerPath)
-                    .build();
-
-            Member savedMember = memberRepository.save(member);
-            return savedMember.getMemberId();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+        if ("INSTRUCTOR".equals(signupDTO.getMemberRole())) {
+            savedGradPath = saveFile(gradCert);
+            savedCareerPath = saveFile(careerCert);
         }
+
+        Member member = Member.builder()
+                .loginId(signupDTO.getMemberId())
+                .password(encoder.encode(signupDTO.getMemberPassword()))
+                .name(signupDTO.getMemberName())
+                .email(signupDTO.getMemberEmail())
+                .phone(signupDTO.getMemberPhone())
+                .role(MemberRole.valueOf(signupDTO.getMemberRole()))
+                .gradCertPath(savedGradPath)
+                .careerCertPath(savedCareerPath)
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+        return savedMember.getMemberId();
     }
 
     private void deleteRejectedInstructorData(String loginId, String email, String phone) {
@@ -136,44 +129,61 @@ public class MemberService {
         return 0;
     }
 
-    public boolean checkIdDuplicate(String memberId){
-        Optional<Member> memberOpt = memberRepository.findByLoginId(memberId);
+//    public boolean checkIdDuplicate(String memberId) {
+//        Optional<Member> memberOpt = memberRepository.findByLoginId(memberId);
+//        if (memberOpt.isPresent()) {
+//            Member member = memberOpt.get();
+//            return member.getRole() != MemberRole.INSTRUCTOR || member.getApprovalStatus() == null || !"REJECTED".equals(member.getApprovalStatus().name());
+//        }
+//        return false;
+//    }
+//
+//    public boolean checkEmailDuplicate(String email) {
+//        Optional<Member> memberOpt = memberRepository.findByEmail(email);
+//        if (memberOpt.isPresent()) {
+//            Member member = memberOpt.get();
+//            return member.getRole() != MemberRole.INSTRUCTOR || member.getApprovalStatus() == null || !"REJECTED".equals(member.getApprovalStatus().name());
+//        }
+//        return false;
+//    }
+//
+//    public boolean checkPhoneDuplicate(String phone) {
+//        Optional<Member> memberOpt = memberRepository.findByPhone(phone);
+//        if (memberOpt.isPresent()) {
+//            Member member = memberOpt.get();
+//            return member.getRole() != MemberRole.INSTRUCTOR || member.getApprovalStatus() == null || !"REJECTED".equals(member.getApprovalStatus().name());
+//        }
+//        return false;
+//    }
+
+    // 중복코드 통일 / 호출만 하기.
+    private boolean isDuplicateAndNotRejected(Optional<Member> memberOpt) {
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
-            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
-                return false;
-            }
-            return true;
+            return member.getRole() != MemberRole.INSTRUCTOR
+                    || member.getApprovalStatus() == null
+                    || !"REJECTED".equals(member.getApprovalStatus().name());
         }
         return false;
     }
 
+    @Transactional(readOnly = true)
+    public boolean checkIdDuplicate(String memberId) {
+        return isDuplicateAndNotRejected(memberRepository.findByLoginId(memberId));
+    }
+
+    @Transactional(readOnly = true)
     public boolean checkEmailDuplicate(String email) {
-        Optional<Member> memberOpt = memberRepository.findByEmail(email);
-        if (memberOpt.isPresent()) {
-            Member member = memberOpt.get();
-            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
-                return false;
-            }
-            return true;
-        }
-        return false;
+        return isDuplicateAndNotRejected(memberRepository.findByEmail(email));
     }
 
+    @Transactional(readOnly = true)
     public boolean checkPhoneDuplicate(String phone) {
-        Optional<Member> memberOpt = memberRepository.findByPhone(phone);
-        if (memberOpt.isPresent()) {
-            Member member = memberOpt.get();
-            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
-                return false;
-            }
-            return true;
-        }
-        return false;
+        return isDuplicateAndNotRejected(memberRepository.findByPhone(phone));
     }
 
-    // 아이디 찾기
-    public String findLoginIdByNameAndEmail(String name, String email){
+    @Transactional(readOnly = true)
+    public String findLoginIdByNameAndEmail(String name, String email) {
         Optional<Member> member = memberRepository.findByNameAndEmail(name, email);
 
         if (member.isPresent()) {
@@ -183,17 +193,15 @@ public class MemberService {
         return null;
     }
 
-    // 아이디 마스킹 처리
-    private String maskLoginId(String loginId){
-        if (loginId.length() <= 3){
-            return loginId.substring(0, 1) + "**";
+    private String maskLoginId(String loginId) {
+        if (loginId.length() <= 3) {
+            return loginId.charAt(0) + "**";
         }
         return loginId.substring(0, 3) + "*".repeat(loginId.length() - 3);
     }
 
-    // 비밀번호 찾기 (임시 비밀번호 발급)
     @Transactional
-    public String issueTempPassword(String loginId, String email){
+    public String issueTempPassword(String loginId, String email) {
         Optional<Member> memberOpt = memberRepository.findByLoginIdAndEmail(loginId, email);
 
         if (memberOpt.isPresent()) {
@@ -205,9 +213,8 @@ public class MemberService {
         return null;
     }
 
-    // 비밀번호 변경
     @Transactional
-    public void changeRegularPassword(Long memberId, String newPassword){
+    public void changeRegularPassword(Long memberId, String newPassword) {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
         member.changeRegularPassword(encoder.encode(newPassword));
@@ -221,7 +228,7 @@ public class MemberService {
         return encoder.matches(currentPassword, member.getPassword());
     }
 
-    private String saveFile(MultipartFile file){
+    private String saveFile(MultipartFile file) {
         if (file == null || file.isEmpty()) return null;
 
         try {
@@ -229,7 +236,7 @@ public class MemberService {
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
 
-            String storedFileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String storedFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             File targetFile = new File(dir, storedFileName);
 
             file.transferTo(targetFile);
@@ -241,7 +248,6 @@ public class MemberService {
         }
     }
 
-    // 프로필 업데이트 (사진 첨부 시)
     @Transactional
     public void updateProfile(Long memberId, String bio, MultipartFile file) throws IOException {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
@@ -295,7 +301,6 @@ public class MemberService {
         profileRepository.save(profile);
     }
 
-    // 전화번호 업데이트
     @Transactional
     public void updatePhone(Long memberId, String phone) {
         Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
@@ -307,7 +312,6 @@ public class MemberService {
         member.updatePhone(phone);
     }
 
-    // 회원 탈퇴
     @Transactional
     public void deleteMember(Long memberId) {
         Integer memberIdInt = Math.toIntExact(memberId);
@@ -315,21 +319,29 @@ public class MemberService {
         Member member = memberRepository.findById(memberIdInt)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        // 강사 탈퇴 조건
         if (member.getRole() == MemberRole.INSTRUCTOR) {
             boolean hasActiveCourses = courseRepository.existsByInstructorIdAndIsOpenTrue(memberIdInt);
             if (hasActiveCourses) {
                 throw new IllegalStateException("진행 중인 강의가 있어 탈퇴할 수 없습니다. 강의 종료 후 다시 시도해 주세요.");
             }
-        }
-        // 학생 탈퇴 조건
-        else if (member.getRole() == MemberRole.STUDENT) {
+        } else if (member.getRole() == MemberRole.STUDENT) {
             boolean hasActiveEnrollments = enrollmentRepository.existsByMemberId(memberIdInt);
             if (hasActiveEnrollments) {
                 throw new IllegalStateException("수강 중인 강의가 있어 탈퇴할 수 없습니다. 수강 취소 또는 종료 후 다시 시도해 주세요.");
             }
         }
-
         memberRepository.delete(member);
+    }
+
+    @Transactional
+    public boolean verifyInstructorCode(Long memberId, String inputCode) {
+        Member member = memberRepository.findById(Math.toIntExact(memberId))
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        if (inputCode.equals(member.getApprovalCode())) {
+            member.verifyApprovalCode();
+            return true;
+        }
+        return false;
     }
 }

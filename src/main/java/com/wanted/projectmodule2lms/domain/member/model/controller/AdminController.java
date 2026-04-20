@@ -33,20 +33,11 @@ public class AdminController {
     @AuditLog
     @GetMapping("/logs")
     public String getLoginLogs(Model model) {
-
         List<LoginLog> logs = loginLogRepository.findAllByOrderByLoginTimeDesc();
-
-        int activeUserCount = 0;
-        for (Object principal : sessionRegistry.getAllPrincipals()) {
-            List<SessionInformation> sessions = sessionRegistry.getAllSessions(principal, false);
-            if (!sessions.isEmpty()) {
-                activeUserCount++;
-            }
-        }
+        int activeUserCount = adminService.getActiveUserCount(sessionRegistry); // 서비스 호출로 끝!
 
         model.addAttribute("logs", logs);
         model.addAttribute("activeUsers", activeUserCount);
-
         return "admin/logs";
     }
 
@@ -75,7 +66,6 @@ public class AdminController {
         return "redirect:/admin/instructors";
     }
 
-    // 메서드 성능 통계 조회
     @AuditLog
     @GetMapping("/audit-logs")
     public String showAuditLogStatistics(Model model) {
