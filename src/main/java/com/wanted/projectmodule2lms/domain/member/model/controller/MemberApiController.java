@@ -1,12 +1,12 @@
 package com.wanted.projectmodule2lms.domain.member.model.controller;
 
 import com.wanted.projectmodule2lms.domain.member.model.service.MemberService;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -31,5 +31,19 @@ public class MemberApiController {
     @GetMapping("/check-phone")
     public ResponseEntity<Boolean> checkPhone(@RequestParam String phone) {
         return ResponseEntity.ok(memberService.checkPhoneDuplicate(phone));
+    }
+
+    @PostMapping("/verify-password")
+    public ResponseEntity<Boolean> verifyPassword(@LoginMemberId Long memberId, @RequestBody Map<String, String> request) {
+        if (memberId == null) {
+            return ResponseEntity.ok(false);
+        }
+
+        String currentPassword = request.get("password");
+
+
+        boolean isMatch = memberService.verifyPassword(memberId, currentPassword);
+
+        return ResponseEntity.ok(isMatch);
     }
 }

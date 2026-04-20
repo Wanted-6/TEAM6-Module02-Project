@@ -28,11 +28,9 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         LoginMemberDTO loginMember = authDetails.getLoginMemberDTO();
         String username = authentication.getName();
 
+        // (기존 코드) 로그인 실패 카운트 초기화 및 로그 저장
         memberService.resetLoginFailCount(username);
-
-         loginLogService.saveLoginLog(username, true, request.getRemoteAddr());
-
-        memberService.resetLoginFailCount(username);
+        loginLogService.saveLoginLog(username, true, request.getRemoteAddr());
 
         if ("INSTRUCTOR".equals(loginMember.getRole())) {
 
@@ -57,14 +55,11 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         if (loginMember.isTempPassword()) {
             System.out.println("🚨 임시 비밀번호 사용자 [" + username + "] 감지: 비밀번호 변경 페이지로 이동합니다.");
-
             String targetUrl = "/member/edit-password";
-
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
             return;
         }
 
-        super.onAuthenticationSuccess(request, response, authentication);
+        getRedirectStrategy().sendRedirect(request, response, "/");
     }
-
 }

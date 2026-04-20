@@ -72,16 +72,25 @@ public class MemberController {
     }
 
     @PostMapping("/edit-password")
-    @ResponseBody
-    public ResponseEntity<String> updatePassword(@LoginMemberId Long memberId, @RequestParam("newPassword") String newPassword) {
+    public String updatePassword(@LoginMemberId Long memberId,
+                                 @RequestParam("newPassword") String newPassword,
+                                 HttpSession session,
+                                 RedirectAttributes rttr) {
+
         if (memberId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+            return "redirect:/auth/login";
         }
+
         try {
             memberService.changeRegularPassword(memberId, newPassword);
-            return ResponseEntity.ok("success");
+            session.invalidate();
+
+            rttr.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다. 새로운 비밀번호로 다시 로그인해주세요.");
+            return "redirect:/auth/login";
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
+            rttr.addFlashAttribute("error", "비밀번호 변경에 실패했습니다.");
+            return "redirect:/member/edit-password";
         }
     }
 
@@ -137,10 +146,15 @@ public class MemberController {
     @PostMapping("/profile/update")
     public String updateProfile(@LoginMemberId Long memberId,
                                 @RequestParam("bio") String bio,
+                                @RequestParam(value = "useDefaultImage", defaultValue = "false") boolean useDefaultImage,
                                 @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                 RedirectAttributes rttr) throws IOException {
 
-        memberService.updateProfile(memberId, bio, profileImage);
+        if (useDefaultImage) {
+            memberService.updateToDefaultProfile(memberId, bio);
+        } else {
+            memberService.updateProfile(memberId, bio, profileImage);
+        }
 
         rttr.addFlashAttribute("message", "프로필이 수정되었습니다.");
         return "redirect:/member/mypage";
