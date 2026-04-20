@@ -41,7 +41,6 @@ public class MemberApiController {
 
         String currentPassword = request.get("password");
 
-
         boolean isMatch = memberService.verifyPassword(memberId, currentPassword);
 
         return ResponseEntity.ok(isMatch);

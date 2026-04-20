@@ -28,12 +28,11 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         LoginMemberDTO loginMember = authDetails.getLoginMemberDTO();
         String username = authentication.getName();
 
-        // (기존 코드) 로그인 실패 카운트 초기화 및 로그 저장
+        // 로그인 실패 카운트 초기화 및 로그 저장
         memberService.resetLoginFailCount(username);
         loginLogService.saveLoginLog(username, true, request.getRemoteAddr());
 
         if ("INSTRUCTOR".equals(loginMember.getRole())) {
-
             if ("PENDING".equals(loginMember.getApprovalStatus())) {
                 System.out.println("🚨 대기 중이므로 로그인 할 수 없습니다.");
                 getRedirectStrategy().sendRedirect(request, response, "/auth/login?error=pending");

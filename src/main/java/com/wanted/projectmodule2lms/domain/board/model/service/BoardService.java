@@ -64,7 +64,7 @@ public class    BoardService {
     }
 
     public BoardViewDTO findBoardById(Integer postId) {
-        return toBoardViewDTO(findActiveBoard(postId));
+        return toBoardDetailViewDTO(findActiveBoard(postId));
     }
 
     public List<Course> findAllCourses() {
@@ -388,6 +388,41 @@ public class    BoardService {
                 loadCourseTitleMap(Collections.singletonList(board)),
                 loadCourseInstructorMap(Collections.singletonList(board)),
                 loadSectionTitleMap(Collections.singletonList(board))
+        );
+    }
+
+    private BoardViewDTO toBoardDetailViewDTO(Board board) {
+        Member member = memberRepository.findById(board.getMemberId()).orElse(null);
+
+        Course course = null;
+        if (board.getCourseId() != null) {
+            course = courseRepository.findById(board.getCourseId()).orElse(null);
+        }
+
+        Section section = null;
+        if (board.getSectionId() != null) {
+            section = sectionRepository.findById(board.getSectionId()).orElse(null);
+        }
+
+        return new BoardViewDTO(
+                board.getPostId(),
+                board.getMemberId(),
+                member != null ? member.getName() : null,
+                board.getCourseId(),
+                course != null ? course.getTitle() : null,
+                course != null ? course.getInstructorId() : null,
+                board.getSectionId(),
+                section != null ? section.getTitle() : null,
+                board.getTitle(),
+                board.getContent(),
+                board.getPostType(),
+                board.getIsSecret(),
+                board.getAnswerStatus(),
+                board.getViewCount(),
+                board.getIsDeleted(),
+                board.getCreatedAt(),
+                board.getUpdatedAt(),
+                member != null && member.getProfile() != null ? member.getProfile().getProfileImage() : null
         );
     }
 
