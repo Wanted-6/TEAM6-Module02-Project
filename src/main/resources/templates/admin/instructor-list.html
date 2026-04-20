@@ -21,45 +21,27 @@
         .btn-group { display: flex; justify-content: center; gap: 10px; }
         form { margin: 0; }
         button { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-approve { background-color: #28a745; } /* 초록색 승인 */
+        .btn-approve { background-color: #28a745; }
         .btn-approve:hover { background-color: #218838; }
-        .btn-reject { background-color: #dc3545; } /* 빨간색 반려 */
+        .btn-reject { background-color: #dc3545; }
         .btn-reject:hover { background-color: #c82333; }
 
         /* 텅 비었을 때 */
         .empty-msg { text-align: center; padding: 50px; color: #777; }
 
         /* 비활성화 버튼 및 텍스트 스타일 */
-        .btn-disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-        .status-text {
-            display: block;
-            margin-top: 5px;
-            font-size: 13px;
-            font-weight: bold;
-        }
+        .btn-disabled { background-color: #6c757d; cursor: not-allowed; opacity: 0.8; }
+        .status-text { display: block; margin-top: 5px; font-size: 13px; font-weight: bold; }
         .text-success { color: #28a745; }
         .text-danger { color: #dc3545; }
 
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-top h2 { margin: 0; }
 
         /* 메인으로 가기 버튼 */
         .btn-home {
-            background-color: #0056b3;
-            color: white;
-            padding: 10px 16px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+            background-color: #0056b3; color: white; padding: 10px 16px;
+            text-decoration: none; border-radius: 5px; font-weight: bold;
             transition: background-color 0.3s;
         }
         .btn-home:hover { background-color: #004494; }
@@ -97,8 +79,14 @@
             <td th:text="${inst.email}">test@test.com</td>
 
             <td>
-                <a th:if="${inst.gradCertPath != null}" th:href="@{${inst.gradCertPath}}" target="_blank" style="color: #0056b3; text-decoration: none;">📄 졸업증명서</a><br>
-                <a th:if="${inst.careerCertPath != null}" th:href="@{${inst.careerCertPath}}" target="_blank" style="color: #0056b3; text-decoration: none;">📄 경력증명서</a>
+                <a th:if="${inst.gradCertPath != null}"
+                   th:href="@{'/uploads/' + ${#strings.replace(inst.gradCertPath, '/uploads/', '')}}"
+                   target="_blank" style="color: #0056b3; text-decoration: none;">📄 졸업증명서</a><br>
+
+                <a th:if="${inst.careerCertPath != null}"
+                   th:href="@{'/uploads/' + ${#strings.replace(inst.careerCertPath, '/uploads/', '')}}"
+                   target="_blank" style="color: #0056b3; text-decoration: none;">📄 경력증명서</a>
+
                 <span th:if="${inst.gradCertPath == null and inst.careerCertPath == null}" style="color: #999;">첨부파일 없음</span>
             </td>
 
