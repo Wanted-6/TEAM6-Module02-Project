@@ -59,12 +59,12 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(auth -> {
                     // 1. 누구나 접근 가능한 URL 설정
-                    auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**").permitAll();
+                    auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**", "/error", "/uploads/**").permitAll();
 
                     // 2. 권한별 URL 접근 제어 (HTML에서 설정한 3가지 Role 기준)
 
                     // 관리자 전용
-                    auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**", "/error").permitAll();
+//                    auth.requestMatchers("/auth/**", "/member/signup", "/", "/api/member/**", "/error").permitAll();
                     auth.requestMatchers("/admin/**").hasAnyAuthority("ADMIN");
                     auth.requestMatchers("/instructor/**").hasAnyAuthority("INSTRUCTOR", "ADMIN");
                     auth.requestMatchers("/member/**").hasAnyAuthority("STUDENT", "INSTRUCTOR", "ADMIN");

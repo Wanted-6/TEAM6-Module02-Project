@@ -2,187 +2,53 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>로그인 실패</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>64Lab | 알림</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { headline: ['Manrope', 'sans-serif'], body: ['Noto Sans KR', 'sans-serif'] },
+                    colors: { brand: '#2b3f8f', brandSoft: '#edf2ff', ink: '#1b2540', line: '#dbe3f1' },
+                    boxShadow: { soft: '0 18px 40px rgba(43, 63, 143, 0.08)' }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* 배경도 실패 테마에 맞춰 살짝 붉은빛이 도는 웜톤으로 변경 */
-            background: linear-gradient(135deg, #f8fafc 0%, #fee2e2 100%);
-            font-family: "Pretendard", "Noto Sans KR", sans-serif;
-            color: #1f2937;
-        }
-
-        .message-wrapper {
-            width: 100%;
-            max-width: 520px;
-            padding: 24px;
-        }
-
-        .message-card {
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 18px 45px rgba(220, 38, 38, 0.08); /* 그림자도 테마에 맞게 붉은 톤 */
-            overflow: hidden;
-            border: 1px solid #fee2e2;
-        }
-
-        .message-top {
-            padding: 28px 28px 18px;
-            /* 에러를 나타내는 세련된 레드 그라데이션 */
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: #ffffff;
-        }
-
-        .message-top h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .message-top p {
-            margin: 10px 0 0;
-            font-size: 14px;
-            opacity: 0.95;
-        }
-
-        .message-body {
-            padding: 28px;
-        }
-
-        .icon-box {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            background: #fef2f2;
-            color: #ef4444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-        }
-
-        .message-title {
-            text-align: center;
-            margin: 0 0 12px;
-            font-size: 22px;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .message-text {
-            margin: 0;
-            padding: 16px 18px;
-            border-radius: 14px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            font-size: 15px;
-            line-height: 1.6;
-            color: #ef4444; /* 실패 메시지는 붉은색으로 강조 */
-            font-weight: 500;
-            text-align: center;
-            word-break: keep-all;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 28px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 160px;
-            padding: 12px 18px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* 메인 버튼 (다시 로그인) */
-        .btn-primary {
-            background: #ef4444;
-            color: #ffffff;
-            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
-        }
-
-        .btn-primary:hover {
-            background: #dc2626;
-        }
-
-        /* 서브 버튼 (메인으로) */
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #e5e7eb;
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        @media (max-width: 600px) {
-            .message-wrapper {
-                padding: 16px;
-            }
-
-            .message-top,
-            .message-body {
-                padding: 22px;
-            }
-
-            .message-title {
-                font-size: 20px;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
+        body { font-family: 'Noto Sans KR', sans-serif; background: linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
+        .content-card { background: #ffffff; border-radius: 40px; }
     </style>
 </head>
-<body>
-<div class="message-wrapper">
-    <div class="message-card">
-        <div class="message-top">
-            <h1>로그인 실패</h1>
+<body class="flex min-h-screen items-center justify-center p-6 text-ink">
+
+<div class="content-card w-full max-w-md p-10 shadow-soft border border-line/50">
+    <div class="mb-8 text-center">
+        <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50 text-red-500">
+            <span class="material-symbols-outlined text-5xl">warning</span>
         </div>
+        <h1 class="font-headline text-2xl font-extrabold tracking-tight text-ink">로그인 실패</h1>
+        <p class="mt-3 font-medium text-slate-500">입력하신 정보를 다시 확인해 주세요.</p>
+    </div>
 
-        <div class="message-body">
-            <div class="icon-box">⚠️</div>
+    <div class="mb-10 rounded-2xl border border-red-100 bg-red-50/50 p-5 text-center">
+        <p class="text-[15px] font-semibold leading-relaxed text-red-600" th:text="${message}">
+            존재하지 않는 아이디거나 비밀번호가 일치하지 않습니다.
+        </p>
+    </div>
 
-            <h2 class="message-title">로그인에 실패했습니다</h2>
-
-<!--            <p class="message-text" th:text="${param.message}">-->
-            <p class="message-text" th:text="${message}">
-                존재하지 않는 아이디거나 비밀번호가 일치하지 않습니다.
-            </p>
-
-            <div class="button-group">
-                <a href="/auth/login" class="btn btn-primary">다시 로그인</a>
-                <a href="/" class="btn btn-secondary">메인으로 가기</a>
-            </div>
-        </div>
+    <div class="space-y-3">
+        <a href="/auth/login" class="block w-full rounded-2xl bg-brand py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#223374] active:scale-[0.98]">
+            다시 로그인하기
+        </a>
+        <a href="/" class="block w-full rounded-2xl border border-line bg-white py-4 text-center text-sm font-bold text-slate-600 transition hover:bg-slate-50">
+            메인으로 이동
+        </a>
     </div>
 </div>
+
 </body>
 </html>

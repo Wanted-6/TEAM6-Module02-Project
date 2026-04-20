@@ -45,7 +45,17 @@
 
         <div class="p-4 rounded-xl bg-slate-50">
             <p class="text-slate-500 mb-2">자료 파일</p>
-            <p th:text="${section.materialFile} ?: '등록된 자료가 없습니다.'"></p>
+
+            <a th:if="${section.materialFile != null and section.materialFile != ''}"
+               th:href="@{/download/section/{fileName}(fileName=${#strings.substring(section.materialFile, section.materialFile.lastIndexOf('/') + 1)})}"
+               th:text="${#strings.substring(section.materialFile, section.materialFile.lastIndexOf('/') + 1)}"
+               class="text-blue-600 hover:underline">
+                파일 다운로드
+            </a>
+
+            <span th:if="${section.materialFile == null or section.materialFile == ''}">
+                등록된 자료가 없습니다.
+            </span>
         </div>
 
         <div class="flex gap-3">

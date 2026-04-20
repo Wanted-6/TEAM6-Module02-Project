@@ -190,29 +190,6 @@
                     </div>
                 </div>
 
-                <div class="mt-8 hidden flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
-                    <div class="text-sm text-on-surface-variant">
-                        <span class="font-bold text-on-surface">총점</span>
-                        <span th:text="|${attendancePage.attendanceScore + attendancePage.assignmentScore + attendancePage.examScore + attendancePage.attitudeScore}점 / 100점|">80점 / 100점</span>
-                    </div>
-
-                    <div th:if="${attendancePage.attendanceScore + attendancePage.assignmentScore + attendancePage.examScore + attendancePage.attitudeScore >= 80}">
-                        <a class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
-                           th:href="@{/student/certificate(courseId=${attendancePage.courseId})}">
-                            <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
-                            수료증 발급
-                        </a>
-                    </div>
-
-                    <button th:unless="${attendancePage.attendanceScore + attendancePage.assignmentScore + attendancePage.examScore + attendancePage.attitudeScore >= 80}"
-                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
-                            type="button"
-                            disabled>
-                        <span class="material-symbols-outlined mr-2 text-base">lock</span>
-                        수료 기준 미달
-                    </button>
-                </div>
-
                 <div class="mt-8 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
                     <div class="text-sm text-on-surface-variant">
                         <span class="font-bold text-on-surface">총점</span>
@@ -238,7 +215,6 @@
                     </button>
 
                     <a th:if="${attendancePage.certificateStatus == 'APPROVED' or attendancePage.certificateStatus == 'ISSUED'}"
-
                        class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
                        th:href="@{/student/certificate(courseId=${attendancePage.courseId})}">
                         <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
@@ -321,11 +297,25 @@
                                     <span class="material-symbols-outlined text-primary">description</span>
                                     <div class="flex-1">
                                         <p class="text-sm font-semibold">학습 자료</p>
-                                        <p class="text-[10px] text-on-surface-variant mt-1"
-                                           th:text="${sectionItem.materialFile} ?: '등록된 자료가 없습니다.'"></p>
+
+                                        <a th:if="${sectionItem.materialFile != null and !#strings.isEmpty(sectionItem.materialFile)}"
+                                           th:href="@{/download/section/{fileName}(fileName=${#strings.substring(sectionItem.materialFile, sectionItem.materialFile.lastIndexOf('/') + 1)})}"
+                                           th:text="${#strings.substring(sectionItem.materialFile, sectionItem.materialFile.lastIndexOf('/') + 1)}"
+                                           class="text-[10px] text-primary hover:underline mt-1 inline-block">
+                                            section-material.pdf
+                                        </a>
+
+                                        <p th:if="${sectionItem.materialFile == null or #strings.isEmpty(sectionItem.materialFile)}"
+                                           class="text-[10px] text-on-surface-variant mt-1">
+                                            등록된 자료가 없습니다.
+                                        </p>
                                     </div>
                                 </div>
-                                <span class="text-primary text-xs font-bold">자료 확인</span>
+
+                                <span class="text-primary text-xs font-bold"
+                                      th:if="${sectionItem.materialFile != null and !#strings.isEmpty(sectionItem.materialFile)}">
+                                    자료 확인
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -379,13 +369,19 @@
                     </div>
 
                     <div class="rounded-lg bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant"
-                         th:if="${attendancePage.assignment != null and attendancePage.assignment.attachmentFile != null and !#strings.isEmpty(attendancePage.assignment.attachmentFile)}">
+                         th:if="${attendancePage.assignment != null}">
                         <span class="mr-2 font-semibold text-on-surface">첨부 자료</span>
-                        <a th:href="@{/${attendancePage.assignment.attachmentFile}}"
-                           th:text="${attendancePage.assignment.attachmentFile}"
+
+                        <a th:if="${attendancePage.assignment.attachmentFile != null and !#strings.isEmpty(attendancePage.assignment.attachmentFile)}"
+                           th:href="@{/download/assignment/{fileName}(fileName=${#strings.substring(attendancePage.assignment.attachmentFile, attendancePage.assignment.attachmentFile.lastIndexOf('/') + 1)})}"
+                           th:text="${#strings.substring(attendancePage.assignment.attachmentFile, attendancePage.assignment.attachmentFile.lastIndexOf('/') + 1)}"
                            class="text-primary hover:underline">
                             assignment1.pdf
                         </a>
+
+                        <span th:if="${attendancePage.assignment.attachmentFile == null or #strings.isEmpty(attendancePage.assignment.attachmentFile)}">
+                            -
+                        </span>
                     </div>
 
                     <div th:if="${attendancePage.assignment == null}"
@@ -393,13 +389,25 @@
                         등록된 과제가 없어서 제출할 수 없습니다.
                     </div>
 
+                    <div th:if="${errorMessage}"
+                         class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm"
+                         th:text="${errorMessage}">
+                        에러 메시지
+                    </div>
+
+                    <div th:if="${successMessage}"
+                         class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700 text-sm"
+                         th:text="${successMessage}">
+                        성공 메시지
+                    </div>
+
                     <form th:if="${attendancePage.assignment != null}"
-                          th:action="@{/courses/{courseId}/assignment/submissions(courseId=${attendancePage.courseId})}"
+                          th:action="@{/courses/{courseId}/assignment/submissions(courseId=${attendancePage.courseId}, role='STUDENT')}"
                           method="post"
                           enctype="multipart/form-data"
                           class="space-y-4">
 
-                        <input type="hidden" name="enrollmentId" th:value="${attendancePage.enrollmentId}"/>
+                        <input type="hidden" name="sectionId" th:value="${attendancePage.section.sectionId}"/>
 
                         <div>
                             <label class="mb-2 block text-xs font-bold uppercase text-on-surface-variant">제출 내용</label>

@@ -2,148 +2,116 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>관리자 대시보드 - 강사 승인</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>64Lab | 강사 가입 승인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { headline: ['Manrope', 'sans-serif'], body: ['Noto Sans KR', 'sans-serif'] }, colors: { brand: '#2b3f8f', brandSoft: '#edf2ff', ink: '#1b2540', line: '#dbe3f1' }, boxShadow: { soft: '0 18px 40px rgba(43, 63, 143, 0.08)' } } } }
+    </script>
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f4f7f6; padding: 40px; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 1000px; margin: auto; }
-        h2 { color: #333; margin-top: 0; }
-
-        /* 알림 메시지 */
-        .alert { padding: 15px; background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
-
-        /* 테이블 스타일 */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #ddd; }
-        th { background-color: #0056b3; color: white; font-weight: bold; }
-        tr:hover { background-color: #f9f9f9; }
-
-        /* 버튼 스타일 */
-        .btn-group { display: flex; justify-content: center; gap: 10px; }
-        form { margin: 0; }
-        button { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; }
-        .btn-approve { background-color: #28a745; } /* 초록색 승인 */
-        .btn-approve:hover { background-color: #218838; }
-        .btn-reject { background-color: #dc3545; } /* 빨간색 반려 */
-        .btn-reject:hover { background-color: #c82333; }
-
-        /* 텅 비었을 때 */
-        .empty-msg { text-align: center; padding: 50px; color: #777; }
-
-        /* 비활성화 버튼 및 텍스트 스타일 */
-        .btn-disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
-        .status-text {
-            display: block;
-            margin-top: 5px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        .text-success { color: #28a745; }
-        .text-danger { color: #dc3545; }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .header-top h2 { margin: 0; }
-
-        /* 메인으로 가기 버튼 */
-        .btn-home {
-            background-color: #0056b3;
-            color: white;
-            padding: 10px 16px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .btn-home:hover { background-color: #004494; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen text-ink">
 
-<div class="container">
-    <div class="header-top">
-        <h2>👨‍🏫 강사 가입 승인 대기열</h2>
-        <a th:href="@{/}" class="btn-home">🏠 메인으로</a>
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
+
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="h-9 w-9 overflow-hidden rounded-full border border-slate-200">
+                    <img class="profile-sync h-full w-full object-cover"
+                         th:src="${member != null and member.profile != null and member.profile.profileImage != null and member.profile.profileImage != '' and member.profile.profileImage != 'default-profile.png'} ? '/uploads/' + ${member.profile.profileImage} + '?t=' + ${#dates.createNow().getTime()} : '/img/default-profile.png'"
+                         onerror="this.src='/img/default-profile.png'">
+                </div>
+                <span class="text-sm font-medium text-slate-700">
+                    <strong class="font-bold text-brand" th:text="${member != null ? member.name : #authentication.name}">관리자1</strong>님, 환영합니다.
+                </span>
+            </div>
+            <form th:action="@{/auth/logout}" th:method="post" class="inline">
+                <button type="submit" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="mx-auto max-w-6xl w-full px-4 py-10">
+    <div class="mb-8 flex justify-between items-end">
+        <div>
+            <h1 class="font-headline text-3xl font-extrabold text-ink">강사 가입 승인 대기열</h1>
+            <p class="mt-2 text-sm font-medium text-slate-500">강사 권한을 요청한 사용자 목록을 관리합니다.</p>
+        </div>
+        <a th:href="@{/}" class="rounded-xl bg-white border border-line px-5 py-2.5 text-sm font-bold text-slate-700 hover:border-brand hover:text-brand transition shadow-sm">
+            대시보드 홈
+        </a>
     </div>
 
-    <div th:if="${message}" class="alert" th:text="${message}"></div>
+    <div th:if="${message}" class="mb-6 rounded-2xl bg-emerald-50 p-4 border border-emerald-100 text-sm font-bold text-emerald-700" th:text="${message}"></div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>아이디</th>
-            <th>이름</th>
-            <th>이메일</th>
-            <th>제출 서류</th>
-            <th>가입 신청일</th>
-            <th>승인 / 반려</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:if="${#lists.isEmpty(instructors)}">
-            <td colspan="6" class="empty-msg">현재 승인 대기 중인 강사가 없습니다. 🎉</td>
-        </tr>
-
-        <tr th:each="inst : ${instructors}">
-            <td th:text="${inst.loginId}">teacher1</td>
-            <td th:text="${inst.name}">김강사</td>
-            <td th:text="${inst.email}">test@test.com</td>
-
-            <td>
-                <a th:if="${inst.gradCertPath != null}" th:href="@{${inst.gradCertPath}}" target="_blank" style="color: #0056b3; text-decoration: none;">📄 졸업증명서</a><br>
-                <a th:if="${inst.careerCertPath != null}" th:href="@{${inst.careerCertPath}}" target="_blank" style="color: #0056b3; text-decoration: none;">📄 경력증명서</a>
-                <span th:if="${inst.gradCertPath == null and inst.careerCertPath == null}" style="color: #999;">첨부파일 없음</span>
-            </td>
-
-            <td th:text="${inst.createdAt != null ? #temporals.format(inst.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">2026-04-16</td>
-
-            <td>
-                <div class="btn-group" th:if="${inst.approvalStatus == null or #strings.toString(inst.approvalStatus) == 'PENDING'}">
-                    <form th:action="@{/admin/instructors/{id}/approve(id=${inst.memberId})}" method="post">
-                        <button type="submit" class="btn-approve" onclick="return confirm('이 강사를 승인하시겠습니까?');">승인</button>
-                    </form>
-
-                    <form th:action="@{/admin/instructors/{id}/reject(id=${inst.memberId})}" method="post" onsubmit="return confirmReject(this);">
-                        <input type="hidden" name="reason" class="reject-reason-input">
-                        <button type="submit" class="btn-reject">반려</button>
-                    </form>
-                </div>
-
-                <div th:if="${inst.approvalStatus != null and #strings.toString(inst.approvalStatus) == 'APPROVED'}">
-                    <button type="button" class="btn btn-disabled" disabled>승인완료</button>
-                    <span class="status-text text-success" th:text="${inst.approvalCode}">승인코드 표시</span>
-                </div>
-
-                <div th:if="${inst.approvalStatus != null and #strings.toString(inst.approvalStatus) == 'REJECTED'}">
-                    <button type="button" class="btn btn-disabled" disabled>반려처리됨</button>
-                    <span class="status-text text-danger" th:text="${inst.rejectReason}">반려사유 표시</span>
-                </div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+    <div class="overflow-hidden rounded-[24px] border border-line bg-white shadow-soft">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm whitespace-nowrap">
+                <thead class="bg-slate-50 text-slate-600 font-bold border-b border-line">
+                <tr>
+                    <th class="px-6 py-4">아이디</th>
+                    <th class="px-6 py-4">이름</th>
+                    <th class="px-6 py-4">이메일</th>
+                    <th class="px-6 py-4">제출 서류</th>
+                    <th class="px-6 py-4">가입 신청일</th>
+                    <th class="px-6 py-4 text-center">승인 / 반려</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                <tr th:if="${#lists.isEmpty(instructors)}">
+                    <td colspan="6" class="px-6 py-16 text-center text-slate-500 font-bold">현재 승인 대기 중인 강사가 없습니다. 🎉</td>
+                </tr>
+                <tr th:each="inst : ${instructors}" class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-bold text-brand" th:text="${inst.loginId}">teacher1</td>
+                    <td class="px-6 py-4 font-bold text-ink" th:text="${inst.name}">김강사</td>
+                    <td class="px-6 py-4 text-slate-600" th:text="${inst.email}">test@test.com</td>
+                    <td class="px-6 py-4 space-y-1">
+                        <a th:if="${inst.gradCertPath != null}" th:href="@{'/uploads/' + ${#strings.replace(inst.gradCertPath, '/uploads/', '')}}" target="_blank" class="block text-brand hover:underline font-bold">📄 졸업증명서</a>
+                        <a th:if="${inst.careerCertPath != null}" th:href="@{'/uploads/' + ${#strings.replace(inst.careerCertPath, '/uploads/', '')}}" target="_blank" class="block text-brand hover:underline font-bold">📄 경력증명서</a>
+                        <span th:if="${inst.gradCertPath == null and inst.careerCertPath == null}" class="text-slate-400">첨부파일 없음</span>
+                    </td>
+                    <td class="px-6 py-4 text-slate-500" th:text="${inst.createdAt != null ? #temporals.format(inst.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">2026-04-16</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center gap-2" th:if="${inst.approvalStatus == null or #strings.toString(inst.approvalStatus) == 'PENDING'}">
+                            <form th:action="@{/admin/instructors/{id}/approve(id=${inst.memberId})}" method="post">
+                                <button type="submit" class="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-600 transition" onclick="return confirm('이 강사를 승인하시겠습니까?');">승인</button>
+                            </form>
+                            <form th:action="@{/admin/instructors/{id}/reject(id=${inst.memberId})}" method="post" onsubmit="return confirmReject(this);">
+                                <input type="hidden" name="reason" class="reject-reason-input">
+                                <button type="submit" class="rounded-xl bg-red-500 px-4 py-2 text-xs font-bold text-white hover:bg-red-600 transition">반려</button>
+                            </form>
+                        </div>
+                        <div th:if="${inst.approvalStatus != null and #strings.toString(inst.approvalStatus) == 'APPROVED'}">
+                            <span class="inline-block rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-200">승인완료</span>
+                            <span class="block mt-1 text-[11px] font-bold text-emerald-500" th:text="${inst.approvalCode}">승인코드 표시</span>
+                        </div>
+                        <div th:if="${inst.approvalStatus != null and #strings.toString(inst.approvalStatus) == 'REJECTED'}">
+                            <span class="inline-block rounded-xl bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 border border-red-200">반려처리됨</span>
+                            <span class="block mt-1 text-[11px] font-bold text-red-500" th:text="${inst.rejectReason}">반려사유 표시</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
 
 <script>
     function confirmReject(form) {
         let reason = prompt("반려 사유를 입력해 주세요. (강사에게 메일로 발송됩니다)");
-
-        if (reason) {
-            form.querySelector('.reject-reason-input').value = reason;
-            return true;
-        }
-
+        if (reason) { form.querySelector('.reject-reason-input').value = reason; return true; }
         alert("반려 사유가 입력되지 않아 취소되었습니다.");
         return false;
     }
 </script>
-
 </body>
 </html>

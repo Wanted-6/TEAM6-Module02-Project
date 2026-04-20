@@ -4,18 +4,14 @@ import com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class BoardDTO {
+public class BoardViewDTO {
 
     private Integer postId;
     private Integer memberId;

@@ -67,14 +67,13 @@
                     <a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">관리자 공지 제목</a>
                 </td>
                 <td>
-                    <div th:with="writer=${@memberRepository.findById(board.memberId).orElse(null)}"
-                         style="display: inline-flex; align-items: center; gap: 8px;">
-                        <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
-                             th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                    <div style="display: inline-flex; align-items: center; gap: 8px;">
+                        <img th:if="${board.profileImage != null and board.profileImage != 'default-profile.png'}"
+                             th:src="@{|/uploads/${board.profileImage}|}"
                              onerror="this.src='/img/default-profile.png'"
                              alt="profile image"
                              style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
-                        <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                        <img th:unless="${board.profileImage != null and board.profileImage != 'default-profile.png'}"
                              src="/img/default-profile.png"
                              alt="default profile image"
                              style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">

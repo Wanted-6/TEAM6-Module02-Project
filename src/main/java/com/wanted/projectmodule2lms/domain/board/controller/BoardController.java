@@ -1,8 +1,10 @@
 package com.wanted.projectmodule2lms.domain.board.controller;
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
+import com.wanted.projectmodule2lms.domain.board.model.dto.BoardViewDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
+import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentThreadDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
@@ -10,7 +12,7 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
-import com.wanted.projectmodule2lms.global.util.SecurityUtil;
+import com.wanted.projectmodule2lms.global.service.CurrentMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,12 +27,12 @@ import java.util.List;
 public class BoardController {
     private final CommentService commentService;
     private final BoardService boardService;
-    private final MemberRepository memberRepository;
+    private final CurrentMemberService currentMemberService;
 
     @ModelAttribute
-    public void addCurrentMemberInfo(Model model) {
-        Integer currentMemberId = getCurrentMemberId();
-        MemberRole currentRole = getCurrentMemberRole();
+    public void addCurrentMemberInfo(@LoginMemberId Long loginMemberId, Model model) {
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
 
         model.addAttribute("currentMemberId", currentMemberId);
         model.addAttribute("currentRole", currentRole);
@@ -49,7 +51,7 @@ public class BoardController {
     @AuditLog
     @GetMapping("/course-notices")
     public String courseNoticeListPage(@RequestParam(required = false) String keyword, Model model) {
-        List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
+        List<BoardViewDTO> boardList = (keyword == null || keyword.isBlank())
                 ? boardService.findBoardByPostType(BoardType.COURSE_NOTICE)
                 : boardService.searchBoardByPostTypeAndTitle(BoardType.COURSE_NOTICE, keyword);
         model.addAttribute("boardList", boardList);
@@ -60,7 +62,7 @@ public class BoardController {
     @AuditLog
     @GetMapping("/admin-notices")
     public String adminNoticeListPage(@RequestParam(required = false) String keyword, Model model) {
-        List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
+        List<BoardViewDTO> boardList = (keyword == null || keyword.isBlank())
                 ? boardService.findBoardByPostType(BoardType.ADMIN_NOTICE)
                 : boardService.searchBoardByPostTypeAndTitle(BoardType.ADMIN_NOTICE, keyword);
         model.addAttribute("boardList", boardList);
@@ -71,7 +73,7 @@ public class BoardController {
     @AuditLog
     @GetMapping("/free")
     public String freeListPage(@RequestParam(required = false) String keyword, Model model) {
-        List<BoardDTO> boardList = (keyword == null || keyword.isBlank())
+        List<BoardViewDTO> boardList = (keyword == null || keyword.isBlank())
                 ? boardService.findBoardByPostType(BoardType.FREE)
                 : boardService.searchBoardByPostTypeAndTitle(BoardType.FREE, keyword);
         model.addAttribute("boardList", boardList);
@@ -85,12 +87,15 @@ public class BoardController {
                                      @RequestParam(required = false) Integer courseId,
                                      @LoginMemberId Long loginMemberId,
                                      Model model) {
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
 
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
-        List<BoardDTO> boardList;
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        List<BoardViewDTO> boardList;
 
-        if (currentMemberId != null && currentRole != null) {
+        if (currentRole != null) {
             boardList = boardService.findVisibleSectionQna(currentMemberId, currentRole, keyword);
         } else if (keyword == null || keyword.isBlank()) {
             boardList = boardService.findBoardByPostType(BoardType.SECTION_QNA);
@@ -111,18 +116,17 @@ public class BoardController {
     @AuditLog
     @GetMapping("/detail")
     public String boardDetailPage(@RequestParam Integer postId, Model model) {
-        BoardDTO board = boardService.findBoardById(postId);
-        List<CommentDTO> commentList=commentService.findCommentsByPostId(postId);
+        BoardViewDTO board = boardService.findBoardById(postId);
+        List<CommentThreadDTO> commentThreads = commentService.findCommentThreadsByPostId(postId);
         model.addAttribute("board", board);
-        model.addAttribute("commentList", commentList);
+        model.addAttribute("commentThreads", commentThreads);
         model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/detail";
     }
 
     @PostMapping("/view-count")
     @ResponseBody
-    public void viewCount(@LoginMemberId Long loginMemberId,
-                          @RequestParam Integer postId) {
+    public void viewCount(@RequestParam Integer postId) {
         boardService.increaseViewCount(postId);
     }
 
@@ -132,12 +136,14 @@ public class BoardController {
                                   @RequestParam(required = false) Integer sectionId,
                                   @LoginMemberId Long loginMemberId,
                                   Model model) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
 
-        List<Course> courses = (currentMemberId != null && currentRole != null)
-                ? boardService.findAvailableCourses(type, currentMemberId, currentRole)
-                : boardService.findAllCourses();
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+
+        List<Course> courses = boardService.findAvailableCourses(type, currentMemberId, currentRole);
         String selectedCourseTitle = courses.stream()
                 .filter(course -> courseId != null && course.getCourseId().equals(courseId))
                 .map(Course::getTitle)
@@ -145,9 +151,8 @@ public class BoardController {
                 .orElse(null);
         model.addAttribute("boardType", type);
         model.addAttribute("courses", courses);
-        model.addAttribute("sections", (currentMemberId != null && currentRole != null)
-                ? boardService.findAvailableSections(type, currentMemberId, currentRole)
-                : List.of());
+        model.addAttribute("sections",
+                boardService.findAvailableSections(type, currentMemberId, currentRole));
         model.addAttribute("selectedCourseId", courseId);
         model.addAttribute("selectedCourseTitle", selectedCourseTitle);
         model.addAttribute("selectedSectionId", sectionId);
@@ -159,8 +164,12 @@ public class BoardController {
     public String registBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
                               RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
 
         try {
             boardService.registBoard(boardDTO, currentMemberId, currentRole);
@@ -175,7 +184,7 @@ public class BoardController {
 
     @GetMapping("/modify")
     public String boardModifyPage(@RequestParam Integer postId, Model model) {
-        BoardDTO board = boardService.findBoardById(postId);
+        BoardViewDTO board = boardService.findBoardById(postId);
         model.addAttribute("board", board);
         model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/modify";
@@ -186,8 +195,11 @@ public class BoardController {
     public String modifyBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
                               RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
 
         try {
             boardService.modifyBoard(boardDTO, currentMemberId, currentRole);
@@ -200,7 +212,7 @@ public class BoardController {
 
     @GetMapping("/delete")
     public String boardDeletePage(@RequestParam Integer postId, Model model) {
-        BoardDTO board = boardService.findBoardById(postId);
+        BoardViewDTO board = boardService.findBoardById(postId);
         model.addAttribute("board", board);
         model.addAttribute("listPath", getListPath(board.getPostType(), board.getCourseId()));
         return "board/delete";
@@ -211,9 +223,13 @@ public class BoardController {
     public String deleteBoard(@LoginMemberId Long loginMemberId,
                               @RequestParam Integer postId,
                               RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
-        BoardDTO board = boardService.findBoardById(postId);
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        BoardViewDTO board = boardService.findBoardById(postId);
         try {
             boardService.deleteBoard(postId, currentMemberId, currentRole);
             return "redirect:" + getListPath(board.getPostType(), board.getCourseId());
@@ -295,19 +311,4 @@ public class BoardController {
         return true;
     }
 
-    private Integer getCurrentMemberId() {
-        Long currentMemberId = SecurityUtil.getCurrentMemberId();
-        return currentMemberId != null ? currentMemberId.intValue() : null;
-    }
-
-    private MemberRole getCurrentMemberRole() {
-        Integer currentMemberId = getCurrentMemberId();
-
-        if (currentMemberId == null) {
-            return null;
-        }
-
-        Member member = memberRepository.findById(currentMemberId).orElse(null);
-        return member != null ? member.getRole() : null;
-    }
 }

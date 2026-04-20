@@ -49,7 +49,7 @@ public class SectionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/sections/regist";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "섹션 등록 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "섹션 등록 중 처리할 수 없는 문제가 발생했습니다.");
             return "redirect:/courses/" + courseId + "/sections/regist";
         }
     }
@@ -87,7 +87,7 @@ public class SectionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/sections/" + sectionId + "/modify";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "섹션 수정 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "섹션 수정 중 처리할 수 없는 문제가 발생했습니다.");
             return "redirect:/sections/" + sectionId + "/modify";
         }
     }
