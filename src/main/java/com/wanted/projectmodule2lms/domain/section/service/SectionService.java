@@ -60,6 +60,10 @@ public class SectionService {
             throw new IllegalArgumentException("같은 코스 안에 중복된 섹션 순서가 존재합니다.");
         }
 
+        if (sectionRepository.existsByCourseIdAndOpenDate(courseId, createDTO.getOpenDate())) {
+            throw new IllegalArgumentException("같은 코스에는 동일한 날짜의 섹션을 등록할 수 없습니다.");
+        }
+
         if (sectionRepository.countByCourseId(courseId) >= 8) {
             throw new IllegalArgumentException("한 코스의 섹션은 8개까지만 등록할 수 있습니다.");
         }
@@ -76,7 +80,6 @@ public class SectionService {
                 createDTO.getTitle(),
                 createDTO.getVideoUrl(),
                 materialPath,
-                // createDTO.getMaterialFile(),
                 createDTO.getSectionOrder(),
                 createDTO.getOpenDate()
         );
@@ -101,6 +104,14 @@ public class SectionService {
             throw new IllegalArgumentException("같은 코스 안에 중복된 섹션 순서가 존재합니다.");
         }
 
+        if (sectionRepository.existsByCourseIdAndOpenDateAndSectionIdNot(
+                foundSection.getCourseId(),
+                updateDTO.getOpenDate(),
+                sectionId
+        )) {
+            throw new IllegalArgumentException("같은 코스에는 동일한 날짜의 섹션을 등록할 수 없습니다.");
+        }
+
         if (updateDTO.getSectionOrder() < 1 || updateDTO.getSectionOrder() > 8) {
             throw new IllegalArgumentException("섹션 순서는 1부터 8까지만 가능합니다.");
         }
@@ -118,7 +129,6 @@ public class SectionService {
                 updateDTO.getTitle(),
                 updateDTO.getVideoUrl(),
                 materialPath,
-                // updateDTO.getMaterialFile(),
                 updateDTO.getSectionOrder(),
                 updateDTO.getOpenDate()
         );
@@ -208,8 +218,9 @@ public class SectionService {
 
         materialUpload.transferTo(new File(filePath + "/" + savedName));
 
-        return "static/files/section/" + savedName;
+        return "files/section/" + savedName;
     }
+
     private void updateExamDueDate(Integer courseId) {
         Section lastSection = sectionRepository.findByCourseIdAndSectionOrder(courseId, 8)
                 .orElse(null);

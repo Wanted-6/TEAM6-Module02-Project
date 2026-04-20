@@ -65,6 +65,7 @@ public class SubmissionController {
     @PostMapping("/courses/{courseId}/assignment/submissions")
     public String registSubmission(@PathVariable Integer courseId,
                                    @RequestParam(defaultValue = "STUDENT") String role,
+                                   @RequestParam Integer sectionId,
                                    @LoginMemberId Long memberId,
                                    @ModelAttribute SubmissionCreateDTO createDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
@@ -89,13 +90,13 @@ public class SubmissionController {
             );
 
             rttr.addFlashAttribute("successMessage", "과제가 제출되었습니다.");
-            return "redirect:/courses/" + courseId + "/assignment/submissions/me?role=STUDENT";
+            return "redirect:/student/attendance/" + courseId + "/" + sectionId;
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/courses/" + courseId + "/assignment/submissions/regist?role=STUDENT";
+            return "redirect:/student/attendance/" + courseId + "/" + sectionId;
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "과제 제출 중 오류가 발생했습니다.");
-            return "redirect:/courses/" + courseId + "/assignment/submissions/regist?role=STUDENT";
+            rttr.addFlashAttribute("errorMessage", "과제 제출 중 처리할 수 없는 문제가 발생했습니다.");
+            return "redirect:/student/attendance/" + courseId + "/" + sectionId;
         }
     }
 
@@ -179,7 +180,7 @@ public class SubmissionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "제출물 수정 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "제출물 수정 중 처리할 수 없는 문제가 발생했습니다.");
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         }
     }

@@ -223,6 +223,6 @@ public class SubmissionService {
 
         attachmentUpload.transferTo(new File(filePath + "/" + savedName));
 
-        return "static/files/submission/" + savedName;
+        return "files/submission/" + savedName;
     }
 }

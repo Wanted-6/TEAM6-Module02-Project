@@ -47,12 +47,16 @@
 
         <div>
             <p class="text-sm text-slate-500 mb-2">첨부 파일</p>
-            <span th:if="${submission.attachmentFile == null or submission.attachmentFile == ''}">-</span>
+
             <a th:if="${submission.attachmentFile != null and submission.attachmentFile != ''}"
-               th:href="@{/${submission.attachmentFile}}"
+               th:href="@{/download/submission/{fileName}(fileName=${#strings.substring(submission.attachmentFile, submission.attachmentFile.lastIndexOf('/') + 1)})}"
                class="text-blue-600 hover:underline">
                 파일 다운로드
             </a>
+
+            <span th:if="${submission.attachmentFile == null or submission.attachmentFile == ''}">
+                -
+            </span>
         </div>
 
         <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
