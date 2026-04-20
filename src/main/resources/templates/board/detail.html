@@ -93,7 +93,8 @@
             </tr>
             </thead>
             <tbody>
-            <th:block th:each="comment : ${commentList}" th:if="${comment.parentCommentId == null}">
+            <th:block th:each="thread : ${commentThreads}">
+                <th:block th:with="comment=${thread.parent}">
                 <tr>
                     <td>
                         <div style="display: inline-flex; align-items: center; gap: 8px;">
@@ -174,7 +175,7 @@
                     </td>
                 </tr>
 
-                <th:block th:each="reply : ${commentList}" th:if="${reply.parentCommentId == comment.commentId}">
+                <th:block th:each="reply : ${thread.replies}">
                     <tr>
                         <td>
                             <div style="display: inline-flex; align-items: center; gap: 8px; padding-left: 10px;">
@@ -276,8 +277,9 @@
                         </form>
                     </td>
                 </tr>
+                </th:block>
             </th:block>
-            <tr th:if="${commentList == null or #lists.isEmpty(commentList)}">
+            <tr th:if="${commentThreads == null or #lists.isEmpty(commentThreads)}">
                 <td colspan="4">등록된 댓글이 없습니다.</td>
             </tr>
             </tbody>

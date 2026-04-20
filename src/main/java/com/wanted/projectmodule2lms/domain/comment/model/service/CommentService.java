@@ -5,6 +5,7 @@ import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
 import com.wanted.projectmodule2lms.domain.comment.model.dao.CommentRepository;
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
+import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentThreadDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentViewDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.entity.Comment;
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
@@ -14,10 +15,10 @@ import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final ModelMapper modelMapper;
     private final MemberRepository memberRepository;
     private final BoardService boardService;
     private final CourseRepository courseRepository;
@@ -181,4 +181,25 @@ public class CommentService {
                 .map(Enrollment::getCourseId)
                 .anyMatch(courseId::equals);
     }
+
+    public List<CommentThreadDTO> findCommentThreadsByPostId(Integer postId) {
+        List<CommentViewDTO> comments = findCommentsByPostId(postId);
+
+        List<CommentViewDTO> parents = comments.stream()
+                .filter(comment -> comment.getParentCommentId() == null)
+                .toList();
+
+        Map<Integer, List<CommentViewDTO>> replyMap = comments.stream()
+                .filter(comment -> comment.getParentCommentId() != null)
+                .collect(Collectors.groupingBy(CommentViewDTO::getParentCommentId));
+
+        return parents.stream()
+                .map(parent -> new CommentThreadDTO(
+                        parent,
+                        replyMap.getOrDefault(parent.getCommentId(), Collections.emptyList())
+                ))
+                .toList();
+    }
+
+
 }
