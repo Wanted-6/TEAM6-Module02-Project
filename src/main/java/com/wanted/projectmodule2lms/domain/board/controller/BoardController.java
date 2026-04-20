@@ -85,6 +85,7 @@ public class BoardController {
                                      @RequestParam(required = false) Integer courseId,
                                      @LoginMemberId Long loginMemberId,
                                      Model model) {
+
         Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
         MemberRole currentRole = getCurrentMemberRole();
         List<BoardDTO> boardList;

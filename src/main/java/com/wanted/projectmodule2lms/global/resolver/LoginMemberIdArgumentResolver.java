@@ -3,6 +3,7 @@ package com.wanted.projectmodule2lms.global.resolver;
 import com.wanted.projectmodule2lms.domain.auth.model.dto.AuthDetails;
 import com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,9 +37,9 @@ public class LoginMemberIdArgumentResolver implements HandlerMethodArgumentResol
         System.out.println("1. 인증 객체: " + authentication);
 
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
-            System.out.println("2. 실패: 인증 안 됨! (anonymousUser)");
             return null;
         }
+
         Object principal = authentication.getPrincipal();
         System.out.println("3. principal 클래스: " + principal.getClass().getName()); // 3번 출력
 
