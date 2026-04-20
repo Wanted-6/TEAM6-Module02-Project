@@ -9,7 +9,6 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.profile.dao.ProfileRepository;
 import com.wanted.projectmodule2lms.domain.profile.entity.Profile;
-import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,16 +27,17 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ProfileRepository profileRepository;
     private final CourseRepository courseRepository;
-    private final EnrollmentRepository  enrollmentRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final PasswordEncoder encoder;
 
     @Transactional
     public Integer regist(SignupDTO signupDTO, MultipartFile gradCert, MultipartFile careerCert) {
-
         if (signupDTO.getMemberId() == null || signupDTO.getMemberId().length() < 4) {
             System.out.println("아이디는 4글자 이상으로 설정해주세요.");
             return null;
         }
+
+        deleteRejectedInstructorData(signupDTO.getMemberId(), signupDTO.getMemberEmail(), signupDTO.getMemberPhone());
 
         if (memberRepository.existsByLoginId(signupDTO.getMemberId())) {
             return null;
@@ -69,6 +69,22 @@ public class MemberService {
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    private void deleteRejectedInstructorData(String loginId, String email, String phone) {
+        memberRepository.findByLoginId(loginId).ifPresent(this::deleteIfRejected);
+        memberRepository.findByEmail(email).ifPresent(this::deleteIfRejected);
+        memberRepository.findByPhone(phone).ifPresent(this::deleteIfRejected);
+
+        memberRepository.flush();
+    }
+
+    private void deleteIfRejected(Member member) {
+        if (member.getRole() == MemberRole.INSTRUCTOR
+                && member.getApprovalStatus() != null
+                && "REJECTED".equals(member.getApprovalStatus().name())) {
+            memberRepository.delete(member);
         }
     }
 
@@ -109,38 +125,52 @@ public class MemberService {
     @Transactional
     public void resetLoginFailCount(String username) {
         Optional<Member> memberOptional = memberRepository.findByLoginId(username);
-
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
-            member.resetLoginFailCount();
-        }
+        memberOptional.ifPresent(Member::resetLoginFailCount);
     }
 
     public int getLoginFailCount(String username) {
-
         LoginMemberDTO member = findByUsername(username);
-
         if (member != null && member.getLoginFailCount() != null) {
             return member.getLoginFailCount();
         }
         return 0;
     }
 
-    // ID 중복 체크
     public boolean checkIdDuplicate(String memberId){
-        return memberRepository.existsByLoginId(memberId);
+        Optional<Member> memberOpt = memberRepository.findByLoginId(memberId);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
-    // 이메일 중복 체크
     public boolean checkEmailDuplicate(String email) {
-        return memberRepository.existsByEmail(email);
+        Optional<Member> memberOpt = memberRepository.findByEmail(email);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
-    // 전화번호 중복 체크
     public boolean checkPhoneDuplicate(String phone) {
-        return memberRepository.existsByPhone(phone);
+        Optional<Member> memberOpt = memberRepository.findByPhone(phone);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
-
 
     // 아이디 찾기
     public String findLoginIdByNameAndEmail(String name, String email){
@@ -158,7 +188,7 @@ public class MemberService {
         if (loginId.length() <= 3){
             return loginId.substring(0, 1) + "**";
         }
-        return loginId.substring(0, 3) + "*".repeat(loginId.length()-3);
+        return loginId.substring(0, 3) + "*".repeat(loginId.length() - 3);
     }
 
     // 비밀번호 찾기 (임시 비밀번호 발급)
@@ -168,29 +198,34 @@ public class MemberService {
 
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();
-
             String tempPassword = UUID.randomUUID().toString().substring(0, 6) + "!A1";
-
             member.changeToTempPassword(encoder.encode(tempPassword));
-
             return tempPassword;
         }
         return null;
     }
 
+    // 비밀번호 변경
     @Transactional
     public void changeRegularPassword(Long memberId, String newPassword){
-
         Member member = memberRepository.findById(Math.toIntExact(memberId))
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
         member.changeRegularPassword(encoder.encode(newPassword));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean verifyPassword(Long memberId, String currentPassword) {
+        Member member = memberRepository.findById(Math.toIntExact(memberId))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        return encoder.matches(currentPassword, member.getPassword());
     }
 
     private String saveFile(MultipartFile file){
         if (file == null || file.isEmpty()) return null;
 
         try {
-            String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/uploads/";
+            String uploadDir = "C:/lab/uploads/";
             File dir = new File(uploadDir);
             if (!dir.exists()) dir.mkdirs();
 
@@ -198,6 +233,7 @@ public class MemberService {
             File targetFile = new File(dir, storedFileName);
 
             file.transferTo(targetFile);
+
             return "/uploads/" + storedFileName;
         } catch (Exception e) {
             e.printStackTrace();
@@ -205,6 +241,7 @@ public class MemberService {
         }
     }
 
+    // 프로필 업데이트 (사진 첨부 시)
     @Transactional
     public void updateProfile(Long memberId, String bio, MultipartFile file) throws IOException {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
@@ -222,12 +259,11 @@ public class MemberService {
         }
 
         if (file != null && !file.isEmpty()) {
-            String savePath = "C:/lab/uploads/";
+            String savePath = "C:/lab/uploads/"; // 환경에 맞게 경로 확인할 것
             File dir = new File(savePath);
             if (!dir.exists()) dir.mkdirs();
 
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
             file.transferTo(new File(savePath + fileName));
 
             profile.update(bio, fileName);
@@ -239,6 +275,28 @@ public class MemberService {
     }
 
     @Transactional
+    public void updateToDefaultProfile(Long memberId, String bio) {
+        Member member = memberRepository.findById(Math.toIntExact(memberId))
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        Profile profile = member.getProfile();
+
+        if (profile == null) {
+            profile = Profile.builder()
+                    .member(member)
+                    .bio(bio)
+                    .profileImage("default-profile.png")
+                    .build();
+            member.assignProfile(profile);
+        } else {
+            profile.update(bio, "default-profile.png");
+        }
+
+        profileRepository.save(profile);
+    }
+
+    // 전화번호 업데이트
+    @Transactional
     public void updatePhone(Long memberId, String phone) {
         Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
 
@@ -249,7 +307,7 @@ public class MemberService {
         member.updatePhone(phone);
     }
 
-
+    // 회원 탈퇴
     @Transactional
     public void deleteMember(Long memberId) {
         Integer memberIdInt = Math.toIntExact(memberId);
@@ -260,7 +318,6 @@ public class MemberService {
         // 강사 탈퇴 조건
         if (member.getRole() == MemberRole.INSTRUCTOR) {
             boolean hasActiveCourses = courseRepository.existsByInstructorIdAndIsOpenTrue(memberIdInt);
-
             if (hasActiveCourses) {
                 throw new IllegalStateException("진행 중인 강의가 있어 탈퇴할 수 없습니다. 강의 종료 후 다시 시도해 주세요.");
             }
@@ -268,7 +325,6 @@ public class MemberService {
         // 학생 탈퇴 조건
         else if (member.getRole() == MemberRole.STUDENT) {
             boolean hasActiveEnrollments = enrollmentRepository.existsByMemberId(memberIdInt);
-
             if (hasActiveEnrollments) {
                 throw new IllegalStateException("수강 중인 강의가 있어 탈퇴할 수 없습니다. 수강 취소 또는 종료 후 다시 시도해 주세요.");
             }
