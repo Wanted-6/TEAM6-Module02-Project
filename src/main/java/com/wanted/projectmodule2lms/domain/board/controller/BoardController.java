@@ -7,6 +7,8 @@ import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentThreadDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
+import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
+import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;

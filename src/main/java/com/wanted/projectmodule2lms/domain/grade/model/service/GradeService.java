@@ -12,6 +12,7 @@ import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
+import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeQueryRepository;
 import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeChartDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeDTO;
@@ -24,6 +25,7 @@ import com.wanted.projectmodule2lms.domain.submission.model.dao.SubmissionReposi
 import com.wanted.projectmodule2lms.domain.submission.model.entity.Submission;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,59 +55,16 @@ public class GradeService {
     private final AssignmentRepository assignmentRepository;
     private final SubmissionRepository submissionRepository;
     private final BoardRepository boardRepository;
+    private final GradeQueryRepository gradeQueryRepository;
+
 
     public List<GradeDTO> findGradesByMemberId(Integer memberId) {
-        List<Enrollment> enrollments = enrollmentRepository.findByMemberId(memberId);
-        List<GradeDTO> gradeDTOList = new ArrayList<>();
-
-        for (Enrollment enrollment : enrollments) {
-            Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
-                    .orElse(null);
-
-            if (grade == null) {
-                continue;
-            }
-
-            Course course = courseRepository.findById(enrollment.getCourseId())
-                    .orElse(null);
-
-            String courseTitle = (course != null) ? course.getTitle() : "과목명 없음";
-            String studentName = memberRepository.findById(enrollment.getMemberId())
-                    .map(member -> member.getName())
-                    .orElse("이름 없음");
-            String completionStatus = getCompletionStatus(grade);
-
-            GradeDTO gradeDTO = new GradeDTO(
-                    grade.getGradeId(),
-                    grade.getEnrollmentId(),
-                    enrollment.getCourseId(),
-                    studentName,
-                    courseTitle,
-                    grade.getAttendanceScore(),
-                    grade.getAssignmentScore(),
-                    grade.getExamScore(),
-                    grade.getAttitudeScore(),
-                    grade.getTotalScore(),
-                    completionStatus
-            );
-
-            gradeDTOList.add(gradeDTO);
-        }
-
-        return gradeDTOList;
+        return gradeQueryRepository.findGradesByMemberId(memberId);
     }
 
     @Transactional
     public void updateGradeByInstructor(Integer instructorId, GradeUpdateDTO dto) {
-        Enrollment enrollment = enrollmentRepository.findById(dto.getEnrollmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));
-
-        Course course = courseRepository.findById(enrollment.getCourseId())
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강의입니다."));
-
-        if (!course.getInstructorId().equals(instructorId)) {
-            throw new UnauthorizedInstructorException("해당 강의의 담당 강사만 성적을 수정할 수 있습니다.");
-        }
+        getAuthorizedEnrollmentForInstructor(instructorId, dto.getEnrollmentId());
 
         Grade grade = gradeRepository.findByEnrollmentId(dto.getEnrollmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("성적 정보가 존재하지 않습니다."));
@@ -170,102 +129,21 @@ public class GradeService {
     }
 
     public List<GradeDTO> findGradesByInstructorId(Integer instructorId) {
-        List<Course> courses = courseRepository.findByInstructorId(instructorId);
-        List<GradeDTO> gradeDTOList = new ArrayList<>();
-
-        for (Course course : courses) {
-            List<Enrollment> enrollments = enrollmentRepository.findByCourseId(course.getCourseId());
-
-            for (Enrollment enrollment : enrollments) {
-                Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
-                        .orElse(null);
-
-                if (grade == null) {
-                    continue;
-                }
-
-                String studentName = memberRepository.findById(enrollment.getMemberId())
-                        .map(member -> member.getName())
-                        .orElse("이름 없음");
-
-                String completionStatus = getCompletionStatus(grade);
-
-                GradeDTO gradeDTO = new GradeDTO(
-                        grade.getGradeId(),
-                        grade.getEnrollmentId(),
-                        enrollment.getCourseId(),
-                        studentName,
-                        course.getTitle(),
-                        grade.getAttendanceScore(),
-                        grade.getAssignmentScore(),
-                        grade.getExamScore(),
-                        grade.getAttitudeScore(),
-                        grade.getTotalScore(),
-                        completionStatus
-                );
-
-                gradeDTOList.add(gradeDTO);
-            }
-        }
-
-        return gradeDTOList;
+        return gradeQueryRepository.findGradesByInstructorId(instructorId);
     }
+
 
     public List<GradeDTO> findGradesByInstructorIdAndCourseId(Integer instructorId, Integer courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
-
-        if (!course.getInstructorId().equals(instructorId)) {
-            throw new IllegalArgumentException("담당 강의만 조회할 수 있습니다.");
-        }
-
-        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
-        List<GradeDTO> gradeDTOList = new ArrayList<>();
-
-        for (Enrollment enrollment : enrollments) {
-            Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
-                    .orElse(null);
-
-            if (grade == null) {
-                continue;
-            }
-
-            String studentName = memberRepository.findById(enrollment.getMemberId())
-                    .map(member -> member.getName())
-                    .orElse("이름 없음");
-
-            String completionStatus = getCompletionStatus(grade);
-
-            GradeDTO gradeDTO = new GradeDTO(
-                    grade.getGradeId(),
-                    grade.getEnrollmentId(),
-                    enrollment.getCourseId(),
-                    studentName,
-                    course.getTitle(),
-                    grade.getAttendanceScore(),
-                    grade.getAssignmentScore(),
-                    grade.getExamScore(),
-                    grade.getAttitudeScore(),
-                    grade.getTotalScore(),
-                    completionStatus
-            );
-
-            gradeDTOList.add(gradeDTO);
-        }
-
-        return gradeDTOList;
+        getAuthorizedCourse(instructorId, courseId);
+        return gradeQueryRepository.findGradesByCourseId(courseId);
     }
 
+
     public GradeDTO findGradeByEnrollmentIdForInstructor(Integer instructorId, Integer enrollmentId) {
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));
+        Enrollment enrollment = getAuthorizedEnrollmentForInstructor(instructorId, enrollmentId);
 
         Course course = courseRepository.findById(enrollment.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강의입니다."));
-
-        if (!course.getInstructorId().equals(instructorId)) {
-            throw new UnauthorizedInstructorException("해당 강의의 담당 강사만 조회할 수 있습니다.");
-        }
 
         Grade grade = gradeRepository.findByEnrollmentId(enrollmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("성적 정보가 존재하지 않습니다."));
@@ -330,12 +208,7 @@ public class GradeService {
     }
 
     public InstructorGradeDashboardDTO findDashboardSummaryByCourseId(Integer instructorId, Integer courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
-
-        if (!course.getInstructorId().equals(instructorId)) {
-            throw new IllegalArgumentException("해당 강의만 조회할 수 있습니다.");
-        }
+        getAuthorizedCourse(instructorId, courseId);
         int pendingQuestionCount= (int) boardRepository.countByCourseIdAndPostTypeAndAnswerStatusAndIsDeletedFalse(
                 courseId,
                 BoardType.SECTION_QNA,
@@ -445,12 +318,20 @@ public class GradeService {
                     .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
                     .thenComparing(Attendance::getAttendanceId, Comparator.nullsFirst(Comparator.naturalOrder()));
 
-    public GradeChartDTO getChartDataByEnrollmentId(Long enrollmentId) {
+    public GradeChartDTO getChartDataByEnrollmentId(Integer memberId, Integer enrollmentId) {
 
-        Grade grade = gradeRepository.findByEnrollmentId(enrollmentId.intValue()).orElse(null);
+        getAuthorizedEnrollmentForStudent(memberId, enrollmentId);
+
+        Grade grade = gradeRepository.findByEnrollmentId(enrollmentId).orElse(null);
 
         if (grade == null) {
-            return null;
+            return GradeChartDTO.builder()
+                    .attendance(0.0)
+                    .assignment(0.0)
+                    .exam(0.0)
+                    .attitude(0.0)
+                    .total(0.0)
+                    .build();
         }
 
         return GradeChartDTO.builder()
@@ -461,5 +342,38 @@ public class GradeService {
                 .total(grade.getTotalScore() != null ? grade.getTotalScore().doubleValue() : 0.0)
                 .build();
     }
+
+
+    private Course getAuthorizedCourse(Integer instructorId, Integer courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강의입니다."));
+
+        if (!course.getInstructorId().equals(instructorId)) {
+            throw new UnauthorizedInstructorException("해당 강의의 담당 강사만 접근할 수 있습니다.");
+        }
+
+        return course;
+    }
+
+//enrollmentid를 받을 때
+    private Enrollment getAuthorizedEnrollmentForInstructor(Integer instructorId, Integer enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));
+
+        getAuthorizedCourse(instructorId, enrollment.getCourseId());
+        return enrollment;
+    }
+
+    private Enrollment getAuthorizedEnrollmentForStudent(Integer memberId, Integer enrollmentId) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));
+
+        if (!enrollment.getMemberId().equals(memberId)) {
+            throw new UnauthorizedStudentAccessException("본인의 수강 정보만 조회할 수 있습니다.");
+        }
+
+        return enrollment;
+    }
+
 
 }

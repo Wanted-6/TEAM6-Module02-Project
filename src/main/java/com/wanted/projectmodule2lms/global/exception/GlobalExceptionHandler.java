@@ -18,4 +18,18 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorMessage", e.getMessage());
         return "error/403";
     }
+
+    @ExceptionHandler(UnauthorizedStudentAccessException.class)
+    public String handleUnauthorizedStudentAccess(UnauthorizedStudentAccessException e, Model model) {
+        model.addAttribute("errorMessage", e.getMessage());
+        return "error/403";
+    }
+
+    @ExceptionHandler(LoginRequiredException.class)
+    public String handleLoginRequired(LoginRequiredException e) {
+        return "redirect:/auth/login";
+    }
+
+
+
 }
