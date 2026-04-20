@@ -12,6 +12,8 @@ import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentReposi
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
+import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
+import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -41,6 +43,7 @@ public class CertificateService {
     private final AttendanceService attendanceService;
     private final MemberRepository memberRepository;
     private final CourseRepository courseRepository;
+    private final SectionRepository sectionRepository;
 
     @Transactional
     public void requestCertificate(Integer memberId, Integer courseId) {
@@ -232,4 +235,17 @@ public class CertificateService {
         contentStream.showText(text);
         contentStream.endText();
     }
+
+    public Integer findFirstSectionId(Integer courseId){
+        Section section = sectionRepository.findByCourseIdAndSectionOrder(courseId, 1)
+                .orElseGet(() -> {
+                    List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
+                    if (sectionList.isEmpty()) {
+                        return null;
+                    }
+                    return sectionList.get(0);
+                });
+        return section != null ? section.getSectionId() : null;
+    }
+
 }

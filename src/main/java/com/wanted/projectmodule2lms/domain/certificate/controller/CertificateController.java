@@ -2,8 +2,6 @@ package com.wanted.projectmodule2lms.domain.certificate.controller;
 
 import com.wanted.projectmodule2lms.domain.certificate.model.dto.CertificateViewDTO;
 import com.wanted.projectmodule2lms.domain.certificate.model.service.CertificateService;
-import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
-import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,7 +21,6 @@ import java.util.List;
 public class CertificateController {
 
     private final CertificateService certificateService;
-    private final SectionRepository sectionRepository;
 
 
     @PostMapping("/request")
@@ -35,21 +31,13 @@ public class CertificateController {
         }
 
         certificateService.requestCertificate(memberId.intValue(), courseId);
+        Integer sectionId=certificateService.findFirstSectionId(courseId);
 
-        Section section = sectionRepository.findByCourseIdAndSectionOrder(courseId, 1)
-                .orElseGet(() -> {
-                    List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
-                    if (sectionList.isEmpty()) {
-                        return null;
-                    }
-                    return sectionList.get(0);
-                });
-
-        if (section == null) {
+        if (sectionId == null) {
             return "redirect:/student/courses";
         }
 
-        return "redirect:/student/attendance/" + courseId + "/" + section.getSectionId();
+        return "redirect:/student/attendance/" + courseId + "/" + sectionId;
     }
     @GetMapping
     public String certificatePage(@LoginMemberId Long memberId,
@@ -68,7 +56,9 @@ public class CertificateController {
     public ResponseEntity<byte[]> downloadCertificate(@LoginMemberId Long memberId,
                                                       @RequestParam Integer courseId) {
         if (memberId == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            return ResponseEntity.status(302)
+                    .header(HttpHeaders.LOCATION, "/auth/login")
+                    .build();
         }
 
         byte[] pdfBytes = certificateService.generateCertificatePdf(memberId.intValue(), courseId);
