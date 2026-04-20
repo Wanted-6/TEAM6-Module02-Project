@@ -37,6 +37,8 @@ public class MemberService {
             return null;
         }
 
+        deleteRejectedInstructorData(signupDTO.getMemberId(), signupDTO.getMemberEmail(), signupDTO.getMemberPhone());
+
         if (memberRepository.existsByLoginId(signupDTO.getMemberId())) {
             return null;
         }
@@ -67,6 +69,22 @@ public class MemberService {
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    private void deleteRejectedInstructorData(String loginId, String email, String phone) {
+        memberRepository.findByLoginId(loginId).ifPresent(this::deleteIfRejected);
+        memberRepository.findByEmail(email).ifPresent(this::deleteIfRejected);
+        memberRepository.findByPhone(phone).ifPresent(this::deleteIfRejected);
+
+        memberRepository.flush();
+    }
+
+    private void deleteIfRejected(Member member) {
+        if (member.getRole() == MemberRole.INSTRUCTOR
+                && member.getApprovalStatus() != null
+                && "REJECTED".equals(member.getApprovalStatus().name())) {
+            memberRepository.delete(member);
         }
     }
 
@@ -118,19 +136,40 @@ public class MemberService {
         return 0;
     }
 
-    // ID 중복 체크
     public boolean checkIdDuplicate(String memberId){
-        return memberRepository.existsByLoginId(memberId);
+        Optional<Member> memberOpt = memberRepository.findByLoginId(memberId);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
-    // 이메일 중복 체크
     public boolean checkEmailDuplicate(String email) {
-        return memberRepository.existsByEmail(email);
+        Optional<Member> memberOpt = memberRepository.findByEmail(email);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
-    // 전화번호 중복 체크
     public boolean checkPhoneDuplicate(String phone) {
-        return memberRepository.existsByPhone(phone);
+        Optional<Member> memberOpt = memberRepository.findByPhone(phone);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            if (member.getRole() == MemberRole.INSTRUCTOR && member.getApprovalStatus() != null && "REJECTED".equals(member.getApprovalStatus().name())) {
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     // 아이디 찾기
@@ -220,7 +259,7 @@ public class MemberService {
         }
 
         if (file != null && !file.isEmpty()) {
-            String savePath = "C:/lab/uploads/"; // 환경에 맞게 경로 확인 요망
+            String savePath = "C:/lab/uploads/"; // 환경에 맞게 경로 확인할 것
             File dir = new File(savePath);
             if (!dir.exists()) dir.mkdirs();
 
@@ -243,7 +282,6 @@ public class MemberService {
         Profile profile = member.getProfile();
 
         if (profile == null) {
-            // 프로필이 아예 없었다면 새로 생성하면서 기본 이미지 셋팅
             profile = Profile.builder()
                     .member(member)
                     .bio(bio)
@@ -251,7 +289,6 @@ public class MemberService {
                     .build();
             member.assignProfile(profile);
         } else {
-            // 기존 프로필이 있다면 이미지 파일명을 기본으로 업데이트
             profile.update(bio, "default-profile.png");
         }
 
