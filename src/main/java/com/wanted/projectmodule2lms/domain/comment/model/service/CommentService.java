@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -35,10 +37,16 @@ public class CommentService {
     public List<CommentViewDTO> findCommentsByPostId(Integer postId) {
         List<Comment> commentList = commentRepository.findByPostIdAndIsDeletedFalseOrderByCommentIdAsc(postId);
 
+        Set<Integer> memberIds = commentList.stream()
+                .map(Comment::getMemberId)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Member> memberMap = memberRepository.findAllById(memberIds).stream()
+                .collect(Collectors.toMap(Member::getMemberId, member -> member));
+
         return commentList.stream()
                 .map(comment -> {
-                    Member member = memberRepository.findById(comment.getMemberId())
-                            .orElse(null);
+                    Member member = memberMap.get(comment.getMemberId());
                     return toCommentViewDTO(comment, member);
                 })
                 .collect(Collectors.toList());

@@ -135,7 +135,8 @@ public class AttendanceService {
         int weightedAssignmentScore = calculateWeightedScore(assignmentScore, ASSIGNMENT_MAX_SCORE);
         int weightedExamScore = calculateWeightedScore(examScore, EXAM_MAX_SCORE);
         int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
-        int totalScore = calculateTotalScore(memberId, courseId);
+        int totalScore = attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
+
 
         return new AttendancePageDTO(
                 memberId,
