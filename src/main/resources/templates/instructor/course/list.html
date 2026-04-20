@@ -37,13 +37,12 @@
                 <label class="block text-sm font-medium mb-2">카테고리</label>
                 <select name="category" class="w-full rounded-lg border-slate-300">
                     <option value="">전체</option>
-                    <option value="인문" th:selected="${category == '인문'}">인문</option>
-                    <option value="사회" th:selected="${category == '사회'}">사회</option>
-                    <option value="교육" th:selected="${category == '교육'}">교육</option>
-                    <option value="공학" th:selected="${category == '공학'}">공학</option>
-                    <option value="자연" th:selected="${category == '자연'}">자연</option>
-                    <option value="예체능" th:selected="${category == '예체능'}">예체능</option>
-                    <option value="기타" th:selected="${category == '기타'}">기타</option>
+                    <option value="Backend" th:selected="${category == 'Backend'}">Backend</option>
+                    <option value="Database" th:selected="${category == 'Database'}">Database</option>
+                    <option value="AI" th:selected="${category == 'AI'}">AI</option>
+                    <option value="Infra" th:selected="${category == 'Infra'}">Infra</option>
+                    <option value="DevOps" th:selected="${category == 'DevOps'}">DevOps</option>
+                    <option value="Data" th:selected="${category == 'Data'}">Data</option>
                 </select>
             </div>
             <div class="flex items-end gap-3">
@@ -58,6 +57,50 @@
             </div>
         </div>
     </form>
+
+    <div class="mb-8 flex flex-wrap gap-3">
+        <a th:href="@{/courses(role='INSTRUCTOR')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == null or category == ''} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            전체
+        </a>
+
+        <a th:href="@{/courses(role='INSTRUCTOR', category='Backend')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == 'Backend'} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            Backend
+        </a>
+
+        <a th:href="@{/courses(role='INSTRUCTOR', category='Database')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == 'Database'} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            Database
+        </a>
+
+        <a th:href="@{/courses(role='INSTRUCTOR', category='AI')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == 'AI'} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            AI
+        </a>
+
+        <a th:href="@{/courses(role='INSTRUCTOR', category='Infra')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == 'Infra'} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            Infra
+        </a>
+
+        <a th:href="@{/courses(role='INSTRUCTOR', category='DevOps')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == 'DevOps'} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            DevOps
+        </a>
+
+        <a th:href="@{/courses(role='INSTRUCTOR', category='Data')}"
+           class="px-5 py-2 rounded-xl border transition"
+           th:classappend="${category == 'Data'} ? ' bg-slate-900 text-white border-slate-900' : ' bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+            Data
+        </a>
+    </div>
 
     <div th:if="${errorMessage}" class="mb-6 rounded-lg bg-red-100 text-red-800 px-4 py-3" th:text="${errorMessage}"></div>
     <div th:if="${successMessage}" class="mb-6 rounded-lg bg-green-100 text-green-800 px-4 py-3" th:text="${successMessage}"></div>
@@ -93,7 +136,6 @@
             <h2 class="text-xl font-semibold text-slate-900 mb-2" th:text="${course.title}">코스명</h2>
             <p class="text-sm text-slate-500 mb-4" th:text="${course.category}">카테고리</p>
             <p class="text-sm text-slate-700 min-h-[48px]" th:text="${course.description}">설명</p>
-
         </a>
     </div>
 

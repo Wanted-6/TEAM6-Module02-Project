@@ -40,13 +40,12 @@
             <div>
                 <label class="block text-sm font-medium mb-2">카테고리</label>
                 <select name="category" class="w-full rounded-lg border-slate-300" required>
-                    <option value="인문" th:selected="${course.category == '인문'}">인문</option>
-                    <option value="사회" th:selected="${course.category == '사회'}">사회</option>
-                    <option value="교육" th:selected="${course.category == '교육'}">교육</option>
-                    <option value="공학" th:selected="${course.category == '공학'}">공학</option>
-                    <option value="자연" th:selected="${course.category == '자연'}">자연</option>
-                    <option value="예체능" th:selected="${course.category == '예체능'}">예체능</option>
-                    <option value="기타" th:selected="${course.category == '기타'}">기타</option>
+                    <option value="Backend" th:selected="${course.category == 'Backend'}">Backend</option>
+                    <option value="Database" th:selected="${course.category == 'Database'}">Database</option>
+                    <option value="AI" th:selected="${course.category == 'AI'}">AI</option>
+                    <option value="Infra" th:selected="${course.category == 'Infra'}">Infra</option>
+                    <option value="DevOps" th:selected="${course.category == 'DevOps'}">DevOps</option>
+                    <option value="Data" th:selected="${course.category == 'Data'}">Data</option>
                 </select>
             </div>
             <div>
