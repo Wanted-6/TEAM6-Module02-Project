@@ -2,100 +2,51 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>강사 승인 코드 인증 - Wanted LMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>64Lab | 강사 승인 코드 인증</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { headline: ['Manrope', 'sans-serif'], body: ['Noto Sans KR', 'sans-serif'] }, colors: { brand: '#2b3f8f', brandSoft: '#edf2ff', ink: '#1b2540', line: '#dbe3f1' }, boxShadow: { soft: '0 18px 40px rgba(43, 63, 143, 0.08)' } } } }
+    </script>
     <style>
-        /* 기본 배경 및 폰트 세팅 */
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f4f7f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        /* 하얀색 중앙 카드 박스 */
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-        }
-
-        h2 { text-align: center; color: #333; margin-top: 0; margin-bottom: 10px; }
-        p { text-align: center; color: #666; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; font-size: 14px; }
-
-        /* 입력창 스타일 */
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 16px;
-            letter-spacing: 2px; /* 코드가 잘 보이게 자간을 넓힘 */
-            text-transform: uppercase; /* 소문자를 쳐도 대문자로 보이게 자동 변환! */
-        }
-        input[type="text"]:focus {
-            border-color: #0056b3;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 86, 179, 0.2);
-        }
-
-        /* 버튼 스타일 */
-        button {
-            width: 100%;
-            padding: 14px;
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        button:hover { background-color: #004494; }
-
-        /* 에러 메시지 (틀렸을 때만 나타남) */
-        .error-message {
-            color: #dc3545;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 13px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
+        body { font-family: 'Noto Sans KR', sans-serif; background: linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen text-ink">
 
-<div class="card">
-    <h2>강사 권한 활성화</h2>
-    <p>관리자에게 메일로 발급받은<br>6자리 승인 코드를 입력해 주세요.</p>
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
+    </div>
+</header>
 
-    <div th:if="${error}" class="error-message" th:text="${error}"></div>
+<main class="flex-grow flex items-center justify-center p-6">
+    <div class="w-full max-w-md rounded-[40px] bg-white p-10 shadow-soft border border-line/50">
 
-    <form th:action="@{/member/verify-code}" method="post">
-        <div class="form-group">
-            <label for="code">승인 코드</label>
-            <input type="text" id="code" name="code" placeholder="예: A9B2C1"
-                   maxlength="6" pattern="[A-Za-z0-9]{6}"
-                   title="6자리 영문/숫자를 입력해주세요." required autofocus>
+        <div class="text-center mb-8">
+            <h2 class="font-headline text-2xl font-extrabold text-ink">강사 권한 활성화</h2>
+            <p class="mt-3 text-sm font-medium text-slate-500">관리자에게 메일로 발급받은<br>6자리 승인 코드를 입력해 주세요.</p>
         </div>
-        <button type="submit">인증 완료하기</button>
-    </form>
-</div>
+
+        <div th:if="${error}" class="mb-6 rounded-2xl bg-red-50 p-4 text-center text-sm font-bold text-red-600 border border-red-100" th:text="${error}">
+        </div>
+
+        <form th:action="@{/member/verify-code}" method="post" class="space-y-6">
+            <div class="space-y-2">
+                <label class="ml-1 text-xs font-bold text-slate-700" for="code">승인 코드</label>
+                <input type="text" id="code" name="code" placeholder="예: A9B2C1"
+                       maxlength="6" pattern="[A-Za-z0-9]{6}" title="6자리 영문/숫자를 입력해주세요." required autofocus
+                       class="w-full rounded-2xl border border-line bg-slate-50 px-5 py-4 text-center text-lg font-extrabold uppercase tracking-widest outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brandSoft">
+            </div>
+
+            <button type="submit" class="w-full rounded-2xl bg-brand py-4 text-base font-bold text-white shadow-md transition hover:bg-[#223374] active:scale-[0.98]">
+                인증 완료하기
+            </button>
+        </form>
+    </div>
+</main>
 
 </body>
 </html>

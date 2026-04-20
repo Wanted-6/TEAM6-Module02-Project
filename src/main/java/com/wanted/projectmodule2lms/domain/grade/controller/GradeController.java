@@ -28,9 +28,7 @@ public class GradeController {
     @AuditLog
     @GetMapping("/grades")
     public String findMyGrades(@LoginMemberId Long memberId, Model model) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
-        }
+
 
         List<GradeDTO> grades = gradeService.findGradesByMemberId(memberId.intValue());
         model.addAttribute("grades", grades);
@@ -40,15 +38,14 @@ public class GradeController {
 
     @GetMapping("/api/grades/chart")
     @ResponseBody
-    public ResponseEntity<GradeChartDTO> getGradeChartData(@RequestParam("enrollmentId") Long enrollmentId) {
+    public ResponseEntity<GradeChartDTO> getGradeChartData(@LoginMemberId Long memberId,
+                                                           @RequestParam("enrollmentId") Long enrollmentId) {
 
-        GradeChartDTO chartData = gradeService.getChartDataByEnrollmentId(enrollmentId);
+        GradeChartDTO chartData = gradeService.getChartDataByEnrollmentId(
+                memberId.intValue(),
+                enrollmentId.intValue()
+        );
 
-        if (chartData == null) {
-            chartData = GradeChartDTO.builder()
-                    .attendance(0.0).assignment(0.0).exam(0.0).attitude(0.0).total(0.0)
-                    .build();
-        }
 
         return ResponseEntity.ok(chartData);
     }
