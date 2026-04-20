@@ -7,6 +7,7 @@ import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentReposi
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionCreateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionDTO;
+import com.wanted.projectmodule2lms.domain.section.model.dto.SectionListItemDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SectionService {
 
     private final SectionRepository sectionRepository;
@@ -33,12 +34,8 @@ public class SectionService {
     private final EnrollmentRepository enrollmentRepository;
     private final ResourceLoader resourceLoader;
 
-    public List<SectionDTO> findSectionsByCourseId(Integer courseId) {
-        List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
-
-        return sectionList.stream()
-                .map(section -> modelMapper.map(section, SectionDTO.class))
-                .collect(Collectors.toList());
+    public List<SectionListItemDTO> findSectionsByCourseId(Integer courseId) {
+        return sectionRepository.findSectionListByCourseId(courseId);
     }
 
     public SectionDTO findSectionById(Integer sectionId) {
@@ -46,6 +43,24 @@ public class SectionService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
 
         return modelMapper.map(foundSection, SectionDTO.class);
+
+    }
+
+    public Integer findCourseIdBySectionId(Integer sectionId) {
+        Section foundSection = sectionRepository.findById(sectionId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
+
+        return foundSection.getCourseId();
+    }
+
+    public List<SectionDTO> findMySectionsForAttendance(Integer memberId, Integer courseId) {
+        validateMyCourseAccess(memberId, courseId);
+
+        List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
+
+        return sectionList.stream()
+                .map(section -> modelMapper.map(section, SectionDTO.class))
+                .toList();
     }
 
     @Transactional
@@ -153,29 +168,13 @@ public class SectionService {
         updateExamDueDate(courseId);
     }
 
-    public List<SectionDTO> findMySections(Integer memberId, Integer courseId) {
-
-        enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
-
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
-
-        if (course.getApprovalStatus() != CourseApprovalStatus.APPROVED || !Boolean.TRUE.equals(course.getIsOpen())) {
-            throw new IllegalArgumentException("접근할 수 없는 코스입니다.");
-        }
-
-        List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
-
-        return sectionList.stream()
-                .map(section -> modelMapper.map(section, SectionDTO.class))
-                .collect(Collectors.toList());
+    public List<SectionListItemDTO> findMySections(Integer memberId, Integer courseId) {
+        validateMyCourseAccess(memberId, courseId);
+        return sectionRepository.findSectionListByCourseId(courseId);
     }
 
     public SectionDTO findMySectionDetail(Integer memberId, Integer courseId, Integer sectionId) {
-
-        enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+        validateMyCourseAccess(memberId, courseId);
 
         Section foundSection = sectionRepository.findById(sectionId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
@@ -185,6 +184,18 @@ public class SectionService {
         }
 
         return modelMapper.map(foundSection, SectionDTO.class);
+    }
+
+    private void validateMyCourseAccess(Integer memberId, Integer courseId) {
+        enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
+                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+
+        if (course.getApprovalStatus() != CourseApprovalStatus.APPROVED || !Boolean.TRUE.equals(course.getIsOpen())) {
+            throw new IllegalArgumentException("접근할 수 없는 코스입니다.");
+        }
     }
 
     private String saveMaterialFile(MultipartFile materialUpload) throws IOException {
@@ -221,7 +232,8 @@ public class SectionService {
         return "files/section/" + savedName;
     }
 
-    private void updateExamDueDate(Integer courseId) {
+    @Transactional
+    protected void updateExamDueDate(Integer courseId) {
         Section lastSection = sectionRepository.findByCourseIdAndSectionOrder(courseId, 8)
                 .orElse(null);
 
