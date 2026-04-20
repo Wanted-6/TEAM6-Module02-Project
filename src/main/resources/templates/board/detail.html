@@ -34,14 +34,13 @@
             게시글 번호: <span th:text="${board.postId}">1</span><br>
             게시글 종류: <span th:text="${board.postType}">SECTION_QNA</span><br>
             작성자:
-            <span th:with="writer=${@memberRepository.findById(board.memberId).orElse(null)}"
-                  style="display: inline-flex; align-items: center; gap: 8px; vertical-align: middle;">
-                <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
-                     th:src="@{|/uploads/${writer.profile.profileImage}|}"
+            <span style="display: inline-flex; align-items: center; gap: 8px; vertical-align: middle;">
+                <img th:if="${board.profileImage != null and board.profileImage != 'default-profile.png'}"
+                     th:src="@{|/uploads/${board.profileImage}|}"
                      onerror="this.src='/img/default-profile.png'"
                      alt="profile image"
                      style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
-                <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                <img th:unless="${board.profileImage != null and board.profileImage != 'default-profile.png'}"
                      src="/img/default-profile.png"
                      alt="default profile image"
                      style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
@@ -97,14 +96,13 @@
             <th:block th:each="comment : ${commentList}" th:if="${comment.parentCommentId == null}">
                 <tr>
                     <td>
-                        <div th:with="writer=${@memberRepository.findById(comment.memberId).orElse(null)}"
-                             style="display: inline-flex; align-items: center; gap: 8px;">
-                            <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
-                                 th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                        <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            <img th:if="${comment.profileImage != null and comment.profileImage != 'default-profile.png'}"
+                                 th:src="@{|/uploads/${comment.profileImage}|}"
                                  onerror="this.src='/img/default-profile.png'"
                                  alt="profile image"
                                  style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
-                            <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                            <img th:unless="${comment.profileImage != null and comment.profileImage != 'default-profile.png'}"
                                  src="/img/default-profile.png"
                                  alt="default profile image"
                                  style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
@@ -179,15 +177,14 @@
                 <th:block th:each="reply : ${commentList}" th:if="${reply.parentCommentId == comment.commentId}">
                     <tr>
                         <td>
-                            <div th:with="writer=${@memberRepository.findById(reply.memberId).orElse(null)}"
-                                 style="display: inline-flex; align-items: center; gap: 8px; padding-left: 10px;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; padding-left: 10px;">
                                 <span style="color: #888; font-weight: bold;">ㄴ</span>
-                                <img th:if="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
-                                     th:src="@{|/uploads/${writer.profile.profileImage}|}"
+                                <img th:if="${reply.profileImage != null and reply.profileImage != 'default-profile.png'}"
+                                     th:src="@{|/uploads/${reply.profileImage}|}"
                                      onerror="this.src='/img/default-profile.png'"
                                      alt="profile image"
                                      style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
-                                <img th:unless="${writer?.profile?.profileImage != null and writer.profile.profileImage != 'default-profile.png'}"
+                                <img th:unless="${reply.profileImage != null and reply.profileImage != 'default-profile.png'}"
                                      src="/img/default-profile.png"
                                      alt="default profile image"
                                      style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">

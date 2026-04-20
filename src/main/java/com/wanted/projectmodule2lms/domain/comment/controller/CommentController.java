@@ -2,12 +2,10 @@ package com.wanted.projectmodule2lms.domain.comment.controller;
 
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
-import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
-import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
-import com.wanted.projectmodule2lms.global.util.SecurityUtil;
+import com.wanted.projectmodule2lms.global.service.CurrentMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -22,15 +20,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CommentController {
 
     private final CommentService commentService;
-    private final MemberRepository memberRepository;
+    private final CurrentMemberService currentMemberService;
 
 
     @PostMapping("/regist")
     public String registerComment(@LoginMemberId Long loginMemberId,
                                   @ModelAttribute CommentDTO commentDTO,
                                   RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
 
         try {
             commentService.registComment(commentDTO, currentMemberId, currentRole);
@@ -46,8 +47,11 @@ public class CommentController {
     public String modifyComment(@LoginMemberId Long loginMemberId,
                                 @ModelAttribute CommentDTO commentDTO,
                                 RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
 
         try {
             commentService.modifyComment(commentDTO, currentMemberId, currentRole);
@@ -58,14 +62,17 @@ public class CommentController {
         }
     }
 
- 
+
     @PostMapping("/delete")
     public String deleteComment(@LoginMemberId Long loginMemberId,
                                 @RequestParam Integer commentId,
                                 @RequestParam Integer postId,
                                 RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-        MemberRole currentRole = getCurrentMemberRole();
+        if (loginMemberId == null) {
+            return "redirect:/auth/login";
+        }
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
 
         try {
             commentService.deleteComment(commentId, postId, currentMemberId, currentRole);
@@ -76,15 +83,4 @@ public class CommentController {
         }
     }
 
-    private MemberRole getCurrentMemberRole() {
-        Long loginMemberId = SecurityUtil.getCurrentMemberId();
-        Integer currentMemberId = loginMemberId != null ? loginMemberId.intValue() : null;
-
-        if (currentMemberId == null) {
-            return null;
-        }
-
-        Member member = memberRepository.findById(currentMemberId).orElse(null);
-        return member != null ? member.getRole() : null;
-    }
 }

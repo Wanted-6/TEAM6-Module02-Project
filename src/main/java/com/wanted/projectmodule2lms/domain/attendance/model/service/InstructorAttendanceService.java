@@ -22,11 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,39 +44,70 @@ public class InstructorAttendanceService {
         List<Enrollment> enrollmentList = enrollmentRepository.findByCourseId(courseId);
         List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
 
+        Set<Integer> memberIds = enrollmentList.stream()
+                .map(Enrollment::getMemberId)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Member> memberMap = memberRepository.findAllById(memberIds).stream()
+                .collect(Collectors.toMap(Member::getMemberId, member -> member));
+
+        List<Integer> enrollmentIds = enrollmentList.stream()
+                .map(Enrollment::getEnrollmentId)
+                .toList();
+
+        Map<Integer, Grade> gradeMap = gradeRepository.findByEnrollmentIdIn(enrollmentIds).stream()
+                .collect(Collectors.toMap(Grade::getEnrollmentId, grade -> grade));
+
+        List<Attendance> allAttendances = attendanceRepository
+                .findByEnrollmentIdInOrderByEnrollmentIdAscSectionIdAsc(enrollmentIds);
+
+        Map<Integer, List<Attendance>> attendanceMap = allAttendances.stream()
+                .collect(Collectors.groupingBy(Attendance::getEnrollmentId));
+
         for (Enrollment enrollment : enrollmentList) {
-            Member member = memberRepository.findById(enrollment.getMemberId()).orElse(null);
-            Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId()).orElse(null);
-            List<Attendance> attendanceList = findLatestAttendancesByEnrollmentId(
-                    enrollment.getEnrollmentId()
+            Member member = memberMap.get(enrollment.getMemberId());
+            Grade grade = gradeMap.get(enrollment.getEnrollmentId());
+            List<Attendance> attendanceList = findLatestAttendances(
+                    attendanceMap.getOrDefault(enrollment.getEnrollmentId(), Collections.emptyList())
             );
 
             if (member == null) {
                 continue;
             }
 
-            InstructorAttendanceManageDTO dto = new InstructorAttendanceManageDTO();
-            dto.setMemberId(member.getMemberId());
-            dto.setEnrollmentId(enrollment.getEnrollmentId());
-            dto.setStudentName(member.getName());
-            dto.setEmail(member.getEmail());
-            dto.setProgressRate(calculateProgressRate(sectionList.size(), attendanceList.size()));
-            dto.setAttendanceSummary(buildAttendanceSummary(attendanceList));
-            dto.setAssignmentScore(
-                    grade != null && grade.getAssignmentScore() != null ? grade.getAssignmentScore().doubleValue() : null
+            InstructorAttendanceManageDTO dto = new InstructorAttendanceManageDTO(
+                    member.getMemberId(),
+                    enrollment.getEnrollmentId(),
+                    member.getName(),
+                    member.getEmail(),
+                    calculateProgressRate(sectionList.size(), attendanceList.size()),
+                    buildAttendanceSummary(attendanceList),
+                    grade != null && grade.getAssignmentScore() != null ? grade.getAssignmentScore().doubleValue() : null,
+                    grade != null && grade.getExamScore() != null ? grade.getExamScore().doubleValue() : null,
+                    grade != null && grade.getAttitudeScore() != null ? grade.getAttitudeScore().doubleValue() : null,
+                    null,
+                    buildSectionAttendanceList(sectionList, attendanceList)
             );
-            dto.setExamScore(
-                    grade != null && grade.getExamScore() != null ? grade.getExamScore().doubleValue() : null
-            );
-            dto.setAttitudeScore(
-                    grade != null && grade.getAttitudeScore() != null ? grade.getAttitudeScore().doubleValue() : null
-            );
-            dto.setSectionAttendanceList(buildSectionAttendanceList(sectionList, attendanceList));
             studentList.add(dto);
         }
 
         return studentList;
     }
+
+    private List<Attendance> findLatestAttendances(List<Attendance> attendances) {
+        Map<Integer, Attendance> latestAttendanceBySection = new LinkedHashMap<>();
+
+        for (Attendance attendance : attendances) {
+            Attendance current = latestAttendanceBySection.get(attendance.getSectionId());
+
+            if (current == null || ATTENDANCE_ORDER.compare(attendance, current) > 0) {
+                latestAttendanceBySection.put(attendance.getSectionId(), attendance);
+            }
+        }
+
+        return new ArrayList<>(latestAttendanceBySection.values());
+    }
+
 
     @Transactional
     public void updateAttendanceStatusByInstructor(Integer instructorId,
@@ -154,10 +182,11 @@ public class InstructorAttendanceService {
         List<SectionAttendanceDTO> sectionAttendanceList = new ArrayList<>();
 
         for (Section section : sectionList) {
-            SectionAttendanceDTO sectionAttendanceDTO = new SectionAttendanceDTO();
-            sectionAttendanceDTO.setSectionId(section.getSectionId());
-            sectionAttendanceDTO.setSectionTitle(section.getTitle());
-            sectionAttendanceDTO.setStatus(findAttendanceStatus(section, attendanceList));
+            SectionAttendanceDTO sectionAttendanceDTO = new SectionAttendanceDTO(
+                    section.getSectionId(),
+                    section.getTitle(),
+                    findAttendanceStatus(section, attendanceList)
+            );
             sectionAttendanceList.add(sectionAttendanceDTO);
         }
 

@@ -1,16 +1,15 @@
 package com.wanted.projectmodule2lms.domain.comment.model.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CommentDTO {
-
+public class CommentViewDTO {
     private Integer commentId;
     private Integer postId;
     private Integer memberId;
