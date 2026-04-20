@@ -98,17 +98,17 @@ public class GradeService {
     @Transactional
     public void updateGradeByInstructor(Integer instructorId, GradeUpdateDTO dto) {
         Enrollment enrollment = enrollmentRepository.findById(dto.getEnrollmentId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수강 정보입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));
 
         Course course = courseRepository.findById(enrollment.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강의입니다."));
 
         if (!course.getInstructorId().equals(instructorId)) {
-            throw new IllegalArgumentException("해당 강의의 담당 강사만 성적을 수정할 수 있습니다.");
+            throw new UnauthorizedInstructorException("해당 강의의 담당 강사만 성적을 수정할 수 있습니다.");
         }
 
         Grade grade = gradeRepository.findByEnrollmentId(dto.getEnrollmentId())
-                .orElseThrow(() -> new IllegalArgumentException("성적 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("성적 정보가 존재하지 않습니다."));
 
         BigDecimal attendanceScore = calculateAttendanceScore(dto.getEnrollmentId());
         BigDecimal assignmentScore = dto.getAssignmentScore() != null
