@@ -131,6 +131,6 @@ public class AssignmentService {
 
         attachmentUpload.transferTo(new File(filePath + "/" + savedName));
 
-        return "static/files/assignment/" + savedName;
+        return "files/assignment/" + savedName;
     }
 }

@@ -21,4 +21,6 @@ public class SubmissionDTO {
     private LocalDateTime submittedAt;
     private Double score;
     private String feedback;
+    private String studentName;
+    private String studentLoginId;
 }
