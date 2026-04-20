@@ -2,6 +2,8 @@ package com.wanted.projectmodule2lms.domain.submission.service;
 
 import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
 import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseStudentDTO;
+import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
@@ -24,9 +26,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,29 +39,42 @@ public class SubmissionService {
     private final AssignmentRepository assignmentRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final MemberRepository memberRepository;
+    private final CourseService courseService;
     private final ModelMapper modelMapper;
     private final ResourceLoader resourceLoader;
 
-    public List<SubmissionListDTO> findSubmissionsByAssignmentId(Integer assignmentId) {
-        List<Submission> submissionList = submissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignmentId);
+    public List<SubmissionListDTO> findSubmissionsByAssignmentId(Integer courseId, Integer assignmentId) {
+        List<CourseStudentDTO> studentList = courseService.findStudentsByCourseId(courseId);
+        List<SubmissionListDTO> result = new ArrayList<>();
 
-        return submissionList.stream()
-                .map(submission -> {
-                    Enrollment enrollment = enrollmentRepository.findById(submission.getEnrollmentId())
-                            .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
+        for (CourseStudentDTO student : studentList) {
+            Optional<Submission> submissionOpt =
+                    submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, student.getEnrollmentId());
 
-                    Member member = memberRepository.findById(enrollment.getMemberId())
-                            .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
+            if (submissionOpt.isPresent()) {
+                Submission submission = submissionOpt.get();
 
-                    return new SubmissionListDTO(
-                            submission.getSubmissionId(),
-                            member.getName(),
-                            member.getLoginId(),
-                            submission.getSubmittedAt(),
-                            submission.getScore()
-                    );
-                })
-                .collect(Collectors.toList());
+                result.add(new SubmissionListDTO(
+                        student.getEnrollmentId(),
+                        student.getLoginId(),
+                        student.getName(),
+                        "제출 완료",
+                        submission.getSubmittedAt(),
+                        submission.getSubmissionId()
+                ));
+            } else {
+                result.add(new SubmissionListDTO(
+                        student.getEnrollmentId(),
+                        student.getLoginId(),
+                        student.getName(),
+                        "미제출",
+                        null,
+                        null
+                ));
+            }
+        }
+
+        return result;
     }
 
     public SubmissionDTO findSubmissionById(Integer submissionId) {
@@ -106,6 +122,10 @@ public class SubmissionService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("과제가 존재하지 않습니다."));
 
+        if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
+            throw new IllegalArgumentException("마감일이 지나 제출할 수 없습니다.");
+        }
+
         enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
 
@@ -117,10 +137,6 @@ public class SubmissionService {
 
         if (attachmentPath == null || attachmentPath.isBlank()) {
             attachmentPath = createDTO.getAttachmentFile();
-        }
-
-        if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
-            throw new IllegalArgumentException("마감일이 지나 제출할 수 없습니다.");
         }
 
         Submission submission = new Submission(
@@ -142,6 +158,13 @@ public class SubmissionService {
 
         Submission foundSubmission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 제출물이 존재하지 않습니다."));
+
+        Assignment assignment = assignmentRepository.findById(foundSubmission.getAssignmentId())
+                .orElseThrow(() -> new IllegalArgumentException("과제가 존재하지 않습니다."));
+
+        if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
+            throw new IllegalArgumentException("마감일이 지나 제출물을 수정할 수 없습니다.");
+        }
 
         String attachmentPath = foundSubmission.getAttachmentFile();
         String newAttachmentPath = saveAttachmentFile(attachmentUpload);

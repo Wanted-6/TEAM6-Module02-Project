@@ -29,7 +29,7 @@ public class SubmissionController {
                                                 @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                                 ModelAndView mv) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 제출 목록을 조회할 수 있습니다.");
+            throw new IllegalArgumentException("강사만 제출 현황을 조회할 수 있습니다.");
         }
 
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
@@ -37,7 +37,8 @@ public class SubmissionController {
         mv.addObject("courseId", courseId);
         mv.addObject("course", courseService.findCourseById(courseId));
         mv.addObject("assignment", assignment);
-        mv.addObject("submissionList", submissionService.findSubmissionsByAssignmentId(assignment.getAssignmentId()));
+        mv.addObject("submissionList",
+                submissionService.findSubmissionsByAssignmentId(courseId, assignment.getAssignmentId()));
         mv.addObject("role", role);
         mv.setViewName("submission/list");
         return mv;
