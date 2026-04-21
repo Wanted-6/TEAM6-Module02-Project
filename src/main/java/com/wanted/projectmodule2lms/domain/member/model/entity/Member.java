@@ -66,16 +66,16 @@ public class Member {
 
     @Builder.Default
     @Column(name = "is_verified", nullable = false)
-    private Boolean isVerified = false; // 승인 코드 입력 완료 여부
+    private Boolean isVerified = false;
 
     @Column(name = "reject_reason", columnDefinition = "TEXT")
-    private String rejectReason; // 반려 사유
+    private String rejectReason;
 
     @Column(name = "grad_cert_path")
-    private String gradCertPath; // 졸업증명서 경로
+    private String gradCertPath;
 
     @Column(name = "career_cert_path")
-    private String careerCertPath; // 경력증명서 경로
+    private String careerCertPath;
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private Profile profile;
@@ -108,7 +108,7 @@ public class Member {
 
     public void increaseLoginFailCount() {
         if (this.loginFailCount == null) {
-            this.loginFailCount = 0; // null이면 0으로 초기화
+            this.loginFailCount = 0;
         }
         if (this.accountLocked == null) {
             this.accountLocked = false;
@@ -125,17 +125,10 @@ public class Member {
         this.accountLocked = true;
     }
 
-/*    public void updatePassword(String newPassword) {
-        this.password = newPassword;
-    }*/
-
     public void changePassword(String newPassword){
         this.password = newPassword;
     }
 
-    /**
-     * 회원 생성 메서드
-     */
     public static Member createMember(String loginId,
                                       String password,
                                       String name,
@@ -158,21 +151,18 @@ public class Member {
         this.status = status;
     }
 
-    // [관리자용] 강사 승인 처리 및 승인 코드 발급
     public void approveInstructor(String code){
         this.approvalStatus = ApprovalStatus.APPROVED;
         this.approvalCode = code;
         this.rejectReason = null;
     }
 
-    // [관리자용] 강사 반려 처리
     public void rejectInstructor(String reason){
         this.approvalStatus = ApprovalStatus.REJECTED;
         this.rejectReason = reason;
         this.approvalCode = null;
     }
 
-    // [강사용] 최초 로그인 시 승인 코드로 인증하기
     public void verifyApprovalCode() {
         this.isVerified = true;
         this.approvalCode = null;

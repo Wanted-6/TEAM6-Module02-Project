@@ -22,11 +22,9 @@ public class StudentCourseController {
 
     @AuditLog
     @GetMapping
-    public ModelAndView findMyCourses(
-            @LoginMemberId Long memberId,
-            ModelAndView mv) {
+    public ModelAndView findMyCourses(@LoginMemberId Long memberId,
+                                      ModelAndView mv) {
 
-        // 로그인 체크 (2중)
         if (memberId == null) {
             mv.setViewName("redirect:/auth/login");
             return mv;
@@ -39,10 +37,9 @@ public class StudentCourseController {
     }
 
     @GetMapping("/{courseId}")
-    public ModelAndView findMyCourseDetail(
-            @PathVariable Integer courseId,
-            @LoginMemberId Long memberId,
-            ModelAndView mv) {
+    public ModelAndView findMyCourseDetail(@PathVariable Integer courseId,
+                                           @LoginMemberId Long memberId,
+                                           ModelAndView mv) {
 
         if (memberId == null) {
             mv.setViewName("redirect:/auth/login");

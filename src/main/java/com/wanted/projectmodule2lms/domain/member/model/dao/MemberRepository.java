@@ -1,9 +1,10 @@
 package com.wanted.projectmodule2lms.domain.member.model.dao;
 
-import com.wanted.projectmodule2lms.domain.member.model.entity.ApprovalStatus;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,12 +12,12 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     Optional<Member> findByLoginId(String loginId);
+
     Optional<Member> findByEmail(String email);
+
     Optional<Member> findByPhone(String phone);
 
     boolean existsByLoginId(String loginId);
-
-    boolean existsByEmail(String email);
 
     boolean existsByPhone(String phone);
 
@@ -29,5 +30,8 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     List<Member> findByMemberIdIn(List<Integer> memberIds);
 
-    List<Member> findByRole(MemberRole role);
+    // /admin/instructor 성능 개선 부분.
+    //    List<Member> findByRole(MemberRole role);
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.profile WHERE m.role = :role")
+    List<Member> findByRole(@Param("role") MemberRole role);
 }

@@ -27,12 +27,14 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SubmissionService {
 
     private final SubmissionRepository submissionRepository;
@@ -45,15 +47,24 @@ public class SubmissionService {
 
     public List<SubmissionListDTO> findSubmissionsByAssignmentId(Integer courseId, Integer assignmentId) {
         List<CourseStudentDTO> studentList = courseService.findStudentsByCourseId(courseId);
+
+        if (studentList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Submission> submissionList = submissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignmentId);
+
+        Map<Integer, Submission> submissionMap = new HashMap<>();
+        for (Submission submission : submissionList) {
+            submissionMap.put(submission.getEnrollmentId(), submission);
+        }
+
         List<SubmissionListDTO> result = new ArrayList<>();
 
         for (CourseStudentDTO student : studentList) {
-            Optional<Submission> submissionOpt =
-                    submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, student.getEnrollmentId());
+            Submission submission = submissionMap.get(student.getEnrollmentId());
 
-            if (submissionOpt.isPresent()) {
-                Submission submission = submissionOpt.get();
-
+            if (submission != null) {
                 result.add(new SubmissionListDTO(
                         student.getEnrollmentId(),
                         student.getLoginId(),

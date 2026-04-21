@@ -5,51 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>학생 섹션 상세</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#2b3f8f',
+                        brandSoft: '#edf2ff',
+                        ink: '#1b2540',
+                        line: '#dbe3f1'
+                    },
+                    boxShadow: {
+                        soft: '0 18px 40px rgba(43, 63, 143, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background:
+                    radial-gradient(circle at top left, rgba(43, 63, 143, 0.08), transparent 28%),
+                    linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%);
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
-<div class="max-w-5xl mx-auto px-6 py-10">
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-slate-900">학생 섹션 상세</h1>
-            <p class="text-slate-500 mt-2">수강 중인 섹션의 상세 정보를 확인할 수 있습니다.</p>
+<body class="text-ink">
+<div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <div class="mb-8 rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-soft">
+        <p class="inline-flex rounded-full bg-brandSoft px-4 py-1 text-sm font-semibold text-brand">
+            Student Section Detail
+        </p>
+
+        <div class="mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-ink">섹션 상세</h1>
+                <p class="mt-2 text-sm leading-6 text-slate-600">수강 중인 섹션의 상세 정보를 확인할 수 있습니다.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <a th:href="@{/main}"
+                   class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                    메인
+                </a>
+                <a href="javascript:history.back()"
+                   class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                    이전
+                </a>
+                <a th:href="@{/student/courses/{courseId}(courseId=${courseId}, memberId=${memberId})}"
+                   class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
+                    코스 상세
+                </a>
+                <a th:href="@{/student/courses/{courseId}/sections(courseId=${courseId}, memberId=${memberId})}"
+                   class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
+                    섹션 목록
+                </a>
+            </div>
         </div>
-        <a th:href="@{/student/courses/{courseId}/sections(courseId=${courseId}, memberId=${memberId})}"
-           class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">목록</a>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-6">
+    <div class="rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm space-y-6">
         <div>
-            <h2 class="text-2xl font-bold text-slate-900" th:text="${section.title}"></h2>
+            <h2 class="text-2xl font-extrabold text-slate-900" th:text="${section.title}">섹션명</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-
-            <div class="p-4 rounded-xl bg-slate-50">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="rounded-2xl bg-slate-50 p-4">
                 <p class="text-slate-500 mb-1">섹션 순서</p>
-                <p class="font-medium" th:text="${section.sectionOrder}"></p>
+                <p class="font-semibold text-slate-800" th:text="${section.sectionOrder}"></p>
             </div>
 
-            <div class="p-4 rounded-xl bg-slate-50">
+            <div class="rounded-2xl bg-slate-50 p-4">
                 <p class="text-slate-500 mb-1">오픈 날짜</p>
-                <p class="font-medium" th:text="${section.openDate}"></p>
+                <p class="font-semibold text-slate-800" th:text="${section.openDate}"></p>
             </div>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-50">
-            <p class="text-slate-500 mb-2">영상 URL</p>
-            <p th:text="${section.videoUrl} ?: '등록된 영상이 없습니다.'"></p>
+        <div class="rounded-2xl bg-slate-50 p-5">
+            <p class="text-sm font-semibold text-slate-500 mb-2">영상 URL</p>
+            <p class="text-slate-800 break-all" th:text="${section.videoUrl} ?: '등록된 영상이 없습니다.'"></p>
         </div>
 
-        <div class="p-4 rounded-xl bg-slate-50">
-            <p class="text-slate-500 mb-2">자료 파일</p>
-            <p th:text="${section.materialFile} ?: '등록된 자료가 없습니다.'"></p>
+        <div class="rounded-2xl bg-slate-50 p-5">
+            <p class="text-sm font-semibold text-slate-500 mb-2">자료 파일</p>
+            <p class="text-slate-800" th:text="${section.materialFile} ?: '등록된 자료가 없습니다.'"></p>
         </div>
 
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3 pt-2">
             <a th:if="${section.videoUrl != null and !#strings.isEmpty(section.videoUrl)}"
                th:href="${section.videoUrl}"
                target="_blank"
-               class="px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-100">
+               class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                 영상 보기
             </a>
         </div>

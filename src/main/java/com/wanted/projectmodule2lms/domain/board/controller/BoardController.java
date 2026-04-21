@@ -3,12 +3,9 @@ import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardViewDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
 import com.wanted.projectmodule2lms.domain.board.model.service.BoardService;
-import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.dto.CommentThreadDTO;
 import com.wanted.projectmodule2lms.domain.comment.model.service.CommentService;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
-import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
-import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
@@ -283,24 +280,8 @@ public class BoardController {
         return value == null ? "" : "&" + key + "=" + value;
     }
 
-    private String appendTextQuery(String key, String value) {
-        return value == null || value.isBlank() ? "" : "&" + key + "=" + value;
-    }
-
     private boolean appendQuery(StringBuilder pathBuilder, String key, Integer value, boolean hasQuery) {
         if (value == null) {
-            return hasQuery;
-        }
-
-        pathBuilder.append(hasQuery ? "&" : "?")
-                .append(key)
-                .append("=")
-                .append(value);
-        return true;
-    }
-
-    private boolean appendQuery(StringBuilder pathBuilder, String key, String value, boolean hasQuery) {
-        if (value == null || value.isBlank()) {
             return hasQuery;
         }
 

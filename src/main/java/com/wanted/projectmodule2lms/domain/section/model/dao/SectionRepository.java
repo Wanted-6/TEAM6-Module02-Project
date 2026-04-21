@@ -1,7 +1,10 @@
 package com.wanted.projectmodule2lms.domain.section.model.dao;
 
+import com.wanted.projectmodule2lms.domain.section.model.dto.SectionListItemDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,4 +29,19 @@ public interface SectionRepository extends JpaRepository<Section, Integer> {
     long countByCourseId(Integer courseId);
 
     Optional<Section> findByCourseIdAndSectionOrder(Integer courseId, Integer sectionOrder);
+
+    @Query("""
+        select new com.wanted.projectmodule2lms.domain.section.model.dto.SectionListItemDTO(
+            s.sectionId,
+            s.title,
+            s.sectionOrder,
+            s.openDate,
+            s.materialFile,
+            s.courseId
+        )
+        from Section s
+        where s.courseId = :courseId
+        order by s.sectionOrder asc
+    """)
+    List<SectionListItemDTO> findSectionListByCourseId(@Param("courseId") Integer courseId);
 }
