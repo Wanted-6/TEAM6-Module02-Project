@@ -43,7 +43,6 @@ public class SectionService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
 
         return modelMapper.map(foundSection, SectionDTO.class);
-
     }
 
     public Integer findCourseIdBySectionId(Integer sectionId) {
@@ -69,6 +68,10 @@ public class SectionService {
                                  MultipartFile materialUpload) throws IOException {
         if (!courseRepository.existsById(courseId)) {
             throw new IllegalArgumentException("부모 코스가 존재하지 않습니다.");
+        }
+
+        if (createDTO.getSectionOrder() == null || createDTO.getSectionOrder() < 1 || createDTO.getSectionOrder() > 8) {
+            throw new IllegalArgumentException("섹션 순서는 1부터 8까지만 가능합니다.");
         }
 
         if (sectionRepository.existsByCourseIdAndSectionOrder(courseId, createDTO.getSectionOrder())) {
@@ -100,7 +103,6 @@ public class SectionService {
         );
 
         sectionRepository.save(section);
-        updateExamDueDate(courseId);
         return section.getSectionId();
     }
 
@@ -147,8 +149,6 @@ public class SectionService {
                 updateDTO.getSectionOrder(),
                 updateDTO.getOpenDate()
         );
-
-        updateExamDueDate(foundSection.getCourseId());
     }
 
     @Transactional
@@ -163,9 +163,7 @@ public class SectionService {
             throw new IllegalArgumentException("승인된 코스의 섹션은 삭제할 수 없습니다.");
         }
 
-        Integer courseId = foundSection.getCourseId();
         sectionRepository.deleteById(sectionId);
-        updateExamDueDate(courseId);
     }
 
     public List<SectionListItemDTO> findMySections(Integer memberId, Integer courseId) {
