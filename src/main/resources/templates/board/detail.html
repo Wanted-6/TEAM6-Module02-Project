@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
 <body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId},data-post-id=${board.postId}">
+<div th:replace="~{common/topbar :: topbar}"></div>
 <div class="page-wrapper">
     <div class="top-utility">
         <div class="role-panel">
