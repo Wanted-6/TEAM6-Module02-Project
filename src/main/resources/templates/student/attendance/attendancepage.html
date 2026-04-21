@@ -79,17 +79,10 @@
     <link rel="stylesheet" th:href="@{/css/attendance/attendance.css}" href="/css/attendance/attendance.css"/>
 </head>
 <body class="bg-surface text-on-surface min-h-screen">
-<header class="fixed top-0 w-full flex justify-between items-center px-8 py-4 h-16 bg-[#f2f4f6]/80 backdrop-blur-xl z-50 border-b border-outline-variant/10">
-    <div class="flex items-center gap-8">
-        <span class="text-xl font-bold tracking-tight text-[#191c1e]">64Lab</span>
-        <nav class="hidden md:flex space-x-6">
-            <a class="text-[#0056D2] font-bold border-b-2 border-[#0056D2] pb-1 px-2" href="#">강의실</a>
-        </nav>
-    </div>
-</header>
+<div th:replace="~{common/topbar :: topbar}"></div>
 
-<aside class="fixed left-0 top-0 h-screen w-64 bg-[#f2f4f6] flex flex-col p-6 space-y-8 hidden lg:flex">
-    <div class="mt-16">
+<aside class="fixed left-0 top-[81px] h-[calc(100vh-81px)] w-64 bg-[#f2f4f6] flex flex-col p-6 space-y-8 hidden lg:flex">
+    <div>
         <div class="flex items-center gap-3 mb-2">
             <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
                 <span class="material-symbols-outlined">school</span>
@@ -105,7 +98,7 @@
     </nav>
 </aside>
 
-<main class="lg:ml-64 pt-16 min-h-screen">
+<main class="lg:ml-64 min-h-screen">
     <div class="max-w-[1440px] mx-auto p-8 space-y-8">
         <section class="bg-surface-container-lowest rounded-xl p-8 relative overflow-hidden border border-outline-variant/10">
             <div class="relative z-10">
