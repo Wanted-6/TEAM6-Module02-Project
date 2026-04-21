@@ -26,9 +26,7 @@ public class InstructorGradeController {
 
     @GetMapping("/courses")
     public String instructorCourseList(@LoginMemberId Long memberId, Model model) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
-        }
+
 
         Integer instructorId = memberId.intValue();
         model.addAttribute("courseList", courseService.findCoursesByInstructor(instructorId));
@@ -40,9 +38,7 @@ public class InstructorGradeController {
     public String findGradesByInstructor(@LoginMemberId Long memberId,
                                          @RequestParam(required = false) Integer courseId,
                                          Model model) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
-        }
+
         Integer instructorId = memberId.intValue();
 
         if (courseId != null) {
@@ -59,9 +55,7 @@ public class InstructorGradeController {
     public String showEditForm(@LoginMemberId Long memberId,
                                @RequestParam Integer enrollmentId,
                                Model model) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
-        }
+
         Integer instructorId = memberId.intValue();
 
         model.addAttribute("grade",
@@ -72,9 +66,7 @@ public class InstructorGradeController {
     @PostMapping("/edit")
     public String updateGrade(@LoginMemberId Long memberId,
                               @ModelAttribute GradeUpdateDTO dto) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
-        }
+
         Integer instructorId = memberId.intValue();
 
         gradeService.updateGradeByInstructor(instructorId, dto);
