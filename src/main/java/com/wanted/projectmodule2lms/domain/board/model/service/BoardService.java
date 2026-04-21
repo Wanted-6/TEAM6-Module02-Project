@@ -380,17 +380,6 @@ public class    BoardService {
         }
     }
 
-    private BoardViewDTO toBoardViewDTO(Board board) {
-        return toBoardViewDTO(
-                board,
-                loadMemberNameMap(Collections.singletonList(board)),
-                loadMemberProfileImageMap(Collections.singletonList(board)),
-                loadCourseTitleMap(Collections.singletonList(board)),
-                loadCourseInstructorMap(Collections.singletonList(board)),
-                loadSectionTitleMap(Collections.singletonList(board))
-        );
-    }
-
     private BoardViewDTO toBoardDetailViewDTO(Board board) {
         Member member = memberRepository.findById(board.getMemberId()).orElse(null);
 
