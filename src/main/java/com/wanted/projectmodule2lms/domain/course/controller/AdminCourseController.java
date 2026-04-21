@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin/courses")
@@ -34,10 +36,10 @@ public class AdminCourseController {
 
     @PostMapping("/{courseId}/approve")
     public String approveCourse(@PathVariable Integer courseId,
-                                @RequestParam String adminLoginId,
+                                Principal principal,
                                 RedirectAttributes rttr) {
         try {
-            courseService.approveCourse(courseId, adminLoginId);
+            courseService.approveCourse(courseId, principal.getName());
             rttr.addFlashAttribute("successMessage", "코스가 승인되었습니다.");
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
@@ -47,11 +49,11 @@ public class AdminCourseController {
 
     @PostMapping("/{courseId}/reject")
     public String rejectCourse(@PathVariable Integer courseId,
-                               @RequestParam String adminLoginId,
                                @RequestParam String rejectReason,
+                               Principal principal,
                                RedirectAttributes rttr) {
         try {
-            courseService.rejectCourse(courseId, adminLoginId, rejectReason);
+            courseService.rejectCourse(courseId, principal.getName(), rejectReason);
             rttr.addFlashAttribute("successMessage", "코스가 반려되었습니다.");
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
@@ -61,10 +63,10 @@ public class AdminCourseController {
 
     @PostMapping("/{courseId}/delete")
     public String deleteCourse(@PathVariable Integer courseId,
-                               @RequestParam String adminLoginId,
+                               Principal principal,
                                RedirectAttributes rttr) {
         try {
-            courseService.deleteCourseByAdmin(courseId, adminLoginId);
+            courseService.deleteCourseByAdmin(courseId, principal.getName());
             rttr.addFlashAttribute("successMessage", "코스가 삭제 처리되었습니다.");
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
@@ -89,5 +91,4 @@ public class AdminCourseController {
         mv.setViewName("admin/course/students");
         return mv;
     }
-
 }

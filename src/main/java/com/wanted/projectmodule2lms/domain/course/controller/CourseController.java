@@ -69,12 +69,15 @@ public class CourseController {
     public String registCourse(@RequestParam(defaultValue = "INSTRUCTOR") String role,
                                @ModelAttribute CourseCreateDTO createDTO,
                                @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
-                               RedirectAttributes rttr) {
+                               RedirectAttributes rttr,
+                               Principal principal) {
         if (!"INSTRUCTOR".equals(role)) {
             throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
         }
 
         try {
+            createDTO.setInstructorLoginId(principal.getName());
+
             Integer courseId = courseService.registCourse(createDTO, thumbnailFile);
             rttr.addFlashAttribute("successMessage", "코스가 등록되었습니다.");
             return "redirect:/courses/" + courseId + "?role=INSTRUCTOR";
@@ -104,16 +107,16 @@ public class CourseController {
     @PostMapping("/{courseId}/modify")
     public String modifyCourse(@PathVariable Integer courseId,
                                @RequestParam(defaultValue = "INSTRUCTOR") String role,
-                               @RequestParam String instructorLoginId,
                                @ModelAttribute CourseUpdateDTO updateDTO,
                                @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
-                               RedirectAttributes rttr) {
+                               RedirectAttributes rttr,
+                               Principal principal) {
         if (!"INSTRUCTOR".equals(role)) {
             throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
         }
 
         try {
-            courseService.modifyCourse(courseId, instructorLoginId, updateDTO, thumbnailFile);
+            courseService.modifyCourse(courseId, principal.getName(), updateDTO, thumbnailFile);
             rttr.addFlashAttribute("successMessage", "코스가 수정되었습니다.");
             return "redirect:/courses/" + courseId + "?role=INSTRUCTOR";
         } catch (IllegalArgumentException e) {
