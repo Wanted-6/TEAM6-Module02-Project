@@ -30,8 +30,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
     List<Member> findByMemberIdIn(List<Integer> memberIds);
 
-    // /admin/instructor 성능 개선 부분.
-    //    List<Member> findByRole(MemberRole role);
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.profile WHERE m.role = :role")
     List<Member> findByRole(@Param("role") MemberRole role);
 }

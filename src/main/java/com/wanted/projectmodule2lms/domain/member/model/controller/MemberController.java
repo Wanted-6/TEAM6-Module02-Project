@@ -122,15 +122,6 @@ public class MemberController {
         if (member.getRole() == MemberRole.STUDENT) {
             List<Enrollment> enrollments = enrollmentService.getMyEnrollments(memberId.intValue());
 
-            //코드 최적화 전.
-//            List<Map<String, Object>> courseList = enrollments.stream().map(enroll -> {
-//                Map<String, Object> map = new HashMap<>();
-//                map.put("enrollmentId", enroll.getEnrollmentId());
-//                String cName = courseService.getCourseNameById(enroll.getCourseId());
-//                map.put("courseName", cName != null ? cName : "알 수 없는 과목");
-//                return map;
-//            }).collect(Collectors.toList());
-
             List<Integer> courseIds = enrollments.stream()
                     .map(Enrollment::getCourseId)
                     .collect(Collectors.toList());
