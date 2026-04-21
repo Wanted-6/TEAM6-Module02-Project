@@ -1,7 +1,14 @@
 package com.wanted.projectmodule2lms.domain.course.service;
 
+import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
-import com.wanted.projectmodule2lms.domain.course.model.dto.*;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseAdminDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseAdminListDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseInstructorDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseStudentDTO;
+import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.course.model.entity.CourseApprovalStatus;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
@@ -10,6 +17,7 @@ import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
+import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.Resource;
@@ -32,11 +40,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CourseService {
 
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final MemberRepository memberRepository;
+    private final AssignmentRepository assignmentRepository;
     private final ModelMapper modelMapper;
     private final SectionRepository sectionRepository;
     private final ResourceLoader resourceLoader;
@@ -50,34 +60,7 @@ public class CourseService {
     }
 
     public List<CourseDTO> findAllCourses(String keyword, String category) {
-        String safeKeyword = normalizeKeyword(keyword);
-        String safeCategory = normalizeCategory(category);
-
-        List<Course> courseList;
-
-        if (safeKeyword != null && safeCategory != null) {
-            courseList = courseRepository
-                    .findByApprovalStatusNotAndTitleContainingAndCategoryContainingOrderByCourseIdDesc(
-                            CourseApprovalStatus.DELETED,
-                            safeKeyword,
-                            safeCategory
-                    );
-        } else if (safeKeyword != null) {
-            courseList = courseRepository
-                    .findByApprovalStatusNotAndTitleContainingOrderByCourseIdDesc(
-                            CourseApprovalStatus.DELETED,
-                            safeKeyword
-                    );
-        } else if (safeCategory != null) {
-            courseList = courseRepository
-                    .findByApprovalStatusNotAndCategoryContainingOrderByCourseIdDesc(
-                            CourseApprovalStatus.DELETED,
-                            safeCategory
-                    );
-        } else {
-            courseList = courseRepository
-                    .findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus.DELETED);
-        }
+        List<Course> courseList = findVisibleCourses(keyword, category);
 
         return courseList.stream()
                 .map(course -> modelMapper.map(course, CourseDTO.class))
@@ -89,13 +72,20 @@ public class CourseService {
     }
 
     public List<CourseDTO> findOpenCourses(String keyword, String category) {
-        List<CourseDTO> courseList = findAllCourses(keyword, category);
+        List<Course> courseList = findVisibleCourses(keyword, category);
+
+        List<Integer> courseIds = courseList.stream()
+                .map(Course::getCourseId)
+                .toList();
+
+        Set<Integer> completedCourseIds = findCompletedCourseIdSet(courseIds);
 
         return courseList.stream()
-                .filter(course -> CourseApprovalStatus.APPROVED.name().equals(course.getApprovalStatus()))
+                .filter(course -> course.getApprovalStatus() == CourseApprovalStatus.APPROVED)
                 .filter(course -> Boolean.TRUE.equals(course.getIsOpen()))
-                .filter(course -> sectionRepository.countByCourseId(course.getCourseId()) == 8)
-                .toList();
+                .filter(course -> completedCourseIds.contains(course.getCourseId()))
+                .map(course -> modelMapper.map(course, CourseDTO.class))
+                .collect(Collectors.toList());
     }
 
     public List<CourseDTO> findCoursesByInstructor(Integer instructorId) {
@@ -117,12 +107,39 @@ public class CourseService {
         String safeKeyword = normalizeKeyword(keyword);
         String safeCategory = normalizeCategory(category);
 
-        List<Course> courseList = courseRepository.findAllByInstructorIdOrderByCourseIdDesc(instructor.getMemberId());
+        List<Course> courseList;
+
+        if (safeKeyword != null && safeCategory != null) {
+            courseList = courseRepository
+                    .findByInstructorIdAndApprovalStatusNotAndTitleContainingAndCategoryOrderByCourseIdDesc(
+                            instructor.getMemberId(),
+                            CourseApprovalStatus.DELETED,
+                            safeKeyword,
+                            safeCategory
+                    );
+        } else if (safeKeyword != null) {
+            courseList = courseRepository
+                    .findByInstructorIdAndApprovalStatusNotAndTitleContainingOrderByCourseIdDesc(
+                            instructor.getMemberId(),
+                            CourseApprovalStatus.DELETED,
+                            safeKeyword
+                    );
+        } else if (safeCategory != null) {
+            courseList = courseRepository
+                    .findByInstructorIdAndApprovalStatusNotAndCategoryOrderByCourseIdDesc(
+                            instructor.getMemberId(),
+                            CourseApprovalStatus.DELETED,
+                            safeCategory
+                    );
+        } else {
+            courseList = courseRepository
+                    .findByInstructorIdAndApprovalStatusNotOrderByCourseIdDesc(
+                            instructor.getMemberId(),
+                            CourseApprovalStatus.DELETED
+                    );
+        }
 
         return courseList.stream()
-                .filter(course -> course.getApprovalStatus() != CourseApprovalStatus.DELETED)
-                .filter(course -> safeKeyword == null || course.getTitle().contains(safeKeyword))
-                .filter(course -> safeCategory == null || safeCategory.equals(course.getCategory()))
                 .map(course -> modelMapper.map(course, CourseDTO.class))
                 .collect(Collectors.toList());
     }
@@ -132,6 +149,10 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
 
         return modelMapper.map(foundCourse, CourseDTO.class);
+    }
+
+    public boolean hasAssignmentByCourseId(Integer courseId) {
+        return assignmentRepository.existsByCourseId(courseId);
     }
 
     public List<CourseStudentDTO> findStudentsByCourseId(Integer courseId) {
@@ -145,12 +166,7 @@ public class CourseService {
                 .map(Enrollment::getMemberId)
                 .toList();
 
-        List<Member> memberList = memberRepository.findByMemberIdIn(memberIds);
-
-        Map<Integer, Member> memberMap = new HashMap<>();
-        for (Member member : memberList) {
-            memberMap.put(member.getMemberId(), member);
-        }
+        Map<Integer, Member> memberMap = findMemberMapByIds(memberIds);
 
         List<CourseStudentDTO> studentList = new ArrayList<>();
 
@@ -314,10 +330,24 @@ public class CourseService {
     public List<CourseAdminListDTO> findAdminCourseList() {
         List<Course> courseList = courseRepository.findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus.DELETED);
 
+        if (courseList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Integer> instructorIds = courseList.stream()
+                .map(Course::getInstructorId)
+                .distinct()
+                .toList();
+
+        Map<Integer, Member> instructorMap = findMemberMapByIds(instructorIds);
+
         return courseList.stream()
                 .map(course -> {
-                    Member instructor = memberRepository.findById(course.getInstructorId())
-                            .orElseThrow(() -> new IllegalArgumentException("강사 정보가 존재하지 않습니다."));
+                    Member instructor = instructorMap.get(course.getInstructorId());
+
+                    if (instructor == null) {
+                        throw new IllegalArgumentException("강사 정보가 존재하지 않습니다.");
+                    }
 
                     return new CourseAdminListDTO(
                             course.getCourseId(),
@@ -336,18 +366,20 @@ public class CourseService {
 
         List<Integer> courseIds = enrollmentList.stream()
                 .map(Enrollment::getCourseId)
+                .distinct()
                 .toList();
 
         if (courseIds.isEmpty()) {
             return new ArrayList<>();
         }
 
-        List<Course> courseList = courseRepository.findAllById(courseIds);
+        List<Course> courseList = courseRepository.findByCourseIdIn(courseIds);
+        Set<Integer> completedCourseIds = findCompletedCourseIdSet(courseIds);
 
         return courseList.stream()
                 .filter(course -> course.getApprovalStatus() == CourseApprovalStatus.APPROVED)
                 .filter(course -> Boolean.TRUE.equals(course.getIsOpen()))
-                .filter(course -> sectionRepository.countByCourseId(course.getCourseId()) == 8)
+                .filter(course -> completedCourseIds.contains(course.getCourseId()))
                 .map(course -> modelMapper.map(course, CourseDTO.class))
                 .collect(Collectors.toList());
     }
@@ -383,61 +415,8 @@ public class CourseService {
         );
     }
 
-    private String normalizeKeyword(String keyword) {
-        return StringUtils.hasText(keyword) ? keyword.trim() : null;
-    }
-
-    private String normalizeCategory(String category) {
-        if (!StringUtils.hasText(category)) {
-            return null;
-        }
-
-        String trimmedCategory = category.trim();
-
-        for (String courseCategory : COURSE_CATEGORIES) {
-            if (courseCategory.equalsIgnoreCase(trimmedCategory)) {
-                return courseCategory;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean isValidCategory(String category) {
-        return normalizeCategory(category) != null;
-    }
-
     public List<String> getCourseCategories() {
         return new ArrayList<>(new LinkedHashSet<>(COURSE_CATEGORIES));
-    }
-
-    private String saveThumbnailFile(MultipartFile thumbnailFile) throws IOException {
-        if (thumbnailFile == null || thumbnailFile.isEmpty()) {
-            return null;
-        }
-
-        Resource resource = resourceLoader.getResource("classpath:static/img/course");
-        String filePath;
-
-        if (!resource.exists()) {
-            String root = "src/main/resources/static/img/course";
-            File file = new File(root);
-            file.mkdirs();
-            filePath = file.getAbsolutePath();
-        } else {
-            filePath = resourceLoader
-                    .getResource("classpath:static/img/course")
-                    .getFile()
-                    .getAbsolutePath();
-        }
-
-        String originFileName = thumbnailFile.getOriginalFilename();
-        String ext = originFileName.substring(originFileName.lastIndexOf("."));
-        String savedName = UUID.randomUUID().toString().replace("-", "") + ext;
-
-        thumbnailFile.transferTo(new File(filePath + "/" + savedName));
-
-        return "static/img/course/" + savedName;
     }
 
     public CourseAdminDTO findAdminCourseDetail(Integer courseId) {
@@ -475,10 +454,126 @@ public class CourseService {
         );
     }
 
-
     public String getCourseNameById(Integer courseId) {
         return courseRepository.findById(courseId)
                 .map(Course::getTitle)
                 .orElse(null);
+    }
+
+    private List<Course> findVisibleCourses(String keyword, String category) {
+        String safeKeyword = normalizeKeyword(keyword);
+        String safeCategory = normalizeCategory(category);
+
+        if (safeKeyword != null && safeCategory != null) {
+            return courseRepository
+                    .findByApprovalStatusNotAndTitleContainingAndCategoryContainingOrderByCourseIdDesc(
+                            CourseApprovalStatus.DELETED,
+                            safeKeyword,
+                            safeCategory
+                    );
+        }
+
+        if (safeKeyword != null) {
+            return courseRepository
+                    .findByApprovalStatusNotAndTitleContainingOrderByCourseIdDesc(
+                            CourseApprovalStatus.DELETED,
+                            safeKeyword
+                    );
+        }
+
+        if (safeCategory != null) {
+            return courseRepository
+                    .findByApprovalStatusNotAndCategoryContainingOrderByCourseIdDesc(
+                            CourseApprovalStatus.DELETED,
+                            safeCategory
+                    );
+        }
+
+        return courseRepository.findByApprovalStatusNotOrderByCourseIdDesc(CourseApprovalStatus.DELETED);
+    }
+
+    private Set<Integer> findCompletedCourseIdSet(List<Integer> courseIds) {
+        if (courseIds == null || courseIds.isEmpty()) {
+            return Set.of();
+        }
+
+        List<Section> sectionList = sectionRepository.findByCourseIdIn(courseIds);
+
+        Map<Integer, Long> sectionCountMap = sectionList.stream()
+                .collect(Collectors.groupingBy(Section::getCourseId, Collectors.counting()));
+
+        return sectionCountMap.entrySet().stream()
+                .filter(entry -> entry.getValue() == 8L)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    private Map<Integer, Member> findMemberMapByIds(List<Integer> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        List<Member> memberList = memberRepository.findByMemberIdIn(memberIds);
+
+        Map<Integer, Member> memberMap = new HashMap<>();
+        for (Member member : memberList) {
+            memberMap.put(member.getMemberId(), member);
+        }
+
+        return memberMap;
+    }
+
+    private String normalizeKeyword(String keyword) {
+        return StringUtils.hasText(keyword) ? keyword.trim() : null;
+    }
+
+    private String normalizeCategory(String category) {
+        if (!StringUtils.hasText(category)) {
+            return null;
+        }
+
+        String trimmedCategory = category.trim();
+
+        for (String courseCategory : COURSE_CATEGORIES) {
+            if (courseCategory.equalsIgnoreCase(trimmedCategory)) {
+                return courseCategory;
+            }
+        }
+
+        return null;
+    }
+
+    private String saveThumbnailFile(MultipartFile thumbnailFile) throws IOException {
+        if (thumbnailFile == null || thumbnailFile.isEmpty()) {
+            return null;
+        }
+
+        Resource resource = resourceLoader.getResource("classpath:static/img/course");
+        String filePath;
+
+        if (!resource.exists()) {
+            String root = "src/main/resources/static/img/course";
+            File file = new File(root);
+            file.mkdirs();
+            filePath = file.getAbsolutePath();
+        } else {
+            filePath = resourceLoader
+                    .getResource("classpath:static/img/course")
+                    .getFile()
+                    .getAbsolutePath();
+        }
+
+        String originFileName = thumbnailFile.getOriginalFilename();
+        String ext = "";
+
+        if (originFileName != null && originFileName.contains(".")) {
+            ext = originFileName.substring(originFileName.lastIndexOf("."));
+        }
+
+        String savedName = UUID.randomUUID().toString().replace("-", "") + ext;
+
+        thumbnailFile.transferTo(new File(filePath + "/" + savedName));
+
+        return "static/img/course/" + savedName;
     }
 }

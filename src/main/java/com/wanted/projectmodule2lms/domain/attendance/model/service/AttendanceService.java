@@ -93,7 +93,7 @@ public class AttendanceService {
     public AttendancePageDTO findAttendancePage(Integer memberId, Integer courseId, Integer sectionId) {
         CourseDTO course = courseService.findMyCourseDetail(memberId, courseId);
         SectionDTO section = sectionService.findMySectionDetail(memberId, courseId, sectionId);
-        List<SectionDTO> sectionList = sectionService.findMySections(memberId, courseId);
+        List<SectionDTO> sectionList = sectionService.findMySectionsForAttendance(memberId, courseId);
         AssignmentDTO assignment = assignmentRepository.findByCourseId(courseId)
                 .map(this::toAssignmentDTO)
                 .orElse(null);
