@@ -564,16 +564,11 @@ public class CourseService {
         }
 
         String originFileName = thumbnailFile.getOriginalFilename();
-        String ext = "";
-
-        if (originFileName != null && originFileName.contains(".")) {
-            ext = originFileName.substring(originFileName.lastIndexOf("."));
-        }
-
+        String ext = originFileName.substring(originFileName.lastIndexOf("."));
         String savedName = UUID.randomUUID().toString().replace("-", "") + ext;
 
         thumbnailFile.transferTo(new File(filePath + "/" + savedName));
 
-        return "static/img/course/" + savedName;
+        return "img/course/" + savedName;
     }
 }
