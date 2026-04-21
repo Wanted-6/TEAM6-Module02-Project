@@ -28,7 +28,6 @@ public class AuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         LoginMemberDTO loginMember = authDetails.getLoginMemberDTO();
         String username = authentication.getName();
 
-        // 로그인 실패 카운트 초기화 및 로그 저장
         memberService.resetLoginFailCount(username);
         loginLogService.saveLoginLog(username, true, request.getRemoteAddr());
 

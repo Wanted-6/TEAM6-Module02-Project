@@ -120,7 +120,11 @@ public class MemberController {
                 .orElseThrow(() -> new ResourceNotFoundException("??????嶺뚢돦堉??????怨룸????덈펲."));
 
         if (member.getRole() == MemberRole.STUDENT) {
-            List<Enrollment> enrollments = enrollmentService.getMyEnrollments(currentMemberId.intValue());
+
+
+
+            List<Enrollment> enrollments = enrollmentService.getMyEnrollments(memberId.intValue());
+
 
             List<Integer> courseIds = enrollments.stream()
                     .map(Enrollment::getCourseId)
