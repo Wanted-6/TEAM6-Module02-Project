@@ -7,6 +7,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 text-slate-800">
+
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/main}" class="text-2xl font-extrabold tracking-tight text-[#2b3f8f]">64Lab</a>
+
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 overflow-hidden rounded-full border border-slate-200 shadow-sm">
+                    <img th:src="${member != null and member.profile != null and member.profile.profileImage != null and member.profile.profileImage != '' ? '/uploads/' + member.profile.profileImage : '/img/default-profile.png'}"
+                         class="h-full w-full object-cover"
+                         onerror="this.src='/img/default-profile.png'">
+                </div>
+                <span class="hidden text-sm font-medium text-slate-600 sm:block">
+                    <strong class="text-[#2b3f8f]"
+                            th:text="${member != null and member.name != null ? member.name : #authentication.name}">사용자</strong>님, 환영합니다.
+                </span>
+            </div>
+
+            <form th:action="@{/auth/logout}" method="post" class="inline">
+                <button type="submit"
+                        class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[#2b3f8f] hover:text-[#2b3f8f]">
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
 <div class="max-w-4xl mx-auto px-6 py-10">
 
     <div class="flex items-center justify-between mb-8">
