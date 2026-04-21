@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EnrollmentController {
 
-    private static final String ALL_CATEGORY = "\uC804\uCCB4";
-    private static final String ENROLL_SUCCESS_MESSAGE = "수강신청이 완료되었습니다.";
+    private static final String ENROLL_SUCCESS_MESSAGE = "Enrollment completed.";
 
     private final EnrollmentService enrollmentService;
     private final CourseService courseService;
@@ -56,9 +55,6 @@ public class EnrollmentController {
         model.addAttribute("selectedCategory", category);
         model.addAttribute("enrolledCourseIds", enrolledCourseIds);
 
-        System.out.println("successMessage = " + model.getAttribute("successMessage"));
-        System.out.println("errorMessage = " + model.getAttribute("errorMessage"));
-
         return "student/enrollment/list";
     }
 
@@ -82,7 +78,6 @@ public class EnrollmentController {
         return "student/enrollment/detail";
     }
 
-
     @PostMapping
     public String enrollCourse(
             @LoginMemberId Long memberId,
@@ -93,12 +88,8 @@ public class EnrollmentController {
             return "redirect:/auth/login";
         }
 
-        try {
-            enrollmentService.enrollCourse(Math.toIntExact(memberId), request.getCourseId());
-            rttr.addFlashAttribute("successMessage", ENROLL_SUCCESS_MESSAGE);
-        } catch (IllegalArgumentException e) {
-            rttr.addFlashAttribute("errorMessage", e.getMessage());
-        }
+        enrollmentService.enrollCourse(Math.toIntExact(memberId), request.getCourseId());
+        rttr.addFlashAttribute("successMessage", ENROLL_SUCCESS_MESSAGE);
 
         return "redirect:/student/enrollments/courses";
     }

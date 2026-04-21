@@ -89,12 +89,11 @@ public class CourseService {
     }
 
     public List<CourseDTO> findOpenCourses(String keyword, String category) {
-        List<CourseDTO> courseList = findAllCourses(keyword, category);
+        String safeKeyword = normalizeKeyword(keyword);
+        String safeCategory = normalizeCategory(category);
 
-        return courseList.stream()
-                .filter(course -> CourseApprovalStatus.APPROVED.name().equals(course.getApprovalStatus()))
-                .filter(course -> Boolean.TRUE.equals(course.getIsOpen()))
-                .filter(course -> sectionRepository.countByCourseId(course.getCourseId()) == 8)
+        return courseRepository.findOpenEnrollmentCourses(safeKeyword, safeCategory).stream()
+                .map(course -> modelMapper.map(course, CourseDTO.class))
                 .toList();
     }
 
@@ -332,22 +331,15 @@ public class CourseService {
     }
 
     public List<CourseDTO> findMyCourses(Integer memberId) {
-        List<Enrollment> enrollmentList = enrollmentRepository.findByMemberId(memberId);
-
-        List<Integer> courseIds = enrollmentList.stream()
-                .map(Enrollment::getCourseId)
-                .toList();
+        List<Integer> courseIds = enrollmentRepository.findCourseIdsByMemberId(memberId);
 
         if (courseIds.isEmpty()) {
             return new ArrayList<>();
         }
 
-        List<Course> courseList = courseRepository.findAllById(courseIds);
+        List<Course> courseList = courseRepository.findAvailableCoursesByCourseIds(courseIds);
 
         return courseList.stream()
-                .filter(course -> course.getApprovalStatus() == CourseApprovalStatus.APPROVED)
-                .filter(course -> Boolean.TRUE.equals(course.getIsOpen()))
-                .filter(course -> sectionRepository.countByCourseId(course.getCourseId()) == 8)
                 .map(course -> modelMapper.map(course, CourseDTO.class))
                 .collect(Collectors.toList());
     }
