@@ -2,6 +2,7 @@ package com.wanted.projectmodule2lms.domain.board.model.service;
 
 import com.wanted.projectmodule2lms.domain.board.model.dao.BoardRepository;
 import com.wanted.projectmodule2lms.domain.board.model.dto.BoardDTO;
+import com.wanted.projectmodule2lms.domain.board.model.dto.BoardViewDTO;
 import com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus;
 import com.wanted.projectmodule2lms.domain.board.model.entity.Board;
 import com.wanted.projectmodule2lms.domain.board.model.entity.BoardType;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class BoardService {
+public class    BoardService {
 
     private final BoardRepository boardRepository;
     private final CourseRepository courseRepository;
@@ -38,32 +39,32 @@ public class BoardService {
     private final EnrollmentRepository enrollmentRepository;
     private final ModelMapper modelMapper;
 
-    public List<BoardDTO> findBoardByPostType(BoardType postType) {
-        return toBoardDTOList(boardRepository.findByPostTypeAndIsDeletedFalse(postType));
+    public List<BoardViewDTO> findBoardByPostType(BoardType postType) {
+        return toBoardViewDTOList(boardRepository.findByPostTypeAndIsDeletedFalse(postType));
     }
 
-    public List<BoardDTO> searchBoardByTitle(String title) {
-        return toBoardDTOList(boardRepository.findByTitleContainingAndIsDeletedFalse(title));
+    public List<BoardViewDTO> searchBoardByTitle(String title) {
+        return toBoardViewDTOList(boardRepository.findByTitleContainingAndIsDeletedFalse(title));
     }
 
-    public List<BoardDTO> searchBoardByPostTypeAndTitle(BoardType postType, String title) {
-        return toBoardDTOList(boardRepository.findByPostTypeAndTitleContainingAndIsDeletedFalse(postType, title));
+    public List<BoardViewDTO> searchBoardByPostTypeAndTitle(BoardType postType, String title) {
+        return toBoardViewDTOList(boardRepository.findByPostTypeAndTitleContainingAndIsDeletedFalse(postType, title));
     }
 
-    public List<BoardDTO> findVisibleSectionQna(Integer currentMemberId, MemberRole currentRole, String keyword) {
+    public List<BoardViewDTO> findVisibleSectionQna(Integer currentMemberId, MemberRole currentRole, String keyword) {
         List<Board> boards = (keyword == null || keyword.isBlank())
                 ? boardRepository.findByPostTypeAndIsDeletedFalse(BoardType.SECTION_QNA)
                 : boardRepository.findByPostTypeAndTitleContainingAndIsDeletedFalse(BoardType.SECTION_QNA, keyword);
 
         Set<Integer> allowedCourseIds = getAllowedCourseIdsForSectionQna(currentMemberId, currentRole);
 
-        return toBoardDTOList(boards.stream()
+        return toBoardViewDTOList(boards.stream()
                 .filter(board -> board.getCourseId() != null && allowedCourseIds.contains(board.getCourseId()))
                 .collect(Collectors.toList()));
     }
 
-    public BoardDTO findBoardById(Integer postId) {
-        return toBoardDTO(findActiveBoard(postId));
+    public BoardViewDTO findBoardById(Integer postId) {
+        return toBoardDetailViewDTO(findActiveBoard(postId));
     }
 
     public List<Course> findAllCourses() {
@@ -107,23 +108,12 @@ public class BoardService {
     @Transactional
     public Integer registBoard(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
         if (!canCreateBoard(currentRole, boardDTO.getPostType())) {
-            throw new IllegalArgumentException("해당 게시판에 글을 등록할 권한이 없습니다.");
+            throw new IllegalArgumentException("등록 권한이 없습니다.");
         }
 
-        normalizeBoardDTO(boardDTO, currentMemberId, currentRole);
+        BoardDTO normalizedBoardDTO = normalizeBoardDTO(boardDTO, currentMemberId, currentRole);
+        Board board = modelMapper.map(normalizedBoardDTO, Board.class);
 
-        Board board = Board.builder()
-                .memberId(boardDTO.getMemberId())
-                .courseId(boardDTO.getCourseId())
-                .sectionId(boardDTO.getSectionId())
-                .title(boardDTO.getTitle())
-                .content(boardDTO.getContent())
-                .postType(boardDTO.getPostType())
-                .isSecret(boardDTO.getIsSecret())
-                .answerStatus(boardDTO.getAnswerStatus())
-                .viewCount(boardDTO.getViewCount())
-                .isDeleted(boardDTO.getIsDeleted())
-                .build();
 
         boardRepository.save(board);
         return board.getPostId();
@@ -141,11 +131,18 @@ public class BoardService {
         Integer sectionId = resolveModifiedSectionId(board, boardDTO, currentMemberId, currentRole);
         Boolean isSecret = resolveModifiedSecret(board, boardDTO);
         AnswerStatus answerStatus = resolveModifiedAnswerStatus(board, boardDTO);
+        String title = boardDTO.getTitle();
+
+        if (board.getPostType() == BoardType.SECTION_QNA) {
+            Section section = sectionRepository.findById(sectionId)
+                    .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
+            title = formatSectionQnaTitle(section.getTitle(), boardDTO.getTitle());
+        }
 
         board.modifyBoard(
                 courseId,
                 sectionId,
-                boardDTO.getTitle(),
+                title,
                 boardDTO.getContent(),
                 board.getPostType(),
                 isSecret,
@@ -166,38 +163,66 @@ public class BoardService {
 
     public Board findActiveBoard(Integer postId) {
         return boardRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않거나 삭제되었습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
     }
 
-    private void normalizeBoardDTO(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
-        boardDTO.setMemberId(currentMemberId);
-        boardDTO.setViewCount(0);
-        boardDTO.setIsDeleted(false);
+    private BoardDTO normalizeBoardDTO(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
+        Integer memberId = currentMemberId;
+        Integer viewCount = 0;
+        Boolean isDeleted = false;
+
+        Integer courseId = boardDTO.getCourseId();
+        Integer sectionId = boardDTO.getSectionId();
+        Boolean isSecret = boardDTO.getIsSecret();
+        AnswerStatus answerStatus = boardDTO.getAnswerStatus();
+        String title = boardDTO.getTitle();
 
         if (boardDTO.getPostType() == BoardType.ADMIN_NOTICE || boardDTO.getPostType() == BoardType.FREE) {
-            boardDTO.setCourseId(null);
-            boardDTO.setSectionId(null);
-            boardDTO.setIsSecret(false);
-            boardDTO.setAnswerStatus(null);
-            return;
+            courseId = null;
+            sectionId = null;
+            isSecret = false;
+            answerStatus = null;
+        } else if (boardDTO.getPostType() == BoardType.COURSE_NOTICE) {
+            if (courseId == null) {
+                throw new IllegalArgumentException("코스를 선택해야 합니다.");
+            }
+            if (!isInstructorCourse(courseId, currentMemberId)) {
+                throw new IllegalArgumentException("해당 코스만 공지를 등록할 수 있습니다.");
+            }
+
+            sectionId = null;
+            isSecret = false;
+            answerStatus = null;
+        } else {
+            validateSectionQnaAccess(courseId, sectionId, currentMemberId, currentRole, true);
+            Section section = sectionRepository.findById(sectionId)
+                    .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
+
+            title = formatSectionQnaTitle(section.getTitle(), title);
+            isSecret = Boolean.TRUE.equals(isSecret);
+            answerStatus = AnswerStatus.PENDING;
         }
 
-        if (boardDTO.getPostType() == BoardType.COURSE_NOTICE) {
-            if (boardDTO.getCourseId() == null) {
-                throw new IllegalArgumentException("코스 공지는 코스를 선택해야 합니다.");
-            }
-            if (!isInstructorCourse(boardDTO.getCourseId(), currentMemberId)) {
-                throw new IllegalArgumentException("현재 강사가 담당하는 코스만 공지 등록이 가능합니다.");
-            }
-            boardDTO.setSectionId(null);
-            boardDTO.setIsSecret(false);
-            boardDTO.setAnswerStatus(null);
-            return;
-        }
-
-        validateSectionQnaAccess(boardDTO.getCourseId(), boardDTO.getSectionId(), currentMemberId, currentRole, true);
-        boardDTO.setIsSecret(Boolean.TRUE.equals(boardDTO.getIsSecret()));
-        boardDTO.setAnswerStatus(AnswerStatus.PENDING);
+        return new BoardDTO(
+                boardDTO.getPostId(),
+                memberId,
+                boardDTO.getMemberName(),
+                courseId,
+                boardDTO.getCourseTitle(),
+                boardDTO.getCourseInstructorId(),
+                sectionId,
+                boardDTO.getSectionTitle(),
+                title,
+                boardDTO.getContent(),
+                boardDTO.getPostType(),
+                isSecret,
+                answerStatus,
+                viewCount,
+                isDeleted,
+                boardDTO.getCreatedAt(),
+                boardDTO.getUpdatedAt(),
+                boardDTO.getProfileImage()
+        );
     }
 
     private boolean needsCourseId(BoardType postType) {
@@ -210,11 +235,11 @@ public class BoardService {
         }
 
         if (boardDTO.getCourseId() == null) {
-            throw new IllegalArgumentException("코스 정보가 필요한 게시글입니다.");
+            throw new IllegalArgumentException("코스 정보가 없는 게시글입니다.");
         }
 
         if (board.getPostType() == BoardType.COURSE_NOTICE && !isInstructorCourse(boardDTO.getCourseId(), currentMemberId)) {
-            throw new IllegalArgumentException("현재 강사가 담당하는 코스만 공지 수정이 가능합니다.");
+            throw new IllegalArgumentException("담당 코스 공지만 수정할 수 있습니다.");
         }
 
         if (board.getPostType() == BoardType.SECTION_QNA) {
@@ -222,7 +247,7 @@ public class BoardService {
         }
 
         if (board.getPostType() == BoardType.SECTION_QNA && !boardDTO.getCourseId().equals(board.getCourseId())) {
-            throw new IllegalArgumentException("섹션 Q&A는 코스 정보를 변경할 수 없습니다.");
+            throw new IllegalArgumentException("섹션 Q&A의 코스는 변경할 수 없습니다.");
         }
 
         return boardDTO.getCourseId();
@@ -234,13 +259,13 @@ public class BoardService {
         }
 
         if (boardDTO.getSectionId() == null) {
-            throw new IllegalArgumentException("섹션 Q&A는 섹션 정보를 입력해야 합니다.");
+            throw new IllegalArgumentException("섹션을 선택해야 합니다.");
         }
 
         validateSectionQnaAccess(board.getCourseId(), boardDTO.getSectionId(), currentMemberId, currentRole, false);
 
         if (!boardDTO.getSectionId().equals(board.getSectionId())) {
-            throw new IllegalArgumentException("섹션 Q&A는 섹션 정보를 변경할 수 없습니다.");
+            throw new IllegalArgumentException("섹션 Q&A의 섹션은 변경할 수 없습니다.");
         }
 
         return boardDTO.getSectionId();
@@ -337,64 +362,115 @@ public class BoardService {
                                           MemberRole currentRole,
                                           boolean isCreate) {
         if (courseId == null || sectionId == null) {
-            throw new IllegalArgumentException("섹션 Q&A는 코스와 섹션 정보를 모두 입력해야 합니다.");
+            throw new IllegalArgumentException("코스와 섹션을 모두 선택해야 합니다.");
         }
 
         Set<Integer> allowedCourseIds = getAllowedCourseIdsForSectionQna(currentMemberId, currentRole);
         if (!allowedCourseIds.contains(courseId)) {
             throw new IllegalArgumentException(isCreate
-                    ? "현재 사용자가 접근 가능한 코스에서만 질문을 등록할 수 있습니다."
-                    : "현재 사용자가 접근 가능한 코스의 질문만 수정할 수 있습니다.");
+                    ? "수강 중인 코스에만 섹션 질문을 등록할 수 있습니다."
+                    : "수강 중인 코스의 섹션 질문만 수정할 수 있습니다.");
         }
 
         Section section = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 섹션입니다."));
 
         if (!section.getCourseId().equals(courseId)) {
-            throw new IllegalArgumentException("선택한 섹션은 해당 코스에 속하지 않습니다.");
+            throw new IllegalArgumentException("선택한 섹션이 해당 코스에 속하지 않습니다.");
         }
     }
 
-    private BoardDTO toBoardDTO(Board board) {
-        return toBoardDTO(
-                board,
-                loadMemberNameMap(Collections.singletonList(board)),
-                loadCourseTitleMap(Collections.singletonList(board)),
-                loadCourseInstructorMap(Collections.singletonList(board)),
-                loadSectionTitleMap(Collections.singletonList(board))
+    private BoardViewDTO toBoardDetailViewDTO(Board board) {
+        Member member = memberRepository.findById(board.getMemberId()).orElse(null);
+
+        Course course = null;
+        if (board.getCourseId() != null) {
+            course = courseRepository.findById(board.getCourseId()).orElse(null);
+        }
+
+        Section section = null;
+        if (board.getSectionId() != null) {
+            section = sectionRepository.findById(board.getSectionId()).orElse(null);
+        }
+
+        return new BoardViewDTO(
+                board.getPostId(),
+                board.getMemberId(),
+                member != null ? member.getName() : null,
+                board.getCourseId(),
+                course != null ? course.getTitle() : null,
+                course != null ? course.getInstructorId() : null,
+                board.getSectionId(),
+                section != null ? section.getTitle() : null,
+                board.getTitle(),
+                board.getContent(),
+                board.getPostType(),
+                board.getIsSecret(),
+                board.getAnswerStatus(),
+                board.getViewCount(),
+                board.getIsDeleted(),
+                board.getCreatedAt(),
+                board.getUpdatedAt(),
+                member != null && member.getProfile() != null ? member.getProfile().getProfileImage() : null
         );
     }
 
-    private List<BoardDTO> toBoardDTOList(List<Board> boards) {
+    private List<BoardViewDTO> toBoardViewDTOList(List<Board> boards) {
         Map<Integer, String> memberNameMap = loadMemberNameMap(boards);
+        Map<Integer, String> memberProfileImageMap = loadMemberProfileImageMap(boards);
         Map<Integer, String> courseTitleMap = loadCourseTitleMap(boards);
         Map<Integer, Integer> courseInstructorMap = loadCourseInstructorMap(boards);
         Map<Integer, String> sectionTitleMap = loadSectionTitleMap(boards);
 
         return boards.stream()
-                .map(board -> toBoardDTO(board, memberNameMap, courseTitleMap, courseInstructorMap, sectionTitleMap))
+                .map(board -> toBoardViewDTO(board, memberNameMap, memberProfileImageMap, courseTitleMap, courseInstructorMap, sectionTitleMap))
                 .collect(Collectors.toList());
     }
 
-    private BoardDTO toBoardDTO(Board board,
-                                Map<Integer, String> memberNameMap,
-                                Map<Integer, String> courseTitleMap,
-                                Map<Integer, Integer> courseInstructorMap,
-                                Map<Integer, String> sectionTitleMap) {
-        BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
-        boardDTO.setMemberName(resolveMemberName(board.getMemberId(), memberNameMap));
+    private BoardViewDTO toBoardViewDTO(Board board,
+                                        Map<Integer, String> memberNameMap,
+                                        Map<Integer, String> memberProfileImageMap,
+                                        Map<Integer, String> courseTitleMap,
+                                        Map<Integer, Integer> courseInstructorMap,
+                                        Map<Integer, String> sectionTitleMap) {
 
+        String memberName = resolveMemberName(board.getMemberId(), memberNameMap);
+        String profileImage = resolveMemberProfileImage(board.getMemberId(), memberProfileImageMap);
+
+        String courseTitle = null;
+        Integer courseInstructorId = null;
         if (board.getCourseId() != null) {
-            boardDTO.setCourseTitle(resolveCourseTitle(board.getCourseId(), courseTitleMap));
-            boardDTO.setCourseInstructorId(resolveCourseInstructorId(board.getCourseId(), courseInstructorMap));
+            courseTitle = resolveCourseTitle(board.getCourseId(), courseTitleMap);
+            courseInstructorId = resolveCourseInstructorId(board.getCourseId(), courseInstructorMap);
         }
 
+        String sectionTitle = null;
         if (board.getSectionId() != null) {
-            boardDTO.setSectionTitle(resolveSectionTitle(board.getSectionId(), sectionTitleMap));
+            sectionTitle = resolveSectionTitle(board.getSectionId(), sectionTitleMap);
         }
 
-        return boardDTO;
+        return new BoardViewDTO(
+                board.getPostId(),
+                board.getMemberId(),
+                memberName,
+                board.getCourseId(),
+                courseTitle,
+                courseInstructorId,
+                board.getSectionId(),
+                sectionTitle,
+                board.getTitle(),
+                board.getContent(),
+                board.getPostType(),
+                board.getIsSecret(),
+                board.getAnswerStatus(),
+                board.getViewCount(),
+                board.getIsDeleted(),
+                board.getCreatedAt(),
+                board.getUpdatedAt(),
+                profileImage
+        );
     }
+
 
     private Map<Integer, String> loadMemberNameMap(List<Board> boards) {
         Set<Integer> memberIds = boards.stream()
@@ -407,6 +483,22 @@ public class BoardService {
 
         return memberRepository.findAllById(memberIds).stream()
                 .collect(Collectors.toMap(Member::getMemberId, Member::getName));
+    }
+
+    private Map<Integer, String> loadMemberProfileImageMap(List<Board> boards) {
+        Set<Integer> memberIds = boards.stream()
+                .map(Board::getMemberId)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        if (memberIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return memberRepository.findAllById(memberIds).stream()
+                .collect(Collectors.toMap(
+                        Member::getMemberId,
+                        member -> member.getProfile() != null ? member.getProfile().getProfileImage() : null
+                ));
     }
 
     private Map<Integer, String> loadCourseTitleMap(List<Board> boards) {
@@ -453,21 +545,29 @@ public class BoardService {
 
     private String resolveMemberName(Integer memberId, Map<Integer, String> memberNameMap) {
         if (memberId == null) {
-            throw new IllegalStateException("게시글 작성자 정보가 비어 있습니다.");
+            throw new IllegalStateException("게시글 작성자 정보가 없습니다.");
         }
 
         String memberName = memberNameMap.get(memberId);
         if (memberName == null) {
-            throw new IllegalStateException("게시글 작성자 정보를 찾을 수 없습니다. memberId=" + memberId);
+            throw new IllegalStateException("작성자 이름을 찾을 수 없습니다. memberId=" + memberId);
         }
 
         return memberName;
     }
 
+    private String resolveMemberProfileImage(Integer memberId, Map<Integer, String> memberProfileImageMap) {
+        if (memberId == null) {
+            return null;
+        }
+
+        return memberProfileImageMap.get(memberId);
+    }
+
     private String resolveCourseTitle(Integer courseId, Map<Integer, String> courseTitleMap) {
         String courseTitle = courseTitleMap.get(courseId);
         if (courseTitle == null) {
-            throw new IllegalStateException("게시글 코스 정보를 찾을 수 없습니다. courseId=" + courseId);
+            throw new IllegalStateException("코스 제목을 찾을 수 없습니다. courseId=" + courseId);
         }
 
         return courseTitle;
@@ -476,7 +576,7 @@ public class BoardService {
     private Integer resolveCourseInstructorId(Integer courseId, Map<Integer, Integer> courseInstructorMap) {
         Integer courseInstructorId = courseInstructorMap.get(courseId);
         if (courseInstructorId == null) {
-            throw new IllegalStateException("게시글 코스 담당 강사 정보를 찾을 수 없습니다. courseId=" + courseId);
+            throw new IllegalStateException("코스 강사 정보를 찾을 수 없습니다. courseId=" + courseId);
         }
 
         return courseInstructorId;
@@ -485,14 +585,39 @@ public class BoardService {
     private String resolveSectionTitle(Integer sectionId, Map<Integer, String> sectionTitleMap) {
         String sectionTitle = sectionTitleMap.get(sectionId);
         if (sectionTitle == null) {
-            throw new IllegalStateException("게시글 섹션 정보를 찾을 수 없습니다. sectionId=" + sectionId);
+            throw new IllegalStateException("섹션 제목을 찾을 수 없습니다. sectionId=" + sectionId);
         }
 
         return sectionTitle;
     }
+
+    private String formatSectionQnaTitle(String sectionTitle, String rawTitle) {
+        String normalizedTitle = rawTitle == null ? "" : rawTitle.trim();
+        String prefix = "[" + sectionTitle + "] ";
+
+        if (normalizedTitle.startsWith("[")) {
+            int closingIndex = normalizedTitle.indexOf(']');
+            if (closingIndex >= 0 && normalizedTitle.length() > closingIndex + 1) {
+                normalizedTitle = normalizedTitle.substring(closingIndex + 1).trim();
+            }
+        }
+
+        return prefix + normalizedTitle;
+    }
+
     @Transactional
     public void increaseViewCount(Integer postId) {
-        Board boad = findActiveBoard(postId);
-        boad.increasedViewCount();
+        Board board = findActiveBoard(postId);
+        board.increasedViewCount();
     }
- }
+
+    @Transactional
+    public void changeAnswerStatusToAnswered(Integer postId) {
+        Board board = findActiveBoard(postId);
+
+        if (board.getPostType() != BoardType.SECTION_QNA) {
+            return;
+        }
+        board.changeAnswerStatus(AnswerStatus.ANSWERED);
+    }
+}

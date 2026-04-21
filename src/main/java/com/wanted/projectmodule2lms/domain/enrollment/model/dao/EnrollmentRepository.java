@@ -3,6 +3,7 @@ package com.wanted.projectmodule2lms.domain.enrollment.model.dao;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.EnrollmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,5 +27,11 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     long countByMemberIdAndStatus(Integer memberId, EnrollmentStatus status);
 
     long countByCourseIdAndStatus(Integer courseId, EnrollmentStatus status);
+
+    boolean existsByMemberId(Integer memberId);
+
+    @Query("select e.courseId from Enrollment e where e.memberId = :memberId")
+    List<Integer> findCourseIdsByMemberId(Integer memberId);
+
 }
 

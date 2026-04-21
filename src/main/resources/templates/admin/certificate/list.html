@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>64Lab | 수료증 신청 목록</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { headline: ['Manrope', 'sans-serif'], body: ['Noto Sans KR', 'sans-serif'] },
+                    colors: { brand: '#2b3f8f', brandSoft: '#edf2ff', ink: '#1b2540', line: '#dbe3f1' },
+                    boxShadow: { soft: '0 18px 40px rgba(43, 63, 143, 0.08)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background: linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-ink">
+
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
+
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="h-9 w-9 overflow-hidden rounded-full border border-slate-200">
+                    <img class="profile-sync h-full w-full object-cover"
+                         th:src="${member != null and member.profile != null and member.profile.profileImage != null and member.profile.profileImage != '' and member.profile.profileImage != 'default-profile.png'} ? '/uploads/' + ${member.profile.profileImage} + '?t=' + ${#dates.createNow().getTime()} : '/img/default-profile.png'"
+                         onerror="this.src='/img/default-profile.png'">
+                </div>
+                <span class="text-sm font-medium text-slate-700">
+                    <strong class="font-bold text-brand" th:text="${member != null ? member.name : #authentication.name}">관리자1</strong>님, 환영합니다.
+                </span>
+            </div>
+            <form th:action="@{/auth/logout}" th:method="post" class="inline">
+                <button type="submit" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[0.25em] text-brand">Certificate Admin</p>
+                <h1 class="mt-2 font-headline text-3xl font-extrabold tracking-tight text-ink">수료증 신청 목록</h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                    학생이 신청한 수료증 요청 내역을 확인하는 화면입니다. 승인 대기 상태인 요청은 바로 승인 처리할 수 있습니다.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="overflow-hidden rounded-[28px] border border-line bg-white shadow-soft"
+             th:if="${certificateList != null and !#lists.isEmpty(certificateList)}">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-line">
+                    <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">학생</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">이메일</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">코스</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">총점</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">상태</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">신청일</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500">처리</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-line">
+                    <tr th:each="certificate : ${certificateList}" class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-6 py-5">
+                            <div class="font-bold text-ink" th:text="${certificate.studentName}">김학생</div>
+                            <div class="mt-1 text-xs text-slate-500" th:text="|회원번호 ${certificate.memberId}|">회원번호 1</div>
+                        </td>
+                        <td class="px-6 py-5 text-sm font-medium text-slate-600" th:text="${certificate.studentEmail}">student1@test.com</td>
+                        <td class="px-6 py-5">
+                            <div class="font-bold text-brand" th:text="${certificate.courseTitle}">Spring Boot 입문</div>
+                            <div class="mt-1 text-xs text-slate-500" th:text="|코스번호 ${certificate.courseId}|">코스번호 1</div>
+                        </td>
+                        <td class="px-6 py-5 text-sm font-bold text-ink" th:text="|${certificate.totalScore}점|">88점</td>
+                        <td class="px-6 py-5">
+                            <span th:if="${certificate.status == 'REQUESTED'}"
+                                  class="inline-flex rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-600 border border-amber-200">
+                                승인 대기
+                            </span>
+                            <span th:if="${certificate.status == 'APPROVED'}"
+                                  class="inline-flex rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-200">
+                                승인 완료
+                            </span>
+                            <span th:if="${certificate.status == 'ISSUED'}"
+                                  class="inline-flex rounded-xl bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 border border-blue-200">
+                                발급 완료
+                            </span>
+                            <span th:if="${certificate.status == 'REVOKED'}"
+                                  class="inline-flex rounded-xl bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 border border-red-200">
+                                회수됨
+                            </span>
+                        </td>
+                        <td class="px-6 py-5 text-sm text-slate-500 font-medium" th:text="${certificate.requestedAt}">2026-04-17T15:00</td>
+                        <td class="px-6 py-5">
+                            <form th:if="${certificate.status == 'REQUESTED'}"
+                                  th:action="@{/admin/certificates/{certificateId}/approve(certificateId=${certificate.certificateId})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="rounded-xl bg-[#2563eb] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#1d4ed8]">
+                                    승인
+                                </button>
+                            </form>
+
+                            <button th:if="${certificate.status != 'REQUESTED'}"
+                                    type="button"
+                                    class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-400"
+                                    disabled>
+                                처리 완료
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div th:if="${certificateList == null or #lists.isEmpty(certificateList)}"
+             class="rounded-[28px] border border-dashed border-line bg-white px-8 py-20 text-center text-slate-500 shadow-sm">
+            <p class="text-lg font-bold text-ink">수료증 신청 내역이 없습니다.</p>
+            <p class="mt-2 text-sm font-medium">학생이 수료증 발급을 신청하면 이 화면에 목록이 표시됩니다.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>

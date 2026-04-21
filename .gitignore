@@ -1,3 +1,6 @@
+# Secret Files
+application-secret.yml
+
 HELP.md
 .gradle
 build/

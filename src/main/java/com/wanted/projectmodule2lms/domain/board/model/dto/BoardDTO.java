@@ -34,4 +34,5 @@ public class BoardDTO {
     private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String profileImage;
 }

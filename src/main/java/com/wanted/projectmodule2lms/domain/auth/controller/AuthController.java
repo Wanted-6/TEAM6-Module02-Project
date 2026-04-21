@@ -23,31 +23,24 @@ public class AuthController {
     @GetMapping("/fail")
     public ModelAndView loginFail(HttpSession session, ModelAndView mv) {
 
-        // 1. 세션 금고에서 에러 메시지 꺼내기
         String message = (String) session.getAttribute("errorMessage");
 
-        // 2. 꺼낸 뒤에는 금고에서 바로 지워버리기 (새로고침 했을 때 계속 남아있지 않도록!)
         if (message != null) {
             session.removeAttribute("errorMessage");
         } else {
-            // 혹시라도 그냥 주소창에 /auth/fail을 직접 치고 들어온 사람을 위한 기본 메시지
             message = "아이디 또는 비밀번호를 확인해주세요.";
         }
 
-        // 3. 화면으로 전달
         mv.addObject("message", message);
-        mv.setViewName("auth/fail"); // 맨 앞의 '/'는 빼는 게 타임리프 경로 찾기에 더 좋아!
+        mv.setViewName("auth/fail");
         return mv;
     }
 
-
-
-    // 아이디 찾기
     @GetMapping("/find-id")
     public String findIdPage() {
         return "auth/find-id";
     }
-    @AuditLog
+
     @PostMapping("/find-id")
     @ResponseBody
     public ResponseEntity<String> findIdProcess(@RequestParam String name, @RequestParam String email) {
@@ -60,13 +53,11 @@ public class AuthController {
         }
     }
 
-    // 비밀번호 찾기
     @GetMapping("/find-pw")
     public String findPwPage() {
         return "auth/find-pw";
     }
 
-    @AuditLog
     @PostMapping("/find-pw")
     @ResponseBody
     public ResponseEntity<String> findPwProcess(@RequestParam String loginId, @RequestParam String email) {

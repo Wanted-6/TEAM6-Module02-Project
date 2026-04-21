@@ -3,6 +3,7 @@ package com.wanted.projectmodule2lms.domain.section.controller;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionCreateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ public class SectionController {
     private final SectionService sectionService;
 
     /* 특정 코스의 섹션 목록 조회 */
+    @AuditLog
     @GetMapping("/courses/{courseId}/sections")
     public ModelAndView findSectionsByCourse(@PathVariable Integer courseId, ModelAndView mv) {
         mv.addObject("courseId", courseId);
@@ -47,12 +49,13 @@ public class SectionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/sections/regist";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "섹션 등록 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "섹션 등록 중 처리할 수 없는 문제가 발생했습니다.");
             return "redirect:/courses/" + courseId + "/sections/regist";
         }
     }
 
     /* 섹션 상세 조회 */
+    @AuditLog
     @GetMapping("/sections/{sectionId}")
     public ModelAndView findSectionById(@PathVariable Integer sectionId, ModelAndView mv) {
         mv.addObject("section", sectionService.findSectionById(sectionId));
@@ -74,7 +77,7 @@ public class SectionController {
                                 @ModelAttribute SectionUpdateDTO updateDTO,
                                 @RequestParam(value = "materialUpload", required = false) MultipartFile materialUpload,
                                 RedirectAttributes rttr) {
-        Integer courseId = sectionService.findSectionById(sectionId).getCourseId();
+        Integer courseId = sectionService.findCourseIdBySectionId(sectionId);
 
         try {
             sectionService.modifySection(sectionId, updateDTO, materialUpload);
@@ -84,7 +87,7 @@ public class SectionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/sections/" + sectionId + "/modify";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "섹션 수정 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "섹션 수정 중 처리할 수 없는 문제가 발생했습니다.");
             return "redirect:/sections/" + sectionId + "/modify";
         }
     }
@@ -93,7 +96,7 @@ public class SectionController {
     @PostMapping("/sections/{sectionId}/delete")
     public String deleteSection(@PathVariable Integer sectionId,
                                 RedirectAttributes rttr) {
-        Integer courseId = sectionService.findSectionById(sectionId).getCourseId();
+        Integer courseId = sectionService.findCourseIdBySectionId(sectionId);
 
         try {
             sectionService.deleteSection(sectionId);

@@ -1,0 +1,460 @@
+﻿<!DOCTYPE html>
+<html class="light" lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>출석하기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#a93802",
+                        secondary: "#515f74",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#0040a1",
+                        "surface-bright": "#f7f9fb",
+                        "on-background": "#191c1e",
+                        "on-surface": "#191c1e",
+                        outline: "#737785",
+                        tertiary: "#822800",
+                        "inverse-primary": "#b2c5ff",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#0056d2",
+                        error: "#ba1a1a",
+                        surface: "#f7f9fb",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed": "#d5e3fc",
+                        "surface-container": "#eceef0",
+                        "primary-fixed": "#dae2ff",
+                        "tertiary-fixed": "#ffdbcf",
+                        "on-secondary-container": "#57657a",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-container-high": "#e6e8ea",
+                        "surface-container-low": "#f2f4f6",
+                        background: "#f7f9fb",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-fixed-dim": "#ffb59b",
+                        "on-surface-variant": "#424654",
+                        "on-primary-fixed": "#001847",
+                        "surface-tint": "#0056d2",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#812800",
+                        "outline-variant": "#c3c6d6",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary-container": "#ffcebd",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "surface-variant": "#e0e3e5",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#d5e3fc",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#380d00",
+                        primary: "#0040a1",
+                        "on-primary-container": "#ccd8ff",
+                        "primary-fixed-dim": "#b2c5ff"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Manrope"],
+                        body: ["Inter"],
+                        label: ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" th:href="@{/css/attendance/attendance.css}" href="/css/attendance/attendance.css"/>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<div th:replace="~{common/topbar :: topbar}"></div>
+
+<aside class="fixed left-0 top-[81px] h-[calc(100vh-81px)] w-64 bg-[#f2f4f6] flex flex-col p-6 space-y-8 hidden lg:flex">
+    <div>
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+                <span class="material-symbols-outlined">school</span>
+            </div>
+            <div>
+                <h2 class="text-lg font-black text-[#0056D2]">64Lab</h2>
+                <p class="text-[0.6875rem] font-medium uppercase tracking-wider text-on-surface-variant">학습 갤러리</p>
+            </div>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-2">
+        <a class="flex items-center gap-3 px-4 py-3 bg-white text-[#0056D2] rounded-lg shadow-sm font-semibold text-sm transition-all" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span> 강의실</a>
+    </nav>
+</aside>
+
+<main class="lg:ml-64 min-h-screen">
+    <div class="max-w-[1440px] mx-auto p-8 space-y-8">
+        <section class="bg-surface-container-lowest rounded-xl p-8 relative overflow-hidden border border-outline-variant/10">
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                    <div>
+                        <nav class="flex items-center gap-2 text-on-surface-variant text-sm mb-2">
+                            <span>내 강의실</span>
+                            <span class="material-symbols-outlined text-xs">chevron_right</span>
+                            <span th:text="${attendancePage.course.title}">코스 제목</span>
+                        </nav>
+                        <h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2"
+                            th:text="${attendancePage.section.title}">섹션 제목</h1>
+                        <p class="text-on-surface-variant max-w-xl"
+                           th:text="${attendancePage.course.description}">코스 설명</p>
+                    </div>
+                    <div class="min-w-[280px] space-y-3">
+                        <a th:href="@{/main}"
+                           class="inline-flex items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-5 py-3 text-sm font-bold text-on-surface shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white">
+                            <span class="material-symbols-outlined mr-2 text-base">home</span>
+                            메인페이지
+                        </a>
+                        <div class="rounded-xl bg-secondary-container px-4 py-3 text-on-secondary-container">
+                            <div class="flex items-center gap-2 font-semibold">
+                                <span class="material-symbols-outlined text-sm">schedule</span>
+                                <span class="text-sm" th:text="${attendancePage.section.openDate}">2026-03-17</span>
+                            </div>
+                            <div class="mt-3 space-y-2">
+                                <label class="block text-xs font-bold uppercase">테스트 기준 일시</label>
+                                <input class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm text-on-surface"
+                                       id="attendanceCheckAtInput"
+                                       type="datetime-local"
+                                       th:value="|${attendancePage.section.openDate}T00:00|"/>
+                                <p class="text-[11px] text-on-surface-variant">이 값을 바꾸면 출석, 지각, 결석 예정 상태를 직접 테스트할 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-on-surface-variant">
+                            <span>출석</span>
+                            <span th:text="|${attendancePage.attendanceScore} / ${attendancePage.attendanceMaxScore}|">25 / 25</span>
+                        </div>
+                        <div class="h-2 overflow-hidden rounded-full bg-surface-container">
+                            <div class="h-full bg-primary-container"
+                                 th:style="|width:${attendancePage.attendanceScore * 100 / attendancePage.attendanceMaxScore}%|"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-on-surface-variant">
+                            <span>과제</span>
+                            <span th:text="|${attendancePage.assignmentScore} / ${attendancePage.assignmentMaxScore}|">0 / 25</span>
+                        </div>
+                        <div class="h-2 overflow-hidden rounded-full bg-surface-container">
+                            <div class="h-full bg-[#a93802]"
+                                 th:style="|width:${attendancePage.assignmentScore * 100 / attendancePage.assignmentMaxScore}%|"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-on-surface-variant">
+                            <span>시험</span>
+                            <span th:text="|${attendancePage.examScore} / ${attendancePage.examMaxScore}|">0 / 30</span>
+                        </div>
+                        <div class="h-2 overflow-hidden rounded-full bg-surface-container">
+                            <div class="h-full bg-surface-container-highest"
+                                 th:style="|width:${attendancePage.examScore * 100 / attendancePage.examMaxScore}%|"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-on-surface-variant">
+                            <span>태도</span>
+                            <span th:text="|${attendancePage.attitudeScore} / ${attendancePage.attitudeMaxScore}|">0 / 20</span>
+                        </div>
+                        <div class="h-2 overflow-hidden rounded-full bg-surface-container">
+                            <div class="h-full bg-primary"
+                                 th:style="|width:${attendancePage.attitudeScore * 100 / attendancePage.attitudeMaxScore}%|"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
+                    <div class="text-sm text-on-surface-variant">
+                        <span class="font-bold text-on-surface">총점</span>
+                        <span th:text="|${attendancePage.totalScore}점 / 100점|">80점 / 100점</span>
+                    </div>
+
+                    <form th:if="${attendancePage.totalScore >= 80 and attendancePage.certificateStatus == 'NONE'}"
+                          th:action="@{/student/certificate/request}"
+                          method="post">
+                        <input type="hidden" name="courseId" th:value="${attendancePage.courseId}">
+                        <button type="submit"
+                                class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white">
+                            수료증 발급 신청
+                        </button>
+                    </form>
+
+                    <button th:if="${attendancePage.certificateStatus == 'REQUESTED'}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">hourglass_top</span>
+                        승인 대기
+                    </button>
+
+                    <a th:if="${attendancePage.certificateStatus == 'APPROVED' or attendancePage.certificateStatus == 'ISSUED'}"
+                       class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-on-primary shadow-sm transition-all hover:brightness-105"
+                       th:href="@{/student/certificate(courseId=${attendancePage.courseId})}">
+                        <span class="material-symbols-outlined mr-2 text-base">workspace_premium</span>
+                        수료증 발급
+                    </a>
+
+                    <button th:if="${attendancePage.certificateStatus == 'REVOKED'}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">block</span>
+                        수료증 회수됨
+                    </button>
+
+                    <button th:if="${attendancePage.totalScore < 80}"
+                            class="inline-flex items-center rounded-xl bg-surface-container-high px-5 py-3 text-sm font-bold text-on-surface-variant"
+                            type="button"
+                            disabled>
+                        <span class="material-symbols-outlined mr-2 text-base">lock</span>
+                        수료 기준 미달
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            <div class="xl:col-span-7 space-y-6">
+                <div class="flex items-center justify-between px-2">
+                    <h3 class="text-xl font-bold">강의 커리큘럼</h3>
+                    <span class="text-sm text-on-surface-variant"
+                          th:text="|${#lists.size(attendancePage.sectionList)}개 섹션|">8개 섹션</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10"
+                         th:each="sectionItem : ${attendancePage.sectionList}">
+                        <button class="w-full flex items-center justify-between p-6 bg-surface-container-high/30 text-left attendance-accordion-toggle"
+                                type="button"
+                                th:attr="aria-expanded=${sectionItem.sectionId == attendancePage.section.sectionId}">
+                            <div class="flex items-center gap-4">
+                                <span class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xs"
+                                      th:text="${sectionItem.sectionOrder}">01</span>
+                                <div>
+                                    <h4 class="font-bold text-on-surface" th:text="${sectionItem.title}">섹션 제목</h4>
+                                    <p class="text-xs text-on-surface-variant"
+                                       th:text="|오픈일 ${sectionItem.openDate}|">오픈일</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined attendance-accordion-icon"
+                                  th:text="${sectionItem.sectionId == attendancePage.section.sectionId} ? 'expand_less' : 'expand_more'">expand_less</span>
+                        </button>
+
+                        <div class="p-4 space-y-2 attendance-accordion-content"
+                             th:classappend="${sectionItem.sectionId == attendancePage.section.sectionId} ? '' : ' hidden'">
+                            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/5">
+                                <div class="flex items-center gap-4">
+                                    <span class="material-symbols-outlined text-primary"
+                                          style="font-variation-settings: 'FILL' 1;">play_circle</span>
+                                    <div>
+                                        <p class="text-sm font-semibold">학습 영상</p>
+                                        <p class="text-[10px] text-on-surface-variant mt-1"
+                                           th:text="${sectionItem.videoUrl} ?: '등록된 영상이 없습니다.'"></p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end gap-3">
+                                    <button class="min-w-[120px] rounded-lg bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-all hover:brightness-105"
+                                            data-attendance-btn
+                                            type="button"
+                                            th:attr="data-member-id=${attendancePage.memberId},data-section-id=${sectionItem.sectionId},data-open-date=${sectionItem.openDate},data-saved-status=${attendancePage.attendanceStatusMap[sectionItem.sectionId]}">출석체크하기</button>
+                                    <span class="text-[11px] font-semibold text-slate-500" data-attendance-status-label>출석 가능</span>
+                                    <p class="min-h-[16px] text-[11px] text-on-surface-variant" data-attendance-message></p>
+                                    <div class="hidden h-2 w-36 overflow-hidden rounded-full bg-surface-container" data-attendance-progress-wrap>
+                                        <div class="h-full bg-primary" data-attendance-progress-bar style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-4 bg-surface-container-lowest rounded-lg border-2 border-primary/20">
+                                <div class="flex items-center gap-4">
+                                    <span class="material-symbols-outlined text-primary">description</span>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold">학습 자료</p>
+
+                                        <a th:if="${sectionItem.materialFile != null and !#strings.isEmpty(sectionItem.materialFile)}"
+                                           th:href="@{/download/section/{fileName}(fileName=${#strings.substring(sectionItem.materialFile, sectionItem.materialFile.lastIndexOf('/') + 1)})}"
+                                           th:text="${#strings.substring(sectionItem.materialFile, sectionItem.materialFile.lastIndexOf('/') + 1)}"
+                                           class="text-[10px] text-primary hover:underline mt-1 inline-block">
+                                            section-material.pdf
+                                        </a>
+
+                                        <p th:if="${sectionItem.materialFile == null or #strings.isEmpty(sectionItem.materialFile)}"
+                                           class="text-[10px] text-on-surface-variant mt-1">
+                                            등록된 자료가 없습니다.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <span class="text-primary text-xs font-bold"
+                                      th:if="${sectionItem.materialFile != null and !#strings.isEmpty(sectionItem.materialFile)}">
+                                    자료 확인
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-5 space-y-8">
+                <div class="rounded-xl border border-outline-variant/10 bg-surface-container-low p-1.5">
+                    <div class="flex">
+                        <a class="flex-1 rounded-lg bg-white px-4 py-3 text-center text-sm font-bold text-primary shadow-sm"
+                           th:href="@{/courses/{courseId}/assignment(courseId=${attendancePage.courseId})}">
+                            <span class="material-symbols-outlined mr-2 text-sm align-[-2px]">upload_file</span>
+                            과제 제출
+                        </a>
+
+                        <a class="flex-1 rounded-lg px-4 py-3 text-center text-sm font-medium text-[#424654] transition-all hover:bg-white/40"
+                           th:href="@{/board/section-qna(courseId=${attendancePage.courseId})}">
+                            <span class="material-symbols-outlined mr-2 text-sm align-[-2px]">forum</span>
+                            질문 및 답변 (Q&amp;A)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-xl p-8 shadow-sm space-y-6 border border-outline-variant/10">
+                    <div class="flex justify-between items-start gap-6">
+                        <div>
+                            <h4 class="text-xl font-bold mb-1"
+                                th:text="${attendancePage.assignment != null ? attendancePage.assignment.title : '등록된 과제가 없습니다.'}">
+                                과제명
+                            </h4>
+                            <p class="text-sm text-on-surface-variant"
+                               th:text="|코스: ${attendancePage.course.title}|">
+                                코스명
+                            </p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-xs font-bold uppercase text-error"
+                               th:text="${attendancePage.assignment != null ? #temporals.format(attendancePage.assignment.dueDate, 'MM월 dd일 HH:mm 마감') : '마감 정보 없음'}">
+                                마감 정보
+                            </p>
+                            <p class="text-lg font-black text-on-surface"
+                               th:text="${attendancePage.assignment != null ? '과제' : '-'}">
+                                과제
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-container-low p-4 rounded-lg text-sm text-on-surface-variant leading-relaxed"
+                         th:text="${attendancePage.assignment != null ? attendancePage.assignment.description : '현재 코스에 등록된 과제가 없습니다.'}">
+                        과제 설명
+                    </div>
+
+                    <div class="rounded-lg bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant"
+                         th:if="${attendancePage.assignment != null}">
+                        <span class="mr-2 font-semibold text-on-surface">첨부 자료</span>
+
+                        <a th:if="${attendancePage.assignment.attachmentFile != null and !#strings.isEmpty(attendancePage.assignment.attachmentFile)}"
+                           th:href="@{/download/assignment/{fileName}(fileName=${#strings.substring(attendancePage.assignment.attachmentFile, attendancePage.assignment.attachmentFile.lastIndexOf('/') + 1)})}"
+                           th:text="${#strings.substring(attendancePage.assignment.attachmentFile, attendancePage.assignment.attachmentFile.lastIndexOf('/') + 1)}"
+                           class="text-primary hover:underline">
+                            assignment1.pdf
+                        </a>
+
+                        <span th:if="${attendancePage.assignment.attachmentFile == null or #strings.isEmpty(attendancePage.assignment.attachmentFile)}">
+                            -
+                        </span>
+                    </div>
+
+                    <div th:if="${attendancePage.assignment == null}"
+                         class="rounded-lg bg-surface-container-low p-4 text-sm text-on-surface-variant">
+                        등록된 과제가 없어서 제출할 수 없습니다.
+                    </div>
+
+                    <div th:if="${errorMessage}"
+                         class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm"
+                         th:text="${errorMessage}">
+                        에러 메시지
+                    </div>
+
+                    <div th:if="${successMessage}"
+                         class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700 text-sm"
+                         th:text="${successMessage}">
+                        성공 메시지
+                    </div>
+
+                    <form th:if="${attendancePage.assignment != null}"
+                          th:action="@{/courses/{courseId}/assignment/submissions(courseId=${attendancePage.courseId}, role='STUDENT')}"
+                          method="post"
+                          enctype="multipart/form-data"
+                          class="space-y-4">
+
+                        <input type="hidden" name="sectionId" th:value="${attendancePage.section.sectionId}"/>
+
+                        <div>
+                            <label class="mb-2 block text-xs font-bold uppercase text-on-surface-variant">제출 내용</label>
+                            <textarea name="content"
+                                      rows="4"
+                                      class="w-full rounded-xl border border-outline-variant/30 bg-white px-4 py-3 text-sm text-on-surface"
+                                      placeholder="과제 제출 내용을 입력하세요."></textarea>
+                        </div>
+
+                        <div>
+                            <span class="mb-2 block text-xs font-bold uppercase text-on-surface-variant">파일 업로드</span>
+                            <label class="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-outline-variant/30 p-8 text-center transition-all hover:border-primary/50">
+                                <span class="material-symbols-outlined text-4xl text-primary-container">cloud_upload</span>
+                                <span class="text-sm font-medium">파일을 선택하세요</span>
+                                <span class="text-[10px] uppercase text-on-surface-variant">선택 후 제출 버튼을 눌러야 업로드됩니다.</span>
+                                <input type="file"
+                                       id="submissionFileInput"
+                                       name="attachmentUpload"
+                                       class="hidden"/>
+                            </label>
+
+                            <p id="submissionFileName"
+                               class="mt-3 text-sm font-medium text-on-surface-variant">
+                                선택된 파일 없음
+                            </p>
+                        </div>
+
+                        <button class="w-full rounded-xl bg-gradient-to-br from-primary to-primary-container py-4 font-bold text-on-primary shadow-lg shadow-primary/20 transition-all hover:brightness-105 active:scale-[0.98]"
+                                type="submit">
+                            과제 제출하기
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:src="@{/js/attendance/attendance.js}" src="/js/attendance/attendance.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById("submissionFileInput");
+        const fileNameText = document.getElementById("submissionFileName");
+
+        if (fileInput && fileNameText) {
+            fileInput.addEventListener("change", function () {
+                if (fileInput.files && fileInput.files.length > 0) {
+                    fileNameText.textContent = "선택된 파일: " + fileInput.files[0].name;
+                } else {
+                    fileNameText.textContent = "선택된 파일 없음";
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

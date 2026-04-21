@@ -13,4 +13,6 @@ public class CalendarEventDTO {
     private String title;
     private String start;
     private String color;
+    private Integer courseId;
 }
+

@@ -1,43 +1,54 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>자유게시판 목록</title>
     <link rel="stylesheet" href="/css/board/crud.css">
 </head>
-<body>
+<body th:attr="data-current-role=${currentRole},data-current-member-id=${currentMemberId}">
+<div th:replace="~{common/topbar :: topbar}"></div>
 <div class="page-wrapper">
     <div class="top-utility">
         <div class="role-panel">
-            <p class="role-label">현재 역할 전환</p>
+            <p class="role-label">현재 로그인 정보</p>
             <div class="role-buttons">
                 <button class="role-btn" data-role="ADMIN" type="button">관리자</button>
                 <button class="role-btn" data-role="INSTRUCTOR" type="button">강사</button>
                 <button class="role-btn" data-role="STUDENT" type="button">학생</button>
             </div>
-            <div class="role-current">현재 선택: <span class="role-badge" data-current-role>STUDENT</span> / 사용자 ID: <span class="role-badge" data-current-member-id>1</span></div>
-            <p class="permission-note">자유게시판은 등록은 열려 있지만 수정, 삭제는 본인 글만 가능합니다.</p>
+            <div class="role-current">
+                현재 역할:
+                <span class="role-badge" data-current-role th:text="${currentRole}">STUDENT</span>
+                / 회원 ID:
+                <span class="role-badge" data-current-member-id th:text="${currentMemberId}">1</span>
+            </div>
+            <p class="permission-note">자유게시판은 관리자, 강사, 학생이 자유롭게 소통할 수 있는 공간입니다.</p>
         </div>
         <div class="page-main">
-            <h1 class="page-title">자유게시판 목록</h1>
-            <p class="page-desc">학생과 강사가 자유롭게 소통하는 게시판입니다.</p>
+            <div class="page-eyebrow">Free Board</div>
+            <h1 class="page-title">자유게시판</h1>
+            <p class="page-desc">질문, 후기, 잡담 등 다양한 이야기를 편하게 나눌 수 있는 게시판입니다.</p>
         </div>
     </div>
 
     <div class="box">
         <div class="button-group">
             <a class="btn" href="/board/regist?type=FREE" data-role-only="ADMIN,INSTRUCTOR,STUDENT">글쓰기</a>
-            <a class="btn gray" href="/board/list">게시판 메인</a>
+            <a class="btn gray" href="/board/list">게시판 홈</a>
         </div>
     </div>
 
     <div class="box">
         <form class="search-bar" method="get" action="/board/free">
-            <input type="text" name="keyword" placeholder="자유게시판 제목 검색" th:value="${keyword}">
+            <input type="text" name="keyword" placeholder="검색어를 입력하세요" th:value="${keyword}">
             <button type="submit" class="btn">검색</button>
             <a class="btn gray" href="/board/free">초기화</a>
         </form>
-        <p class="meta">검색어: <span th:text="${keyword != null and !keyword.isBlank() ? keyword : '전체'}">전체</span></p>
+        <p class="meta">
+            검색 기준:
+            <span th:if="${keyword != null and !keyword.isBlank()}" th:text="${keyword}">keyword</span>
+            <span th:unless="${keyword != null and !keyword.isBlank()}">전체</span>
+        </p>
 
         <table class="table">
             <thead>
@@ -49,19 +60,37 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="board, stat : ${boardList}">
+            <tr th:each="board, stat : ${boardList}"
+                class="post-row"
+                th:attr="data-href=@{/board/detail(postId=${board.postId})}">
                 <td th:text="${stat.count}">1</td>
-                <td><a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">자유글 제목</a></td>
-                <td th:text="${board.memberName != null ? board.memberName : board.memberId}">이학생</td>
+                <td>
+                    <a th:href="@{/board/detail(postId=${board.postId})}" th:text="${board.title}">자유게시판 제목</a>
+                </td>
+                <td>
+                    <div style="display: inline-flex; align-items: center; gap: 8px;">
+                        <img th:if="${board.profileImage != null and board.profileImage != 'default-profile.png'}"
+                             th:src="@{|/uploads/${board.profileImage}|}"
+                             onerror="this.src='/img/default-profile.png'"
+                             alt="profile image"
+                             style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                        <img th:unless="${board.profileImage != null and board.profileImage != 'default-profile.png'}"
+                             src="/img/default-profile.png"
+                             alt="default profile image"
+                             style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid #dbe3f1;">
+                        <span th:text="${board.memberName != null ? board.memberName : board.memberId}">홍길동</span>
+                    </div>
+                </td>
                 <td th:text="${board.viewCount}">12</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
-                <td colspan="4">조회된 자유게시판 글이 없습니다.</td>
+                <td colspan="4">등록된 자유게시판 글이 없습니다.</td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
 <script src="/js/board/role-switcher.js"></script>
+<script src="/js/board/post-row.js"></script>
 </body>
 </html>

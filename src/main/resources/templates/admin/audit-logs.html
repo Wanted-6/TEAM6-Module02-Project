@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>64Lab | API 성능 통계</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { headline: ['Manrope', 'sans-serif'], body: ['Noto Sans KR', 'sans-serif'] }, colors: { brand: '#2b3f8f', brandSoft: '#edf2ff', ink: '#1b2540', line: '#dbe3f1' }, boxShadow: { soft: '0 18px 40px rgba(43, 63, 143, 0.08)' } } } }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background: linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-ink">
+
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="font-headline text-2xl font-extrabold tracking-tight text-brand">64Lab</a>
+
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="h-9 w-9 overflow-hidden rounded-full border border-slate-200">
+                    <img class="profile-sync h-full w-full object-cover"
+                         th:src="${member != null and member.profile != null and member.profile.profileImage != null and member.profile.profileImage != '' and member.profile.profileImage != 'default-profile.png'} ? '/uploads/' + ${member.profile.profileImage} + '?t=' + ${#dates.createNow().getTime()} : '/img/default-profile.png'"
+                         onerror="this.src='/img/default-profile.png'">
+                </div>
+                <span class="text-sm font-medium text-slate-700">
+                    <strong class="font-bold text-brand" th:text="${member != null ? member.name : #authentication.name}">관리자1</strong>님, 환영합니다.
+                </span>
+            </div>
+            <form th:action="@{/auth/logout}" th:method="post" class="inline">
+                <button type="submit" class="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                    로그아웃
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="mx-auto max-w-6xl w-full px-4 py-10">
+    <div class="mb-8 flex justify-between items-end">
+        <div>
+            <h1 class="font-headline text-3xl font-extrabold text-ink">API 성능 통계</h1>
+            <p class="mt-2 text-sm font-medium text-slate-500">시스템 API의 메서드별 실행 횟수와 응답 속도를 모니터링합니다.</p>
+        </div>
+        <a th:href="@{/admin/logs}" class="rounded-xl bg-white border border-line px-5 py-2.5 text-sm font-bold text-slate-700 hover:border-brand hover:text-brand transition shadow-sm">
+            접속 로그 보기
+        </a>
+    </div>
+
+    <div class="overflow-hidden rounded-[24px] border border-line bg-white shadow-soft">
+        <table class="min-w-full text-left text-sm whitespace-nowrap">
+            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-line">
+            <tr>
+                <th class="px-6 py-4">순위</th>
+                <th class="px-6 py-4">실행된 메서드</th>
+                <th class="px-6 py-4">총 호출 횟수</th>
+                <th class="px-6 py-4">평균 실행 시간 (ms)</th>
+                <th class="px-6 py-4 text-center">성능 상태</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+            <tr th:each="stat, iterStat : ${logStats}" class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4 font-bold text-slate-400" th:text="${iterStat.count}">1</td>
+                <td class="px-6 py-4 font-bold text-ink" th:text="${stat.methodName}">Method()</td>
+                <td class="px-6 py-4 font-bold text-brand" th:text="${stat.callCount} + '회'">10회</td>
+                <td class="px-6 py-4 text-slate-600"><span class="font-bold" th:text="${#numbers.formatDecimal(stat.avgExecutionTime, 1, 2)}">10.0</span> ms</td>
+                <td class="px-6 py-4 text-center">
+                    <span th:if="${stat.avgExecutionTime < 100}" class="rounded-xl bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600 border border-emerald-200">양호</span>
+                    <span th:if="${stat.avgExecutionTime >= 100 and stat.avgExecutionTime < 500}" class="rounded-xl bg-yellow-50 px-3 py-1 text-xs font-bold text-yellow-600 border border-yellow-200">보통</span>
+                    <span th:if="${stat.avgExecutionTime >= 500}" class="rounded-xl bg-red-50 px-3 py-1 text-xs font-bold text-red-600 border border-red-200">병목 주의</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(logStats)}">
+                <td colspan="5" class="px-6 py-16 text-center text-slate-500 font-bold">수집된 데이터가 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

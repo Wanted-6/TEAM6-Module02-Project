@@ -5,10 +5,17 @@ import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dto.EnrollmentCreateDTO;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.service.EnrollmentService;
+import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -20,44 +27,50 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EnrollmentController {
 
+    private static final String ENROLL_SUCCESS_MESSAGE = "Enrollment completed.";
+
     private final EnrollmentService enrollmentService;
     private final CourseService courseService;
 
+    @AuditLog
     @GetMapping("/courses")
-    public String findOpenCourses(@RequestParam(required = false) String category,
-                                  Model model) {
+    public String findOpenCourses(
+            @LoginMemberId Long memberId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            Model model) {
 
-        Integer memberId = 1; // 임시 로그인 사용자
-
-        List<CourseDTO> courseList = courseService.findOpenCourses();
-        if (category != null && !category.isBlank() && !category.equals("전체")) {
-            courseList = courseList.stream()
-                    .filter(course -> category.equals(course.getCategory()))
-                    .toList();
+        if (memberId == null) {
+            return "redirect:/auth/login";
         }
 
-        Set<Integer> enrolledCourseIds = enrollmentService.findEnrollmentsByMemberId(memberId).stream()
+        List<CourseDTO> courseList = courseService.findOpenCourses(keyword, category);
+
+        Set<Integer> enrolledCourseIds = enrollmentService.findEnrollmentsByMemberId(Math.toIntExact(memberId)).stream()
                 .map(Enrollment::getCourseId)
                 .collect(Collectors.toSet());
 
         model.addAttribute("courseList", courseList);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategory", category);
         model.addAttribute("enrolledCourseIds", enrolledCourseIds);
-
-        System.out.println("successMessage = " + model.getAttribute("successMessage"));
-        System.out.println("errorMessage = " + model.getAttribute("errorMessage"));
 
         return "student/enrollment/list";
     }
 
+    @AuditLog
     @GetMapping("/courses/{courseId}")
-    public String findCourseDetail(@PathVariable Integer courseId,
-                                   Model model) {
+    public String findCourseDetail(
+            @LoginMemberId Long memberId,
+            @PathVariable Integer courseId,
+            Model model) {
 
-        Integer memberId = 1; // 임시 로그인 사용자
+        if (memberId == null) {
+            return "redirect:/auth/login";
+        }
 
         CourseDTO course = courseService.findCourseById(courseId);
-        boolean enrolled = enrollmentService.isAlreadyEnrolled(memberId, courseId);
+        boolean enrolled = enrollmentService.isAlreadyEnrolled(Math.toIntExact(memberId), courseId);
 
         model.addAttribute("course", course);
         model.addAttribute("enrolled", enrolled);
@@ -66,17 +79,17 @@ public class EnrollmentController {
     }
 
     @PostMapping
-    public String enrollCourse(@ModelAttribute EnrollmentCreateDTO request,
-                               RedirectAttributes rttr) {
+    public String enrollCourse(
+            @LoginMemberId Long memberId,
+            @ModelAttribute EnrollmentCreateDTO request,
+            RedirectAttributes rttr) {
 
-        Integer memberId = 1; // 임시 로그인 사용자
-
-        try {
-            enrollmentService.enrollCourse(memberId, request.getCourseId());
-            rttr.addFlashAttribute("successMessage", "수강신청이 완료되었습니다.");
-        } catch (IllegalArgumentException e) {
-            rttr.addFlashAttribute("errorMessage", e.getMessage());
+        if (memberId == null) {
+            return "redirect:/auth/login";
         }
+
+        enrollmentService.enrollCourse(Math.toIntExact(memberId), request.getCourseId());
+        rttr.addFlashAttribute("successMessage", ENROLL_SUCCESS_MESSAGE);
 
         return "redirect:/student/enrollments/courses";
     }

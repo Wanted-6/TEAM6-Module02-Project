@@ -16,6 +16,4 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     // 여러 수강(enrollment)에 대한 성적 조회
     List<Grade> findByEnrollmentIdIn(List<Integer> enrollmentIds);
 
-    // 수료 여부로 조회
-    List<Grade> findByIsPassed(Boolean isPassed);
 }
