@@ -10,12 +10,14 @@ import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionUpdate
 import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class SubmissionController {
@@ -91,11 +93,20 @@ public class SubmissionController {
 
             rttr.addFlashAttribute("successMessage", "과제가 제출되었습니다.");
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
+
         } catch (IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
+
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "과제 제출 중 처리할 수 없는 문제가 발생했습니다.");
+            log.error("과제 제출 중 예외 발생 - courseId={}, sectionId={}, memberId={}",
+                    courseId, sectionId, memberId, e);
+
+            String message = (e.getMessage() != null && !e.getMessage().isBlank())
+                    ? e.getMessage()
+                    : "과제 제출 중 처리할 수 없는 문제가 발생했습니다.";
+
+            rttr.addFlashAttribute("errorMessage", message);
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
         }
     }
@@ -180,6 +191,7 @@ public class SubmissionController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         } catch (Exception e) {
+            log.error("제출물 수정 중 예외 발생 - submissionId={}, courseId={}", submissionId, courseId, e);
             rttr.addFlashAttribute("errorMessage", "제출물 수정 중 처리할 수 없는 문제가 발생했습니다.");
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         }

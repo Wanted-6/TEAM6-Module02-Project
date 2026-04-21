@@ -77,7 +77,7 @@ public class SectionController {
                                 @ModelAttribute SectionUpdateDTO updateDTO,
                                 @RequestParam(value = "materialUpload", required = false) MultipartFile materialUpload,
                                 RedirectAttributes rttr) {
-        Integer courseId = sectionService.findSectionById(sectionId).getCourseId();
+        Integer courseId = sectionService.findCourseIdBySectionId(sectionId);
 
         try {
             sectionService.modifySection(sectionId, updateDTO, materialUpload);
@@ -96,7 +96,7 @@ public class SectionController {
     @PostMapping("/sections/{sectionId}/delete")
     public String deleteSection(@PathVariable Integer sectionId,
                                 RedirectAttributes rttr) {
-        Integer courseId = sectionService.findSectionById(sectionId).getCourseId();
+        Integer courseId = sectionService.findCourseIdBySectionId(sectionId);
 
         try {
             sectionService.deleteSection(sectionId);

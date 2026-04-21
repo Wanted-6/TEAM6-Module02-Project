@@ -1,9 +1,11 @@
 package com.wanted.projectmodule2lms.domain.assignment.controller;
 
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentCreateDTO;
+import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentUpdateDTO;
 import com.wanted.projectmodule2lms.domain.assignment.service.AssignmentService;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -18,16 +20,27 @@ public class AssignmentController {
 
     private final AssignmentService assignmentService;
     private final CourseService courseService;
+    private final SubmissionService submissionService;
 
     @AuditLog
     @GetMapping("/courses/{courseId}/assignment")
     public ModelAndView findAssignmentByCourse(@PathVariable Integer courseId,
                                                @RequestParam(defaultValue = "STUDENT") String role,
                                                ModelAndView mv) {
+        AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
+
         mv.addObject("courseId", courseId);
         mv.addObject("course", courseService.findCourseById(courseId));
-        mv.addObject("assignment", assignmentService.findAssignmentByCourseId(courseId));
+        mv.addObject("assignment", assignment);
         mv.addObject("role", role);
+
+        if ("INSTRUCTOR".equals(role)) {
+            mv.addObject(
+                    "submissionList",
+                    submissionService.findSubmissionsByAssignmentId(courseId, assignment.getAssignmentId())
+            );
+        }
+
         mv.setViewName("assignment/detail");
         return mv;
     }
@@ -68,7 +81,6 @@ public class AssignmentController {
             return "redirect:/courses/" + courseId + "/assignment/regist?role=INSTRUCTOR";
         }
     }
-
 
     @GetMapping("/courses/{courseId}/assignment/modify")
     public ModelAndView modifyPage(@PathVariable Integer courseId,
