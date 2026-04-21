@@ -10,6 +10,8 @@ import com.wanted.projectmodule2lms.domain.section.model.dto.SectionDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionListItemDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.Resource;
@@ -40,15 +42,14 @@ public class SectionService {
 
     public SectionDTO findSectionById(Integer sectionId) {
         Section foundSection = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 섹션이 존재하지 않습니다."));
 
         return modelMapper.map(foundSection, SectionDTO.class);
-
     }
 
     public Integer findCourseIdBySectionId(Integer sectionId) {
         Section foundSection = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 섹션이 존재하지 않습니다."));
 
         return foundSection.getCourseId();
     }
@@ -68,7 +69,7 @@ public class SectionService {
                                  SectionCreateDTO createDTO,
                                  MultipartFile materialUpload) throws IOException {
         if (!courseRepository.existsById(courseId)) {
-            throw new IllegalArgumentException("부모 코스가 존재하지 않습니다.");
+            throw new ResourceNotFoundException("부모 코스가 존재하지 않습니다.");
         }
 
         if (sectionRepository.existsByCourseIdAndSectionOrder(courseId, createDTO.getSectionOrder())) {
@@ -109,7 +110,7 @@ public class SectionService {
                               SectionUpdateDTO updateDTO,
                               MultipartFile materialUpload) throws IOException {
         Section foundSection = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("수정할 섹션이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수정할 섹션이 존재하지 않습니다."));
 
         if (sectionRepository.existsByCourseIdAndSectionOrderAndSectionIdNot(
                 foundSection.getCourseId(),
@@ -154,10 +155,10 @@ public class SectionService {
     @Transactional
     public void deleteSection(Integer sectionId) {
         Section foundSection = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제할 섹션이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("삭제할 섹션이 존재하지 않습니다."));
 
         Course course = courseRepository.findById(foundSection.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("코스가 존재하지 않습니다."));
 
         if (course.getApprovalStatus() == CourseApprovalStatus.APPROVED) {
             throw new IllegalArgumentException("승인된 코스의 섹션은 삭제할 수 없습니다.");
@@ -177,10 +178,10 @@ public class SectionService {
         validateMyCourseAccess(memberId, courseId);
 
         Section foundSection = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 섹션이 존재하지 않습니다."));
 
         if (!foundSection.getCourseId().equals(courseId)) {
-            throw new IllegalArgumentException("해당 코스의 섹션이 아닙니다.");
+            throw new UnauthorizedStudentAccessException("해당 코스의 섹션이 아닙니다.");
         }
 
         return modelMapper.map(foundSection, SectionDTO.class);
@@ -188,13 +189,13 @@ public class SectionService {
 
     private void validateMyCourseAccess(Integer memberId, Integer courseId) {
         enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("수강 중인 코스가 아닙니다."));
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스가 존재하지 않습니다."));
 
         if (course.getApprovalStatus() != CourseApprovalStatus.APPROVED || !Boolean.TRUE.equals(course.getIsOpen())) {
-            throw new IllegalArgumentException("접근할 수 없는 코스입니다.");
+            throw new UnauthorizedStudentAccessException("접근할 수 없는 코스입니다.");
         }
     }
 
@@ -238,7 +239,7 @@ public class SectionService {
                 .orElse(null);
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스가 존재하지 않습니다."));
 
         if (lastSection == null || lastSection.getOpenDate() == null) {
             course.changeExamDueDate(null);

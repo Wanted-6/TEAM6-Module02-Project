@@ -2,9 +2,14 @@ package com.wanted.projectmodule2lms.domain.course.controller;
 
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -41,7 +46,7 @@ public class AdminCourseController {
         try {
             courseService.approveCourse(courseId, principal.getName());
             rttr.addFlashAttribute("successMessage", "코스가 승인되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + courseId;
@@ -55,7 +60,7 @@ public class AdminCourseController {
         try {
             courseService.rejectCourse(courseId, principal.getName(), rejectReason);
             rttr.addFlashAttribute("successMessage", "코스가 반려되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + courseId;
@@ -68,7 +73,7 @@ public class AdminCourseController {
         try {
             courseService.deleteCourseByAdmin(courseId, principal.getName());
             rttr.addFlashAttribute("successMessage", "코스가 삭제 처리되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + courseId;

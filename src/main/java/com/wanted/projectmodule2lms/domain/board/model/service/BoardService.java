@@ -15,6 +15,7 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -135,7 +136,7 @@ public class    BoardService {
 
         if (board.getPostType() == BoardType.SECTION_QNA) {
             Section section = sectionRepository.findById(sectionId)
-                    .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 섹션입니다."));
             title = formatSectionQnaTitle(section.getTitle(), boardDTO.getTitle());
         }
 
@@ -163,7 +164,7 @@ public class    BoardService {
 
     public Board findActiveBoard(Integer postId) {
         return boardRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 게시글입니다."));
     }
 
     private BoardDTO normalizeBoardDTO(BoardDTO boardDTO, Integer currentMemberId, MemberRole currentRole) {
@@ -196,7 +197,7 @@ public class    BoardService {
         } else {
             validateSectionQnaAccess(courseId, sectionId, currentMemberId, currentRole, true);
             Section section = sectionRepository.findById(sectionId)
-                    .orElseThrow(() -> new IllegalArgumentException("유효한 섹션을 선택해야 합니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 섹션입니다."));
 
             title = formatSectionQnaTitle(section.getTitle(), title);
             isSecret = Boolean.TRUE.equals(isSecret);
@@ -373,7 +374,7 @@ public class    BoardService {
         }
 
         Section section = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 섹션입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 섹션입니다."));
 
         if (!section.getCourseId().equals(courseId)) {
             throw new IllegalArgumentException("선택한 섹션이 해당 코스에 속하지 않습니다.");
