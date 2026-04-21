@@ -9,10 +9,18 @@ import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionScoreD
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -31,7 +39,7 @@ public class SubmissionController {
                                                 @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                                 ModelAndView mv) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 제출 현황을 조회할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 제출 현황을 조회할 수 있습니다.");
         }
 
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
@@ -51,7 +59,7 @@ public class SubmissionController {
                                    @RequestParam(defaultValue = "STUDENT") String role,
                                    ModelAndView mv) {
         if (!"STUDENT".equals(role)) {
-            throw new IllegalArgumentException("학생만 과제를 제출할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("학생만 과제를 제출할 수 있습니다.");
         }
 
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
@@ -73,12 +81,10 @@ public class SubmissionController {
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
         if (!"STUDENT".equals(role)) {
-            throw new IllegalArgumentException("학생만 과제를 제출할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("학생만 과제를 제출할 수 있습니다.");
         }
 
-        if (memberId == null) {
-            return "redirect:/auth/login";
-        }
+        requireMemberId(memberId);
 
         try {
             AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
@@ -94,7 +100,7 @@ public class SubmissionController {
             rttr.addFlashAttribute("successMessage", "과제가 제출되었습니다.");
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
 
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | UnauthorizedStudentAccessException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
 
@@ -117,13 +123,10 @@ public class SubmissionController {
                                          @RequestParam(defaultValue = "STUDENT") String role,
                                          ModelAndView mv) {
         if (!"STUDENT".equals(role)) {
-            throw new IllegalArgumentException("학생만 본인 제출을 조회할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("학생만 본인 제출을 조회할 수 있습니다.");
         }
 
-        if (memberId == null) {
-            mv.setViewName("redirect:/auth/login");
-            return mv;
-        }
+        requireMemberId(memberId);
 
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
         Integer enrollmentId = submissionService.findEnrollmentIdByMemberAndCourse(Math.toIntExact(memberId), courseId);
@@ -157,7 +160,7 @@ public class SubmissionController {
                                    @RequestParam(defaultValue = "STUDENT") String role,
                                    ModelAndView mv) {
         if (!"STUDENT".equals(role)) {
-            throw new IllegalArgumentException("학생만 제출물을 수정할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("학생만 제출물을 수정할 수 있습니다.");
         }
 
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
@@ -177,7 +180,7 @@ public class SubmissionController {
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
         if (!"STUDENT".equals(role)) {
-            throw new IllegalArgumentException("학생만 제출물을 수정할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("학생만 제출물을 수정할 수 있습니다.");
         }
 
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
@@ -187,7 +190,7 @@ public class SubmissionController {
             submissionService.modifySubmission(submissionId, updateDTO, attachmentUpload);
             rttr.addFlashAttribute("successMessage", "제출물이 수정되었습니다.");
             return "redirect:/courses/" + courseId + "/assignment/submissions/me?role=STUDENT";
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         } catch (Exception e) {
@@ -203,7 +206,7 @@ public class SubmissionController {
                                   @ModelAttribute SubmissionScoreDTO scoreDTO,
                                   RedirectAttributes rttr) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 채점할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 채점할 수 있습니다.");
         }
 
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
@@ -212,10 +215,16 @@ public class SubmissionController {
         try {
             submissionService.scoreSubmission(submissionId, scoreDTO);
             rttr.addFlashAttribute("successMessage", "채점 및 피드백이 저장되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/courses/" + courseId + "/assignment/submissions?role=INSTRUCTOR";
+    }
+
+    private void requireMemberId(Long memberId) {
+        if (memberId == null) {
+            throw new LoginRequiredException("로그인한 사용자 정보가 필요합니다.");
+        }
     }
 }

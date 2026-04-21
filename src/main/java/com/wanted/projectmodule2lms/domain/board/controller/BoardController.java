@@ -10,6 +10,7 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import com.wanted.projectmodule2lms.global.service.CurrentMemberService;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -171,7 +172,7 @@ public class BoardController {
         try {
             boardService.registBoard(boardDTO, currentMemberId, currentRole);
             return "redirect:" + getListPath(boardDTO.getPostType(), boardDTO.getCourseId());
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/regist?type=" + boardDTO.getPostType()
                     + appendNumberQuery("courseId", boardDTO.getCourseId())
@@ -201,7 +202,7 @@ public class BoardController {
         try {
             boardService.modifyBoard(boardDTO, currentMemberId, currentRole);
             return "redirect:/board/detail?postId=" + boardDTO.getPostId();
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/modify?postId=" + boardDTO.getPostId();
         }
@@ -230,7 +231,7 @@ public class BoardController {
         try {
             boardService.deleteBoard(postId, currentMemberId, currentRole);
             return "redirect:" + getListPath(board.getPostType(), board.getCourseId());
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/board/detail?postId=" + postId;
         }

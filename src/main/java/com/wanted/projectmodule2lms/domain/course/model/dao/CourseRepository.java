@@ -2,11 +2,14 @@ package com.wanted.projectmodule2lms.domain.course.model.dao;
 
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.course.model.entity.CourseApprovalStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
@@ -91,4 +94,9 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             order by c.courseId desc
             """)
     List<Course> findAvailableCoursesByCourseIds(List<Integer> courseIds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select c from Course c where c.courseId = :courseId")
+    Optional<Course> findByIdForUpdate(Integer courseId);
+
 }

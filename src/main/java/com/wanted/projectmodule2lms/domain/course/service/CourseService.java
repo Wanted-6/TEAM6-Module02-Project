@@ -18,6 +18,9 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.Resource;
@@ -98,10 +101,10 @@ public class CourseService {
 
     public List<CourseDTO> findMyInstructorCourses(String instructorLoginId, String keyword, String category) {
         Member instructor = memberRepository.findByLoginId(instructorLoginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강사 로그인 ID입니다."));
 
         if (instructor.getRole() != MemberRole.INSTRUCTOR) {
-            throw new IllegalArgumentException("강사만 코스 목록을 조회할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스 목록을 조회할 수 있습니다.");
         }
 
         String safeKeyword = normalizeKeyword(keyword);
@@ -146,7 +149,7 @@ public class CourseService {
 
     public CourseDTO findCourseById(Integer courseId) {
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스가 존재하지 않습니다."));
 
         return modelMapper.map(foundCourse, CourseDTO.class);
     }
@@ -195,10 +198,10 @@ public class CourseService {
     @Transactional
     public Integer registCourse(CourseCreateDTO createDTO, MultipartFile thumbnailFile) throws IOException {
         Member instructor = memberRepository.findByLoginId(createDTO.getInstructorLoginId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강사 로그인 ID입니다."));
 
         if (instructor.getRole() != MemberRole.INSTRUCTOR) {
-            throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스를 등록할 수 있습니다.");
         }
 
         String normalizedCategory = normalizeCategory(createDTO.getCategory());
@@ -238,17 +241,17 @@ public class CourseService {
                              MultipartFile thumbnailFile) throws IOException {
 
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수정할 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수정할 코스가 존재하지 않습니다."));
 
         Member instructor = memberRepository.findByLoginId(instructorLoginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강사 로그인 ID입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강사 로그인 ID입니다."));
 
         if (instructor.getRole() != MemberRole.INSTRUCTOR) {
-            throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스를 수정할 수 있습니다.");
         }
 
         if (!foundCourse.getInstructorId().equals(instructor.getMemberId())) {
-            throw new IllegalArgumentException("본인이 등록한 코스만 수정할 수 있습니다.");
+            throw new UnauthorizedInstructorException("본인이 등록한 코스만 수정할 수 있습니다.");
         }
 
         String normalizedCategory = normalizeCategory(updateDTO.getCategory());
@@ -277,10 +280,10 @@ public class CourseService {
     @Transactional
     public void approveCourse(Integer courseId, String adminLoginId) {
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("승인할 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("승인할 코스가 존재하지 않습니다."));
 
         Member admin = memberRepository.findByLoginId(adminLoginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관리자 로그인 ID입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 관리자 로그인 ID입니다."));
 
         if (admin.getRole() != MemberRole.ADMIN) {
             throw new IllegalArgumentException("관리자만 승인할 수 있습니다.");
@@ -298,10 +301,10 @@ public class CourseService {
     @Transactional
     public void rejectCourse(Integer courseId, String adminLoginId, String rejectReason) {
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("반려할 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("반려할 코스가 존재하지 않습니다."));
 
         Member admin = memberRepository.findByLoginId(adminLoginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관리자 로그인 ID입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 관리자 로그인 ID입니다."));
 
         if (admin.getRole() != MemberRole.ADMIN) {
             throw new IllegalArgumentException("관리자만 반려할 수 있습니다.");
@@ -314,10 +317,10 @@ public class CourseService {
     @Transactional
     public void deleteCourseByAdmin(Integer courseId, String adminLoginId) {
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제 처리할 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("삭제 처리할 코스가 존재하지 않습니다."));
 
         Member admin = memberRepository.findByLoginId(adminLoginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관리자 로그인 ID입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 관리자 로그인 ID입니다."));
 
         if (admin.getRole() != MemberRole.ADMIN) {
             throw new IllegalArgumentException("관리자만 삭제 처리할 수 있습니다.");
@@ -346,7 +349,7 @@ public class CourseService {
                     Member instructor = instructorMap.get(course.getInstructorId());
 
                     if (instructor == null) {
-                        throw new IllegalArgumentException("강사 정보가 존재하지 않습니다.");
+                        throw new ResourceNotFoundException("강사 정보가 존재하지 않습니다.");
                     }
 
                     return new CourseAdminListDTO(
@@ -362,12 +365,7 @@ public class CourseService {
     }
 
     public List<CourseDTO> findMyCourses(Integer memberId) {
-        List<Enrollment> enrollmentList = enrollmentRepository.findByMemberId(memberId);
-
-        List<Integer> courseIds = enrollmentList.stream()
-                .map(Enrollment::getCourseId)
-                .distinct()
-                .toList();
+        List<Integer> courseIds = enrollmentRepository.findCourseIdsByMemberId(memberId);
 
         if (courseIds.isEmpty()) {
             return new ArrayList<>();
@@ -384,17 +382,18 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+
     public CourseDTO findMyCourseDetail(Integer memberId, Integer courseId) {
         enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("수강 중인 코스가 아닙니다."));
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스가 존재하지 않습니다."));
 
         if (course.getApprovalStatus() != CourseApprovalStatus.APPROVED
                 || !Boolean.TRUE.equals(course.getIsOpen())
                 || sectionRepository.countByCourseId(courseId) != 8) {
-            throw new IllegalArgumentException("접근할 수 없는 코스입니다.");
+            throw new UnauthorizedStudentAccessException("접근할 수 없는 코스입니다.");
         }
 
         return modelMapper.map(course, CourseDTO.class);
@@ -402,10 +401,10 @@ public class CourseService {
 
     public CourseInstructorDTO findInstructorByCourseId(Integer courseId) {
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스가 존재하지 않습니다."));
 
         Member instructor = memberRepository.findById(foundCourse.getInstructorId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 강사 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 강사 정보가 존재하지 않습니다."));
 
         return new CourseInstructorDTO(
                 instructor.getLoginId(),
@@ -421,17 +420,17 @@ public class CourseService {
 
     public CourseAdminDTO findAdminCourseDetail(Integer courseId) {
         Course foundCourse = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스가 존재하지 않습니다."));
 
         Member instructor = memberRepository.findById(foundCourse.getInstructorId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 강사 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 강사 정보가 존재하지 않습니다."));
 
         String reviewerLoginId = null;
         String reviewerName = null;
 
         if (foundCourse.getReviewedBy() != null) {
             Member reviewer = memberRepository.findById(foundCourse.getReviewedBy())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 검토자 정보가 존재하지 않습니다."));
+                    .orElseThrow(() -> new ResourceNotFoundException("해당 검토자 정보가 존재하지 않습니다."));
             reviewerLoginId = reviewer.getLoginId();
             reviewerName = reviewer.getName();
         }

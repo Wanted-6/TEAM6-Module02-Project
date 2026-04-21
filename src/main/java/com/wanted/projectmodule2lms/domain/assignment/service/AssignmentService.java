@@ -6,6 +6,7 @@ import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentUpdateDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.Resource;
@@ -29,14 +30,14 @@ public class AssignmentService {
 
     public AssignmentDTO findAssignmentByCourseId(Integer courseId) {
         Assignment foundAssignment = assignmentRepository.findByCourseId(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스에 등록된 과제가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 코스에 등록된 과제가 없습니다."));
 
         return modelMapper.map(foundAssignment, AssignmentDTO.class);
     }
 
     public AssignmentDTO findAssignmentById(Integer assignmentId) {
         Assignment foundAssignment = assignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 과제가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 과제가 존재하지 않습니다."));
 
         return modelMapper.map(foundAssignment, AssignmentDTO.class);
     }
@@ -51,7 +52,7 @@ public class AssignmentService {
                                     MultipartFile attachmentUpload) throws IOException {
 
         courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("코스가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("코스가 존재하지 않습니다."));
 
         if (assignmentRepository.findByCourseId(courseId).isPresent()) {
             throw new IllegalArgumentException("해당 코스에는 이미 과제가 등록되어 있습니다.");
@@ -81,7 +82,7 @@ public class AssignmentService {
                                            MultipartFile attachmentUpload) throws IOException {
 
         Assignment foundAssignment = assignmentRepository.findByCourseId(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수정할 과제가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수정할 과제가 존재하지 않습니다."));
 
         String attachmentPath = foundAssignment.getAttachmentFile();
         String newAttachmentPath = saveAttachmentFile(attachmentUpload);

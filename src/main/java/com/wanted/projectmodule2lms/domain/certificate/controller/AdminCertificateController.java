@@ -2,6 +2,7 @@ package com.wanted.projectmodule2lms.domain.certificate.controller;
 
 import com.wanted.projectmodule2lms.domain.certificate.model.service.CertificateService;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,8 +27,15 @@ public class AdminCertificateController {
     @PostMapping("/{certificateId}/approve")
     public String approveCertificate(@PathVariable Integer certificateId,
                                      @LoginMemberId Long adminId) {
-        certificateService.approveCertificate(certificateId, adminId.intValue());
+        certificateService.approveCertificate(certificateId, requireAdminId(adminId));
         return "redirect:/admin/certificates";
+    }
+
+    private Integer requireAdminId(Long adminId) {
+        if (adminId == null) {
+            throw new LoginRequiredException("로그인한 사용자 정보가 필요합니다.");
+        }
+        return adminId.intValue();
     }
 
 }

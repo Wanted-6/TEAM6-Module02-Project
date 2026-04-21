@@ -2,6 +2,7 @@ package com.wanted.projectmodule2lms.domain.member.model.service;
 
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
@@ -21,7 +22,7 @@ public class AdminService {
     @Transactional
     public String approveInstructor(Integer memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         String approvalCode = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         member.approveInstructor(approvalCode);
@@ -32,11 +33,10 @@ public class AdminService {
     @Transactional
     public void rejectInstructor(Integer memberId, String reason) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         member.rejectInstructor(reason);
-
-       mailService.sendRejectEmail(member.getEmail(), reason);
+        mailService.sendRejectEmail(member.getEmail(), reason);
     }
 
     public int getActiveUserCount(SessionRegistry sessionRegistry) {

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <meta charset="UTF-8">
     <title>학생 명단 및 관리</title>
     <style>
@@ -35,6 +37,58 @@
     </style>
 </head>
 <body>
+<header class="sticky top-0 z-50 border-b border-white/70 bg-white/90 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a th:href="@{/}" class="text-2xl font-extrabold tracking-tight text-[#2b3f8f]">
+            64Lab
+        </a>
+
+        <div class="flex items-center gap-3">
+            <th:block sec:authorize="isAnonymous()">
+                <a th:href="@{/auth/login}"
+                   class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-[#2b3f8f]">
+                    로그인
+                </a>
+                <a th:href="@{/member/signup}"
+                   class="rounded-full bg-[#2b3f8f] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
+                    회원가입
+                </a>
+            </th:block>
+
+            <th:block sec:authorize="isAuthenticated()">
+                <div class="flex items-center gap-3">
+                    <div class="h-9 w-9 overflow-hidden rounded-full border border-slate-200 shadow-sm">
+                        <img th:if="${member != null and member.profile != null and member.profile.profileImage != null and !#strings.isEmpty(member.profile.profileImage)}"
+                             th:src="@{/uploads/{file}(file=${member.profile.profileImage})}"
+                             class="h-full w-full object-cover"
+                             alt="프로필 이미지"
+                             onerror="this.src='/img/default-profile.png'">
+
+                        <img th:unless="${member != null and member.profile != null and member.profile.profileImage != null and !#strings.isEmpty(member.profile.profileImage)}"
+                             th:src="@{/img/default-profile.png}"
+                             class="h-full w-full object-cover"
+                             alt="기본 프로필 이미지">
+                    </div>
+
+                    <span class="hidden text-sm font-medium text-slate-600 sm:block">
+                        <strong class="text-[#2b3f8f]"
+                                th:text="${member != null and member.name != null and !#strings.isEmpty(member.name) ? member.name : #authentication.name}">
+                            김학생
+                        </strong>님, 환영합니다.
+                    </span>
+                </div>
+
+                <form th:action="@{/auth/logout}" method="post" class="inline">
+                    <button type="submit"
+                            class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-[#2b3f8f] hover:text-[#2b3f8f]">
+                        로그아웃
+                    </button>
+                </form>
+            </th:block>
+        </div>
+    </div>
+</header>
+
 <div class="page-wrapper">
     <div style="margin: 0 0 28px;">
         <a th:href="@{/main}" style="font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; color: #334a9f; text-decoration: none;">
