@@ -17,18 +17,18 @@ public class AuditLog {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long memberId; // 로그인한 회원 번호
+    private Long memberId;
 
-    private String methodName; // 실행된 메서드 이름
+    private String methodName;
 
-    private long executionTime; // 실행 시간
+    private long executionTime;
 
-    private String status; // 성공/실패 여부
+    private String status;
 
     @Column(columnDefinition = "TEXT")
-    private String errorMessage; // 에러 메시지
+    private String errorMessage;
 
-    private LocalDateTime createdAt; // 생성 시간
+    private LocalDateTime createdAt;
 
     @Builder
     public AuditLog(Long memberId, String methodName, long executionTime, String status, String errorMessage) {

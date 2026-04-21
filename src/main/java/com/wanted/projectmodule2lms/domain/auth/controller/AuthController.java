@@ -36,13 +36,10 @@ public class AuthController {
         return mv;
     }
 
-
-    // 아이디 찾기
     @GetMapping("/find-id")
     public String findIdPage() {
         return "auth/find-id";
     }
-
 
     @PostMapping("/find-id")
     @ResponseBody
@@ -56,7 +53,6 @@ public class AuthController {
         }
     }
 
-    // 비밀번호 찾기
     @GetMapping("/find-pw")
     public String findPwPage() {
         return "auth/find-pw";

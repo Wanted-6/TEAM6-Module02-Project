@@ -129,34 +129,6 @@ public class MemberService {
         return 0;
     }
 
-//    public boolean checkIdDuplicate(String memberId) {
-//        Optional<Member> memberOpt = memberRepository.findByLoginId(memberId);
-//        if (memberOpt.isPresent()) {
-//            Member member = memberOpt.get();
-//            return member.getRole() != MemberRole.INSTRUCTOR || member.getApprovalStatus() == null || !"REJECTED".equals(member.getApprovalStatus().name());
-//        }
-//        return false;
-//    }
-//
-//    public boolean checkEmailDuplicate(String email) {
-//        Optional<Member> memberOpt = memberRepository.findByEmail(email);
-//        if (memberOpt.isPresent()) {
-//            Member member = memberOpt.get();
-//            return member.getRole() != MemberRole.INSTRUCTOR || member.getApprovalStatus() == null || !"REJECTED".equals(member.getApprovalStatus().name());
-//        }
-//        return false;
-//    }
-//
-//    public boolean checkPhoneDuplicate(String phone) {
-//        Optional<Member> memberOpt = memberRepository.findByPhone(phone);
-//        if (memberOpt.isPresent()) {
-//            Member member = memberOpt.get();
-//            return member.getRole() != MemberRole.INSTRUCTOR || member.getApprovalStatus() == null || !"REJECTED".equals(member.getApprovalStatus().name());
-//        }
-//        return false;
-//    }
-
-    // 중복코드 통일 / 호출만 하기.
     private boolean isDuplicateAndNotRejected(Optional<Member> memberOpt) {
         if (memberOpt.isPresent()) {
             Member member = memberOpt.get();

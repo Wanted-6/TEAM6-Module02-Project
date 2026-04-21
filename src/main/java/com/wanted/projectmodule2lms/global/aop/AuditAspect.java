@@ -22,11 +22,7 @@ public class AuditAspect {
 
     @Around("@annotation(com.wanted.projectmodule2lms.global.annotation.AuditLog)")
     public Object logAudit(ProceedingJoinPoint joinPoint) throws Throwable {
-
-        // 메서드 이름 가져오기 (inputData 추출 코드 삭제됨)
         String methodName = joinPoint.getSignature().toShortString();
-
-        // 로그인한 회원의 member_id 가져오기 (pk 대체 값으로 가져옴.)
         Long currentMemberId = com.wanted.projectmodule2lms.global.util.SecurityUtil.getCurrentMemberId();
 
         long startTime = System.currentTimeMillis();
@@ -34,15 +30,11 @@ public class AuditAspect {
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
-
-            // 성공 시 DB 저장 (inputData 파라미터 빠짐)
             saveLogToDb(currentMemberId, methodName, executionTime, "SUCCESS", null);
             return result;
 
         } catch (Exception e) {
             long executionTime = System.currentTimeMillis() - startTime;
-
-            // 실패(에러) 시 에러 메시지와 함께 DB 저장
             saveLogToDb(currentMemberId, methodName, executionTime, "FAIL", e.getMessage());
             throw e;
         }
@@ -59,6 +51,5 @@ public class AuditAspect {
                 .build();
         auditLogRepository.save(logHistory);
     }
-
 
 }

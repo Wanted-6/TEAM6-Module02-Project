@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Integer> {
     List<Board> findByIsDeletedFalse();
+
     Optional<Board> findByPostIdAndIsDeletedFalse(Integer postId);
 
     List<Board> findByPostTypeAndIsDeletedFalse(BoardType postType);
