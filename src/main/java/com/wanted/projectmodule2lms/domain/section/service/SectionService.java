@@ -67,7 +67,7 @@ public class SectionService {
                                  SectionCreateDTO createDTO,
                                  MultipartFile materialUpload) throws IOException {
         if (!courseRepository.existsById(courseId)) {
-            throw new IllegalArgumentException("부모 코스가 존재하지 않습니다.");
+            throw new IllegalArgumentException("코스가 존재하지 않습니다.");
         }
 
         if (createDTO.getSectionOrder() == null || createDTO.getSectionOrder() < 1 || createDTO.getSectionOrder() > 8) {
