@@ -3,7 +3,7 @@ package com.wanted.projectmodule2lms.domain.assignment.controller;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentCreateDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentUpdateDTO;
-import com.wanted.projectmodule2lms.domain.assignment.service.AssignmentService;
+import com.wanted.projectmodule2lms.domain.assignment.model.service.AssignmentService;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
