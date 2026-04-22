@@ -355,7 +355,6 @@ public class GradeService {
         return course;
     }
 
-//enrollmentid를 받을 때
     private Enrollment getAuthorizedEnrollmentForInstructor(Integer instructorId, Integer enrollmentId) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 수강 정보입니다."));

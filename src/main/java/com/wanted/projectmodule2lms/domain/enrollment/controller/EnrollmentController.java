@@ -1,7 +1,7 @@
 package com.wanted.projectmodule2lms.domain.enrollment.controller;
 
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dto.EnrollmentCreateDTO;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.service.EnrollmentService;

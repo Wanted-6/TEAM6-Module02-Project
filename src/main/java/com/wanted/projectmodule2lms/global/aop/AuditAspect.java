@@ -1,15 +1,11 @@
 package com.wanted.projectmodule2lms.global.aop;
 
-import com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO;
 import com.wanted.projectmodule2lms.global.aop.dao.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Slf4j

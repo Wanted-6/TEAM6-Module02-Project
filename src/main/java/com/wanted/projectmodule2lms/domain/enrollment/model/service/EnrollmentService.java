@@ -13,6 +13,7 @@ import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
 import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class EnrollmentService {
 
     @Transactional
     public void enrollCourse(Integer memberId, Integer courseId) {
-        Course course = courseRepository.findById(courseId)
+        Course course = courseRepository.findByIdForUpdate(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 강의입니다."));
 
         if (!Boolean.TRUE.equals(course.getIsOpen())) {
@@ -49,13 +50,14 @@ public class EnrollmentService {
             throw new EnrollmentCapacityExceededException("정원이 초과되어 수강신청할 수 없습니다.");
         }
 
-
-        Enrollment enrollment = new Enrollment(memberId, courseId);
-        Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
-
-        Grade grade = new Grade(savedEnrollment.getEnrollmentId());
-        gradeRepository.save(grade);
+        try {
+            Enrollment savedEnrollment = enrollmentRepository.save(new Enrollment(memberId, courseId));
+            gradeRepository.save(new Grade(savedEnrollment.getEnrollmentId()));
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateEnrollmentException("이미 수강신청한 강의입니다.");
+        }
     }
+
 
     @Transactional(readOnly = true)
     public List<Enrollment> findEnrollmentsByMemberId(Integer memberId) {

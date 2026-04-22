@@ -16,13 +16,21 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionAttendanceDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,27 +116,26 @@ public class InstructorAttendanceService {
         return new ArrayList<>(latestAttendanceBySection.values());
     }
 
-
     @Transactional
     public void updateAttendanceStatusByInstructor(Integer instructorId,
                                                    Integer enrollmentId,
                                                    Integer sectionId,
                                                    String status) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 정보가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수강 정보가 없습니다."));
 
         Section section = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("섹션 정보가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("섹션 정보가 없습니다."));
 
         if (!enrollment.getCourseId().equals(section.getCourseId())) {
             throw new IllegalArgumentException("코스 정보가 일치하지 않습니다.");
         }
 
         Course course = courseRepository.findById(enrollment.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("코스 정보가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("코스 정보가 없습니다."));
 
         if (!course.getInstructorId().equals(instructorId)) {
-            throw new IllegalArgumentException("해당 강의 담당 강사만 출결을 수정할 수 있습니다.");
+            throw new UnauthorizedInstructorException("해당 강의 담당 강사만 출결을 수정할 수 있습니다.");
         }
 
         AttendanceStatus attendanceStatus = AttendanceStatus.valueOf(status);
@@ -205,21 +212,6 @@ public class InstructorAttendanceService {
         }
 
         return "UNCHECKED";
-    }
-
-    private List<Attendance> findLatestAttendancesByEnrollmentId(Integer enrollmentId) {
-        List<Attendance> attendances = attendanceRepository.findByEnrollmentIdOrderBySectionIdAsc(enrollmentId);
-        Map<Integer, Attendance> latestAttendanceBySection = new LinkedHashMap<>();
-
-        for (Attendance attendance : attendances) {
-            Attendance current = latestAttendanceBySection.get(attendance.getSectionId());
-
-            if (current == null || ATTENDANCE_ORDER.compare(attendance, current) > 0) {
-                latestAttendanceBySection.put(attendance.getSectionId(), attendance);
-            }
-        }
-
-        return new ArrayList<>(latestAttendanceBySection.values());
     }
 
     private static final Comparator<Attendance> ATTENDANCE_ORDER =

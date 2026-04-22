@@ -11,7 +11,7 @@ import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceSta
 import com.wanted.projectmodule2lms.domain.certificate.model.dao.CertificateRepository;
 import com.wanted.projectmodule2lms.domain.certificate.model.entity.Certificate;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
@@ -19,7 +19,9 @@ import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
-import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.domain.section.model.service.SectionService;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +46,6 @@ public class AttendanceService {
     private static final double LATE_PENALTY_WEIGHT = 0.5;
     private static final double ABSENT_PENALTY_WEIGHT = 1.0;
 
-
     private final AttendanceRepository attendanceRepository;
     private final SectionRepository sectionRepository;
     private final EnrollmentRepository enrollmentRepository;
@@ -56,7 +57,7 @@ public class AttendanceService {
 
     public Integer calculateTotalScore(Integer memberId, Integer courseId) {
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("수강 중인 코스가 아닙니다."));
 
         Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
                 .orElse(null);
@@ -99,7 +100,7 @@ public class AttendanceService {
                 .orElse(null);
 
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("수강 중인 코스가 아닙니다."));
 
         Grade grade = gradeRepository.findByEnrollmentId(enrollment.getEnrollmentId())
                 .orElse(null);
@@ -137,7 +138,6 @@ public class AttendanceService {
         int weightedAttitudeScore = calculateWeightedScore(attitudeScore, ATTITUDE_MAX_SCORE);
         int totalScore = attendanceScore + weightedAssignmentScore + weightedExamScore + weightedAttitudeScore;
 
-
         return new AttendancePageDTO(
                 memberId,
                 enrollment.getEnrollmentId(),
@@ -158,16 +158,15 @@ public class AttendanceService {
                 totalScore,
                 certificateStatus
         );
-
     }
 
     @Transactional
     public AttendanceCheckResponseDTO checkAttendance(Integer memberId, Integer sectionId, LocalDateTime checkedAt) {
         Section section = sectionRepository.findById(sectionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 섹션이 존재하지 않습니다."));
 
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, section.getCourseId())
-                .orElseThrow(() -> new IllegalArgumentException("수강 중인 코스가 아닙니다."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("수강 중인 코스가 아닙니다."));
 
         LocalDateTime attendanceTime = checkedAt != null ? checkedAt : LocalDateTime.now();
         validateAttendanceWindow(section.getOpenDate(), attendanceTime);
@@ -258,14 +257,14 @@ public class AttendanceService {
 
     private String buildAttendanceMessage(AttendanceStatus status) {
         if (status == AttendanceStatus.LATE) {
-            return "지각으로 출석 완료했습니다.";
+            return "지각으로 출석 완료되었습니다.";
         }
 
         if (status == AttendanceStatus.ABSENT) {
-            return "결석으로 출석 완료했습니다.";
+            return "결석으로 출석 완료되었습니다.";
         }
 
-        return "출석 완료했습니다.";
+        return "출석 완료되었습니다.";
     }
 
     private AssignmentDTO toAssignmentDTO(Assignment assignment) {
@@ -298,5 +297,4 @@ public class AttendanceService {
             Comparator.comparing(Attendance::getCheckedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
                     .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
                     .thenComparing(Attendance::getAttendanceId, Comparator.nullsFirst(Comparator.naturalOrder()));
-
 }

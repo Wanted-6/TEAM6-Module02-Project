@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/auth")
@@ -21,7 +21,7 @@ public class AuthController {
     }
 
     @GetMapping("/fail")
-    public ModelAndView loginFail(HttpSession session, ModelAndView mv) {
+    public String loginFail(HttpSession session, Model model) {
 
         String message = (String) session.getAttribute("errorMessage");
 
@@ -31,9 +31,8 @@ public class AuthController {
             message = "아이디 또는 비밀번호를 확인해주세요.";
         }
 
-        mv.addObject("message", message);
-        mv.setViewName("auth/fail");
-        return mv;
+        model.addAttribute("message", message);
+        return "auth/fail";
     }
 
     @GetMapping("/find-id")

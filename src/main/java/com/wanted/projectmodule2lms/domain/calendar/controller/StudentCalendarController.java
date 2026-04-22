@@ -5,7 +5,11 @@ import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreate
 import com.wanted.projectmodule2lms.domain.calendar.model.service.CalenderService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,58 +41,78 @@ public class StudentCalendarController {
     @AuditLog
     @GetMapping("/events")
     @ResponseBody
-    public List<CalendarEventDTO> getCalendarEvents(@LoginMemberId Long memberId) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
+    public ResponseEntity<?> getCalendarEvents(@LoginMemberId Long memberId) {
+        try {
+            return ResponseEntity.ok(calendarService.findStudentCalendarEvents(requireMemberId(memberId)));
+        } catch (LoginRequiredException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
-        return calendarService.findStudentCalendarEvents(memberId.intValue());
     }
 
     @AuditLog
     @GetMapping("/memos")
     @ResponseBody
-    public List<?> getMemosByDate(@LoginMemberId Long memberId,
-                                  @RequestParam String date) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
+    public ResponseEntity<?> getMemosByDate(@LoginMemberId Long memberId,
+                                            @RequestParam String date) {
+        try {
+            return ResponseEntity.ok(calendarService.findMemosByDate(requireMemberId(memberId), date));
+        } catch (LoginRequiredException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
-        return calendarService.findMemosByDate(memberId.intValue(), date);
     }
 
 
     @PostMapping
     @ResponseBody
-    public String createMemo(@LoginMemberId Long memberId,
-                             @ModelAttribute CalendarMemoCreateDTO dto) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
+    public ResponseEntity<String> createMemo(@LoginMemberId Long memberId,
+                                             @ModelAttribute CalendarMemoCreateDTO dto) {
+        try {
+            calendarService.createMemo(requireMemberId(memberId), dto);
+            return ResponseEntity.ok("ok");
+        } catch (LoginRequiredException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
-        calendarService.createMemo(memberId.intValue(), dto);
-        return "ok";
     }
 
 
     @PutMapping("/{memoId}")
     @ResponseBody
-    public String updateMemo(@LoginMemberId Long memberId,
-                             @PathVariable Integer memoId,
-                             @ModelAttribute CalendarMemoCreateDTO dto) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
+    public ResponseEntity<String> updateMemo(@LoginMemberId Long memberId,
+                                             @PathVariable Integer memoId,
+                                             @ModelAttribute CalendarMemoCreateDTO dto) {
+        try {
+            calendarService.updateMemo(requireMemberId(memberId), memoId, dto);
+            return ResponseEntity.ok("ok");
+        } catch (LoginRequiredException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        calendarService.updateMemo(memberId.intValue(), memoId, dto);
-        return "ok";
     }
 
 
     @DeleteMapping("/{memoId}")
     @ResponseBody
-    public String deleteMemo(@LoginMemberId Long memberId,
-                             @PathVariable Integer memoId) {
-        if (memberId == null) {
-            throw new IllegalStateException(LOGIN_MEMBER_REQUIRED);
+    public ResponseEntity<String> deleteMemo(@LoginMemberId Long memberId,
+                                             @PathVariable Integer memoId) {
+        try {
+            calendarService.deleteMemo(requireMemberId(memberId), memoId);
+            return ResponseEntity.ok("ok");
+        } catch (LoginRequiredException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        calendarService.deleteMemo(memberId.intValue(), memoId);
-        return "ok";
+    }
+
+    private Integer requireMemberId(Long memberId) {
+        if (memberId == null) {
+            throw new LoginRequiredException(LOGIN_MEMBER_REQUIRED);
+        }
+        return memberId.intValue();
     }
 }

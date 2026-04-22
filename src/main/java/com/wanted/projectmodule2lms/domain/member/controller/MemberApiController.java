@@ -1,4 +1,4 @@
-package com.wanted.projectmodule2lms.domain.member.model.controller;
+package com.wanted.projectmodule2lms.domain.member.controller;
 
 import com.wanted.projectmodule2lms.domain.member.model.service.MemberService;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
@@ -15,19 +15,16 @@ import java.util.Map;
 public class MemberApiController {
     private final MemberService memberService;
 
-    // ID 중복 확인 API
     @GetMapping("/check-id")
     public ResponseEntity<Boolean> checkId(@RequestParam String memberId) { // 파라미터 이름 memberId로 통일!
         return ResponseEntity.ok(memberService.checkIdDuplicate(memberId));
     }
 
-    // 이메일 중복 확인 API
     @GetMapping("/check-email")
     public ResponseEntity<Boolean> checkEmail(@RequestParam String email) {
         return ResponseEntity.ok(memberService.checkEmailDuplicate(email));
     }
 
-    // 전화번호 중복 확인 API
     @GetMapping("/check-phone")
     public ResponseEntity<Boolean> checkPhone(@RequestParam String phone) {
         return ResponseEntity.ok(memberService.checkPhoneDuplicate(phone));

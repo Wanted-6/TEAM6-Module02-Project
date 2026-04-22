@@ -9,6 +9,7 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.profile.dao.ProfileRepository;
 import com.wanted.projectmodule2lms.domain.profile.entity.Profile;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -188,14 +189,14 @@ public class MemberService {
     @Transactional
     public void changeRegularPassword(Long memberId, String newPassword) {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
         member.changeRegularPassword(encoder.encode(newPassword));
     }
 
     @Transactional(readOnly = true)
     public boolean verifyPassword(Long memberId, String currentPassword) {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 회원입니다."));
 
         return encoder.matches(currentPassword, member.getPassword());
     }
@@ -223,7 +224,7 @@ public class MemberService {
     @Transactional
     public void updateProfile(Long memberId, String bio, MultipartFile file) throws IOException {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         Profile profile = member.getProfile();
 
@@ -237,7 +238,7 @@ public class MemberService {
         }
 
         if (file != null && !file.isEmpty()) {
-            String savePath = "C:/lab/uploads/"; // 환경에 맞게 경로 확인할 것
+            String savePath = "C:/lab/uploads/";
             File dir = new File(savePath);
             if (!dir.exists()) dir.mkdirs();
 
@@ -255,7 +256,7 @@ public class MemberService {
     @Transactional
     public void updateToDefaultProfile(Long memberId, String bio) {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         Profile profile = member.getProfile();
 
@@ -275,7 +276,8 @@ public class MemberService {
 
     @Transactional
     public void updatePhone(Long memberId, String phone) {
-        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+        Member member = memberRepository.findById(Math.toIntExact(memberId))
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         if (member.getPhone() != null && member.getPhone().equals(phone)) return;
         if (memberRepository.existsByPhone(phone)) {
@@ -289,7 +291,7 @@ public class MemberService {
         Integer memberIdInt = Math.toIntExact(memberId);
 
         Member member = memberRepository.findById(memberIdInt)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 회원입니다."));
 
         if (member.getRole() == MemberRole.INSTRUCTOR) {
             boolean hasActiveCourses = courseRepository.existsByInstructorIdAndIsOpenTrue(memberIdInt);
@@ -308,7 +310,7 @@ public class MemberService {
     @Transactional
     public boolean verifyInstructorCode(Long memberId, String inputCode) {
         Member member = memberRepository.findById(Math.toIntExact(memberId))
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원을 찾을 수 없습니다."));
 
         if (inputCode.equals(member.getApprovalCode())) {
             member.verifyApprovalCode();

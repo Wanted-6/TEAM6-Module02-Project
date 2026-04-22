@@ -1,8 +1,9 @@
 package com.wanted.projectmodule2lms.domain.attendance.controller;
 
 import com.wanted.projectmodule2lms.domain.attendance.model.service.InstructorAttendanceService;
-import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,12 +34,16 @@ public class InstructorAttendanceManageController {
                                                    @RequestParam Integer enrollmentId,
                                                    @RequestParam Integer sectionId,
                                                    @RequestParam String status) {
-        instructorAttendanceService.updateAttendanceStatusByInstructor(
-                loginMemberId.intValue(),
-                enrollmentId,
-                sectionId,
-                status
-        );
-        return ResponseEntity.ok("ok");
+        try {
+            instructorAttendanceService.updateAttendanceStatusByInstructor(
+                    loginMemberId.intValue(),
+                    enrollmentId,
+                    sectionId,
+                    status
+            );
+            return ResponseEntity.ok("ok");
+        } catch (ResourceNotFoundException | UnauthorizedInstructorException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

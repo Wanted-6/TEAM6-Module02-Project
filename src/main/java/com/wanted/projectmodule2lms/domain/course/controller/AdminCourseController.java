@@ -1,11 +1,16 @@
 package com.wanted.projectmodule2lms.domain.course.controller;
 
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
@@ -19,19 +24,17 @@ public class AdminCourseController {
 
     @AuditLog
     @GetMapping
-    public ModelAndView findAllCourses(ModelAndView mv) {
-        mv.addObject("courseList", courseService.findAdminCourseList());
-        mv.setViewName("admin/course/list");
-        return mv;
+    public String findAllCourses(Model model) {
+        model.addAttribute("courseList", courseService.findAdminCourseList());
+        return "admin/course/list";
     }
 
     @AuditLog
     @GetMapping("/{courseId}")
-    public ModelAndView findCourseById(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findAdminCourseDetail(courseId));
-        mv.setViewName("admin/course/detail");
-        return mv;
+    public String findCourseById(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findAdminCourseDetail(courseId));
+        return "admin/course/detail";
     }
 
     @PostMapping("/{courseId}/approve")
@@ -41,7 +44,7 @@ public class AdminCourseController {
         try {
             courseService.approveCourse(courseId, principal.getName());
             rttr.addFlashAttribute("successMessage", "코스가 승인되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + courseId;
@@ -55,7 +58,7 @@ public class AdminCourseController {
         try {
             courseService.rejectCourse(courseId, principal.getName(), rejectReason);
             rttr.addFlashAttribute("successMessage", "코스가 반려되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + courseId;
@@ -68,7 +71,7 @@ public class AdminCourseController {
         try {
             courseService.deleteCourseByAdmin(courseId, principal.getName());
             rttr.addFlashAttribute("successMessage", "코스가 삭제 처리되었습니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + courseId;
@@ -76,19 +79,17 @@ public class AdminCourseController {
 
     @AuditLog
     @GetMapping("/{courseId}/instructor")
-    public ModelAndView findCourseInstructor(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.addObject("instructor", courseService.findInstructorByCourseId(courseId));
-        mv.setViewName("admin/course/instructor");
-        return mv;
+    public String findCourseInstructor(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("instructor", courseService.findInstructorByCourseId(courseId));
+        return "admin/course/instructor";
     }
 
     @AuditLog
     @GetMapping("/{courseId}/students")
-    public ModelAndView findCourseStudents(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.addObject("studentList", courseService.findStudentsByCourseId(courseId));
-        mv.setViewName("admin/course/students");
-        return mv;
+    public String findCourseStudents(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("studentList", courseService.findStudentsByCourseId(courseId));
+        return "admin/course/students";
     }
 }

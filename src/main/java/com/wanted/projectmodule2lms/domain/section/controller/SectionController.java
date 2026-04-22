@@ -2,13 +2,18 @@ package com.wanted.projectmodule2lms.domain.section.controller;
 
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionCreateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
-import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.domain.section.model.service.SectionService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -17,25 +22,20 @@ public class SectionController {
 
     private final SectionService sectionService;
 
-    /* 특정 코스의 섹션 목록 조회 */
     @AuditLog
     @GetMapping("/courses/{courseId}/sections")
-    public ModelAndView findSectionsByCourse(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.addObject("sectionList", sectionService.findSectionsByCourseId(courseId));
-        mv.setViewName("instructor/section/list");
-        return mv;
+    public String findSectionsByCourse(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("sectionList", sectionService.findSectionsByCourseId(courseId));
+        return "instructor/section/list";
     }
 
-    /* 섹션 등록 페이지 */
     @GetMapping("/courses/{courseId}/sections/regist")
-    public ModelAndView registPage(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.setViewName("instructor/section/regist");
-        return mv;
+    public String registPage(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        return "instructor/section/regist";
     }
 
-    /* 섹션 등록 */
     @PostMapping("/courses/{courseId}/sections")
     public String registSection(@PathVariable Integer courseId,
                                 @ModelAttribute SectionCreateDTO createDTO,
@@ -45,7 +45,7 @@ public class SectionController {
             sectionService.registSection(courseId, createDTO, materialUpload);
             rttr.addFlashAttribute("successMessage", "섹션이 등록되었습니다.");
             return "redirect:/courses/" + courseId + "/sections";
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/sections/regist";
         } catch (Exception e) {
@@ -54,24 +54,19 @@ public class SectionController {
         }
     }
 
-    /* 섹션 상세 조회 */
     @AuditLog
     @GetMapping("/sections/{sectionId}")
-    public ModelAndView findSectionById(@PathVariable Integer sectionId, ModelAndView mv) {
-        mv.addObject("section", sectionService.findSectionById(sectionId));
-        mv.setViewName("instructor/section/detail");
-        return mv;
+    public String findSectionById(@PathVariable Integer sectionId, Model model) {
+        model.addAttribute("section", sectionService.findSectionById(sectionId));
+        return "instructor/section/detail";
     }
 
-    /* 섹션 수정 페이지 */
     @GetMapping("/sections/{sectionId}/modify")
-    public ModelAndView modifyPage(@PathVariable Integer sectionId, ModelAndView mv) {
-        mv.addObject("section", sectionService.findSectionById(sectionId));
-        mv.setViewName("instructor/section/modify");
-        return mv;
+    public String modifyPage(@PathVariable Integer sectionId, Model model) {
+        model.addAttribute("section", sectionService.findSectionById(sectionId));
+        return "instructor/section/modify";
     }
 
-    /* 섹션 수정 */
     @PostMapping("/sections/{sectionId}/modify")
     public String modifySection(@PathVariable Integer sectionId,
                                 @ModelAttribute SectionUpdateDTO updateDTO,
@@ -83,7 +78,7 @@ public class SectionController {
             sectionService.modifySection(sectionId, updateDTO, materialUpload);
             rttr.addFlashAttribute("successMessage", "섹션이 수정되었습니다.");
             return "redirect:/courses/" + courseId + "/sections";
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/sections/" + sectionId + "/modify";
         } catch (Exception e) {
@@ -92,7 +87,6 @@ public class SectionController {
         }
     }
 
-    /* 섹션 삭제 */
     @PostMapping("/sections/{sectionId}/delete")
     public String deleteSection(@PathVariable Integer sectionId,
                                 RedirectAttributes rttr) {
@@ -102,7 +96,7 @@ public class SectionController {
             sectionService.deleteSection(sectionId);
             rttr.addFlashAttribute("successMessage", "섹션이 삭제되었습니다.");
             return "redirect:/courses/" + courseId + "/sections";
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/sections/" + sectionId;
         }
