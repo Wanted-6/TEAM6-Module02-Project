@@ -55,13 +55,13 @@ public class MemberController {
                          Model model, RedirectAttributes rttr) {
         try {
             memberService.regist(signupDTO, gradCert, careerCert);
-            rttr.addFlashAttribute("message", "????싨뤆?쎛???곷턄 ?熬곣뫁???琉????鍮?? ?β돦裕??筌뤿굝???낅슣?섋땻??");
+            rttr.addFlashAttribute("message", "회원가입이 완료되었습니다. 승인 후 로그인하실 수 있습니다.");
             return "redirect:/auth/login";
         } catch (IllegalArgumentException | IllegalStateException e) {
             model.addAttribute("message", e.getMessage());
             return "member/signup";
         } catch (Exception e) {
-            model.addAttribute("message", "??類ㅼ뮅????????댁쾼?띠럾? ?꾩룇裕뉑틦??????鍮??");
+            model.addAttribute("message", "회원가입 처리 중 오류가 발생했습니다.");
             return "member/signup";
         }
     }
@@ -81,13 +81,13 @@ public class MemberController {
             memberService.changeRegularPassword(requireMemberId(memberId), newPassword);
             session.invalidate();
 
-            rttr.addFlashAttribute("message", "?????뺢퀡???먯쾸? ?繹먭퍓沅??⑤챷紐드슖??곌떠??롪퍔?η뵳???곕????덈펲. ???됱Ŧ???????뺢퀡???묒뿉????곕뻣 ?β돦裕??筌뤿굝???낅슣?섋땻??");
+            rttr.addFlashAttribute("message", "비밀번호가 변경되었습니다. 보안을 위해 다시 로그인해주세요.");
             return "redirect:/auth/login";
         } catch (ResourceNotFoundException e) {
             rttr.addFlashAttribute("error", e.getMessage());
             return "redirect:/member/edit-password";
         } catch (Exception e) {
-            rttr.addFlashAttribute("error", "?????뺢퀡????곌떠??롪퍔?⑵굢????덉넮???곕????덈펲.");
+            rttr.addFlashAttribute("error", "비밀번호 변경 중 오류가 발생했습니다.");
             return "redirect:/member/edit-password";
         }
     }
@@ -103,10 +103,10 @@ public class MemberController {
                                     @RequestParam("code") String inputCode,
                                     RedirectAttributes rttr) {
         if (memberService.verifyInstructorCode(requireMemberId(memberId), inputCode)) {
-            rttr.addFlashAttribute("message", "?띠룆踰→쾮??筌뤾쑴理???熬곣뫁???琉????鍮??");
+            rttr.addFlashAttribute("message", "강사 인증이 완료되었습니다.");
             return "redirect:/";
         } else {
-            rttr.addFlashAttribute("error", "?獄????袁⑤?獄?쑚泥? ????紐?? ???용????덈펲.");
+            rttr.addFlashAttribute("error", "인증 코드가 올바르지 않습니다.");
             return "redirect:/member/verify-code";
         }
     }
@@ -117,14 +117,10 @@ public class MemberController {
         Long currentMemberId = requireMemberId(memberId);
 
         Member member = memberRepository.findById(currentMemberId.intValue())
-                .orElseThrow(() -> new ResourceNotFoundException("??????嶺뚢돦堉??????怨룸????덈펲."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원 정보를 찾을 수 없습니다."));
 
         if (member.getRole() == MemberRole.STUDENT) {
-
-
-
             List<Enrollment> enrollments = enrollmentService.getMyEnrollments(memberId.intValue());
-
 
             List<Integer> courseIds = enrollments.stream()
                     .map(Enrollment::getCourseId)
@@ -162,7 +158,7 @@ public class MemberController {
             memberService.updateProfile(currentMemberId, bio, profileImage);
         }
 
-        rttr.addFlashAttribute("message", "?熬곣뫁夷?熬곣뫗逾???瑜곸젧??琉????鍮??");
+        rttr.addFlashAttribute("message", "프로필이 성공적으로 수정되었습니다.");
         return "redirect:/member/mypage";
     }
 
@@ -200,7 +196,7 @@ public class MemberController {
 
     private Long requireMemberId(Long memberId) {
         if (memberId == null) {
-            throw new LoginRequiredException("?β돦裕??筌뤿굝由???????筌먲퐢沅뽪뤆?쎛 ?熬곣뫗???紐껊퉵??");
+            throw new LoginRequiredException("로그인이 필요합니다.");
         }
         return memberId;
     }
