@@ -8,13 +8,13 @@ import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -25,18 +25,16 @@ public class SectionController {
 
     @AuditLog
     @GetMapping("/courses/{courseId}/sections")
-    public ModelAndView findSectionsByCourse(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.addObject("sectionList", sectionService.findSectionsByCourseId(courseId));
-        mv.setViewName("instructor/section/list");
-        return mv;
+    public String findSectionsByCourse(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("sectionList", sectionService.findSectionsByCourseId(courseId));
+        return "instructor/section/list";
     }
 
     @GetMapping("/courses/{courseId}/sections/regist")
-    public ModelAndView registPage(@PathVariable Integer courseId, ModelAndView mv) {
-        mv.addObject("courseId", courseId);
-        mv.setViewName("instructor/section/regist");
-        return mv;
+    public String registPage(@PathVariable Integer courseId, Model model) {
+        model.addAttribute("courseId", courseId);
+        return "instructor/section/regist";
     }
 
     @PostMapping("/courses/{courseId}/sections")
@@ -59,17 +57,15 @@ public class SectionController {
 
     @AuditLog
     @GetMapping("/sections/{sectionId}")
-    public ModelAndView findSectionById(@PathVariable Integer sectionId, ModelAndView mv) {
-        mv.addObject("section", sectionService.findSectionById(sectionId));
-        mv.setViewName("instructor/section/detail");
-        return mv;
+    public String findSectionById(@PathVariable Integer sectionId, Model model) {
+        model.addAttribute("section", sectionService.findSectionById(sectionId));
+        return "instructor/section/detail";
     }
 
     @GetMapping("/sections/{sectionId}/modify")
-    public ModelAndView modifyPage(@PathVariable Integer sectionId, ModelAndView mv) {
-        mv.addObject("section", sectionService.findSectionById(sectionId));
-        mv.setViewName("instructor/section/modify");
-        return mv;
+    public String modifyPage(@PathVariable Integer sectionId, Model model) {
+        model.addAttribute("section", sectionService.findSectionById(sectionId));
+        return "instructor/section/modify";
     }
 
     @PostMapping("/sections/{sectionId}/modify")

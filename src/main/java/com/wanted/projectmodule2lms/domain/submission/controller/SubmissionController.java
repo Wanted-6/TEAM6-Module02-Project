@@ -16,13 +16,13 @@ import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessEx
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
@@ -35,41 +35,41 @@ public class SubmissionController {
     private final CourseService courseService;
 
     @GetMapping("/courses/{courseId}/assignment/submissions")
-    public ModelAndView findSubmissionsByCourse(@PathVariable Integer courseId,
-                                                @RequestParam(defaultValue = "INSTRUCTOR") String role,
-                                                ModelAndView mv) {
+    public String findSubmissionsByCourse(@PathVariable Integer courseId,
+                                          @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                          Model model) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new UnauthorizedInstructorException("강사만 제출 현황을 조회할 수 있습니다.");
+            throw new UnauthorizedInstructorException("媛뺤궗留??쒖텧 ?꾪솴??議고쉶?????덉뒿?덈떎.");
         }
 
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findCourseById(courseId));
-        mv.addObject("assignment", assignment);
-        mv.addObject("submissionList",
-                submissionService.findSubmissionsByAssignmentId(courseId, assignment.getAssignmentId()));
-        mv.addObject("role", role);
-        mv.setViewName("submission/list");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findCourseById(courseId));
+        model.addAttribute("assignment", assignment);
+        model.addAttribute(
+                "submissionList",
+                submissionService.findSubmissionsByAssignmentId(courseId, assignment.getAssignmentId())
+        );
+        model.addAttribute("role", role);
+        return "submission/list";
     }
 
     @GetMapping("/courses/{courseId}/assignment/submissions/regist")
-    public ModelAndView registPage(@PathVariable Integer courseId,
-                                   @RequestParam(defaultValue = "STUDENT") String role,
-                                   ModelAndView mv) {
+    public String registPage(@PathVariable Integer courseId,
+                             @RequestParam(defaultValue = "STUDENT") String role,
+                             Model model) {
         if (!"STUDENT".equals(role)) {
-            throw new UnauthorizedStudentAccessException("학생만 과제를 제출할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("?숈깮留?怨쇱젣瑜??쒖텧?????덉뒿?덈떎.");
         }
 
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findCourseById(courseId));
-        mv.addObject("assignment", assignment);
-        mv.addObject("role", role);
-        mv.setViewName("submission/regist");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findCourseById(courseId));
+        model.addAttribute("assignment", assignment);
+        model.addAttribute("role", role);
+        return "submission/regist";
     }
 
     @PostMapping("/courses/{courseId}/assignment/submissions")
@@ -81,7 +81,7 @@ public class SubmissionController {
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
         if (!"STUDENT".equals(role)) {
-            throw new UnauthorizedStudentAccessException("학생만 과제를 제출할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("?숈깮留?怨쇱젣瑜??쒖텧?????덉뒿?덈떎.");
         }
 
         requireMemberId(memberId);
@@ -97,7 +97,7 @@ public class SubmissionController {
                     attachmentUpload
             );
 
-            rttr.addFlashAttribute("successMessage", "과제가 제출되었습니다.");
+            rttr.addFlashAttribute("successMessage", "怨쇱젣媛 ?쒖텧?섏뿀?듬땲??");
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
 
         } catch (ResourceNotFoundException | UnauthorizedStudentAccessException | IllegalArgumentException e) {
@@ -105,12 +105,12 @@ public class SubmissionController {
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
 
         } catch (Exception e) {
-            log.error("과제 제출 중 예외 발생 - courseId={}, sectionId={}, memberId={}",
+            log.error("怨쇱젣 ?쒖텧 以??덉쇅 諛쒖깮 - courseId={}, sectionId={}, memberId={}",
                     courseId, sectionId, memberId, e);
 
             String message = (e.getMessage() != null && !e.getMessage().isBlank())
                     ? e.getMessage()
-                    : "과제 제출 중 처리할 수 없는 문제가 발생했습니다.";
+                    : "怨쇱젣 ?쒖텧 以?泥섎━?????녿뒗 臾몄젣媛 諛쒖깮?덉뒿?덈떎.";
 
             rttr.addFlashAttribute("errorMessage", message);
             return "redirect:/student/attendance/" + courseId + "/" + sectionId;
@@ -118,12 +118,12 @@ public class SubmissionController {
     }
 
     @GetMapping("/courses/{courseId}/assignment/submissions/me")
-    public ModelAndView findMySubmission(@PathVariable Integer courseId,
-                                         @LoginMemberId Long memberId,
-                                         @RequestParam(defaultValue = "STUDENT") String role,
-                                         ModelAndView mv) {
+    public String findMySubmission(@PathVariable Integer courseId,
+                                   @LoginMemberId Long memberId,
+                                   @RequestParam(defaultValue = "STUDENT") String role,
+                                   Model model) {
         if (!"STUDENT".equals(role)) {
-            throw new UnauthorizedStudentAccessException("학생만 본인 제출을 조회할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("?숈깮留?蹂몄씤 ?쒖텧??議고쉶?????덉뒿?덈떎.");
         }
 
         requireMemberId(memberId);
@@ -132,45 +132,42 @@ public class SubmissionController {
         Integer enrollmentId = submissionService.findEnrollmentIdByMemberAndCourse(Math.toIntExact(memberId), courseId);
         SubmissionDTO submission = submissionService.findMySubmission(assignment.getAssignmentId(), enrollmentId);
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findCourseById(courseId));
-        mv.addObject("assignment", assignment);
-        mv.addObject("submission", submission);
-        mv.addObject("role", role);
-        mv.setViewName("submission/detail");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findCourseById(courseId));
+        model.addAttribute("assignment", assignment);
+        model.addAttribute("submission", submission);
+        model.addAttribute("role", role);
+        return "submission/detail";
     }
 
     @GetMapping("/submissions/{submissionId}")
-    public ModelAndView findSubmissionById(@PathVariable Integer submissionId,
-                                           @RequestParam(defaultValue = "INSTRUCTOR") String role,
-                                           ModelAndView mv) {
+    public String findSubmissionById(@PathVariable Integer submissionId,
+                                     @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                                     Model model) {
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
         Integer courseId = assignmentService.findAssignmentById(submission.getAssignmentId()).getCourseId();
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("submission", submission);
-        mv.addObject("role", role);
-        mv.setViewName("submission/detail");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("submission", submission);
+        model.addAttribute("role", role);
+        return "submission/detail";
     }
 
     @GetMapping("/submissions/{submissionId}/modify")
-    public ModelAndView modifyPage(@PathVariable Integer submissionId,
-                                   @RequestParam(defaultValue = "STUDENT") String role,
-                                   ModelAndView mv) {
+    public String modifyPage(@PathVariable Integer submissionId,
+                             @RequestParam(defaultValue = "STUDENT") String role,
+                             Model model) {
         if (!"STUDENT".equals(role)) {
-            throw new UnauthorizedStudentAccessException("학생만 제출물을 수정할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("?숈깮留??쒖텧臾쇱쓣 ?섏젙?????덉뒿?덈떎.");
         }
 
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
         Integer courseId = assignmentService.findAssignmentById(submission.getAssignmentId()).getCourseId();
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("submission", submission);
-        mv.addObject("role", role);
-        mv.setViewName("submission/modify");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("submission", submission);
+        model.addAttribute("role", role);
+        return "submission/modify";
     }
 
     @PostMapping("/submissions/{submissionId}/modify")
@@ -180,7 +177,7 @@ public class SubmissionController {
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
         if (!"STUDENT".equals(role)) {
-            throw new UnauthorizedStudentAccessException("학생만 제출물을 수정할 수 있습니다.");
+            throw new UnauthorizedStudentAccessException("?숈깮留??쒖텧臾쇱쓣 ?섏젙?????덉뒿?덈떎.");
         }
 
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
@@ -188,14 +185,14 @@ public class SubmissionController {
 
         try {
             submissionService.modifySubmission(submissionId, updateDTO, attachmentUpload);
-            rttr.addFlashAttribute("successMessage", "제출물이 수정되었습니다.");
+            rttr.addFlashAttribute("successMessage", "?쒖텧臾쇱씠 ?섏젙?섏뿀?듬땲??");
             return "redirect:/courses/" + courseId + "/assignment/submissions/me?role=STUDENT";
         } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         } catch (Exception e) {
-            log.error("제출물 수정 중 예외 발생 - submissionId={}, courseId={}", submissionId, courseId, e);
-            rttr.addFlashAttribute("errorMessage", "제출물 수정 중 처리할 수 없는 문제가 발생했습니다.");
+            log.error("?쒖텧臾??섏젙 以??덉쇅 諛쒖깮 - submissionId={}, courseId={}", submissionId, courseId, e);
+            rttr.addFlashAttribute("errorMessage", "?쒖텧臾??섏젙 以?泥섎━?????녿뒗 臾몄젣媛 諛쒖깮?덉뒿?덈떎.");
             return "redirect:/submissions/" + submissionId + "/modify?role=STUDENT";
         }
     }
@@ -206,7 +203,7 @@ public class SubmissionController {
                                   @ModelAttribute SubmissionScoreDTO scoreDTO,
                                   RedirectAttributes rttr) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new UnauthorizedInstructorException("강사만 채점할 수 있습니다.");
+            throw new UnauthorizedInstructorException("媛뺤궗留?梨꾩젏?????덉뒿?덈떎.");
         }
 
         SubmissionDTO submission = submissionService.findSubmissionById(submissionId);
@@ -214,7 +211,7 @@ public class SubmissionController {
 
         try {
             submissionService.scoreSubmission(submissionId, scoreDTO);
-            rttr.addFlashAttribute("successMessage", "채점 및 피드백이 저장되었습니다.");
+            rttr.addFlashAttribute("successMessage", "梨꾩젏 諛??쇰뱶諛깆씠 ??λ릺?덉뒿?덈떎.");
         } catch (ResourceNotFoundException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -224,7 +221,7 @@ public class SubmissionController {
 
     private void requireMemberId(Long memberId) {
         if (memberId == null) {
-            throw new LoginRequiredException("로그인한 사용자 정보가 필요합니다.");
+            throw new LoginRequiredException("濡쒓렇?명븳 ?ъ슜???뺣낫媛 ?꾩슂?⑸땲??");
         }
     }
 }

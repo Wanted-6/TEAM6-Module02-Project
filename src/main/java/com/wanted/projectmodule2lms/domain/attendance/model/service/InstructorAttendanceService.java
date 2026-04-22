@@ -214,21 +214,6 @@ public class InstructorAttendanceService {
         return "UNCHECKED";
     }
 
-    private List<Attendance> findLatestAttendancesByEnrollmentId(Integer enrollmentId) {
-        List<Attendance> attendances = attendanceRepository.findByEnrollmentIdOrderBySectionIdAsc(enrollmentId);
-        Map<Integer, Attendance> latestAttendanceBySection = new LinkedHashMap<>();
-
-        for (Attendance attendance : attendances) {
-            Attendance current = latestAttendanceBySection.get(attendance.getSectionId());
-
-            if (current == null || ATTENDANCE_ORDER.compare(attendance, current) > 0) {
-                latestAttendanceBySection.put(attendance.getSectionId(), attendance);
-            }
-        }
-
-        return new ArrayList<>(latestAttendanceBySection.values());
-    }
-
     private static final Comparator<Attendance> ATTENDANCE_ORDER =
             Comparator.comparing(Attendance::getCheckedAt, Comparator.nullsFirst(Comparator.naturalOrder()))
                     .thenComparing(Attendance::getRecordedAt, Comparator.nullsFirst(Comparator.naturalOrder()))

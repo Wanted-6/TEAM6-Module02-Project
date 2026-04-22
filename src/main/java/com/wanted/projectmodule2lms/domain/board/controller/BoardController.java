@@ -9,8 +9,9 @@ import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
-import com.wanted.projectmodule2lms.global.service.CurrentMemberService;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.service.CurrentMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +31,7 @@ public class BoardController {
     @ModelAttribute
     public void addCurrentMemberInfo(@LoginMemberId Long loginMemberId, Model model) {
         Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         model.addAttribute("currentMemberId", currentMemberId);
         model.addAttribute("currentRole", currentRole);
@@ -85,12 +86,8 @@ public class BoardController {
                                      @RequestParam(required = false) Integer courseId,
                                      @LoginMemberId Long loginMemberId,
                                      Model model) {
-        if (loginMemberId == null) {
-            return "redirect:/auth/login";
-        }
-        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
-
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
         List<BoardViewDTO> boardList;
 
         if (currentRole != null) {
@@ -134,12 +131,8 @@ public class BoardController {
                                   @RequestParam(required = false) Integer sectionId,
                                   @LoginMemberId Long loginMemberId,
                                   Model model) {
-        if (loginMemberId == null) {
-            return "redirect:/auth/login";
-        }
-        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
-
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         List<Course> courses = boardService.findAvailableCourses(type, currentMemberId, currentRole);
         String selectedCourseTitle = courses.stream()
@@ -162,12 +155,8 @@ public class BoardController {
     public String registBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
                               RedirectAttributes redirectAttributes) {
-        if (loginMemberId == null) {
-            return "redirect:/auth/login";
-        }
-        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
-
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         try {
             boardService.registBoard(boardDTO, currentMemberId, currentRole);
@@ -193,11 +182,8 @@ public class BoardController {
     public String modifyBoard(@LoginMemberId Long loginMemberId,
                               @ModelAttribute BoardDTO boardDTO,
                               RedirectAttributes redirectAttributes) {
-        if (loginMemberId == null) {
-            return "redirect:/auth/login";
-        }
-        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         try {
             boardService.modifyBoard(boardDTO, currentMemberId, currentRole);
@@ -221,12 +207,8 @@ public class BoardController {
     public String deleteBoard(@LoginMemberId Long loginMemberId,
                               @RequestParam Integer postId,
                               RedirectAttributes redirectAttributes) {
-        if (loginMemberId == null) {
-            return "redirect:/auth/login";
-        }
-        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
-
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
         BoardViewDTO board = boardService.findBoardById(postId);
         try {
             boardService.deleteBoard(postId, currentMemberId, currentRole);
@@ -291,6 +273,18 @@ public class BoardController {
                 .append("=")
                 .append(value);
         return true;
+    }
+
+    private Integer requireCurrentMemberId(Long loginMemberId) {
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        if (currentMemberId == null) {
+            throw new LoginRequiredException("로그인한 사용자 정보가 필요합니다.");
+        }
+        return currentMemberId;
+    }
+
+    private MemberRole resolveCurrentRole(Integer currentMemberId) {
+        return currentMemberService.getCurrentMemberRole(currentMemberId);
     }
 
 }
