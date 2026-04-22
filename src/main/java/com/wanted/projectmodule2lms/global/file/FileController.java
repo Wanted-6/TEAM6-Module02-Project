@@ -29,7 +29,7 @@ public class FileController {
                                Model model) throws Exception {
 
         if (!type.equals("assignment") && !type.equals("submission") && !type.equals("section")) {
-            model.addAttribute("errorMessage", "?섎せ???뚯씪 ?붿껌?낅땲??");
+            model.addAttribute("errorMessage", "잘못된 파일 요청입니다.");
             return "common/file-error";
         }
 
@@ -46,7 +46,7 @@ public class FileController {
         Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
 
         if (!resource.exists() || !resource.isReadable()) {
-            model.addAttribute("errorMessage", "?뚯씪???꾩쭅 ?깅줉?섏? ?딆븯嫄곕굹 ??젣?섏뿀?듬땲??");
+            model.addAttribute("errorMessage", "파일이 아직 등록되지 않았거나 삭제되었습니다.");
             return "common/file-error";
         }
 
