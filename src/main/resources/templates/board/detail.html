@@ -50,7 +50,7 @@
             코스: <span th:text="${board.courseTitle != null ? board.courseTitle : '-'}">Spring Boot 입문</span><br>
             섹션 ID: <span th:text="${board.sectionId != null ? board.sectionId : '-'}">2</span><br>
             비밀글 여부: <span th:text="${board.isSecret} ? 'Y' : 'N'">N</span><br>
-            답변 상태: <span th:text="${board.answerStatus == T(com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus).PENDING ? '답변대기' : (board.answerStatus == T(com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus).ANSWERED ? '답변완료' : '-')}">답변대기</span><br>
+            답변 상태: <span th:text="${board.answerStatus != null and board.answerStatus.name() == 'PENDING' ? '답변대기' : (board.answerStatus != null and board.answerStatus.name() == 'ANSWERED' ? '답변완료' : '-')}">답변대기</span><br>
             조회수: <span th:text="${board.viewCount}">120</span>
         </div>
 
