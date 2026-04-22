@@ -1,4 +1,4 @@
-package com.wanted.projectmodule2lms.domain.assignment.service;
+package com.wanted.projectmodule2lms.domain.assignment.model.service;
 
 import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentCreateDTO;
