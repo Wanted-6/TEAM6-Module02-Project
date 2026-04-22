@@ -50,19 +50,19 @@ public class CertificateService {
     @Transactional
     public void requestCertificate(Integer memberId, Integer courseId) {
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new UnauthorizedStudentAccessException("??띿뺏 餓λ쵐???꾨뗄?ゅ첎? ?袁⑤뻸??덈뼄."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("해당 코스를 수강 중인 학생만 수료증을 신청할 수 있습니다."));
 
         Certificate foundCertificate = certificateRepository.findByEnrollmentId(enrollment.getEnrollmentId())
                 .orElse(null);
 
         if (foundCertificate != null) {
-            throw new IllegalArgumentException("???? ??濡?뵹嶺???ル―???????????곕????덈펲.");
+            throw new IllegalArgumentException("이미 수료증을 신청했거나 발급된 이력이 있습니다.");
         }
 
         Integer totalScore = attendanceService.calculateTotalScore(memberId, courseId);
 
         if (totalScore < 80) {
-            throw new IllegalArgumentException("??濡?뵹 ?リ옇?????寃몃쳴???? 嶺뚮쪇沅?쭛???鍮??");
+            throw new IllegalArgumentException("수료증 발급 기준 점수인 80점 이상을 충족해야 합니다.");
         }
 
         Certificate certificate = new Certificate(
@@ -117,10 +117,10 @@ public class CertificateService {
     @Transactional
     public void approveCertificate(Integer certificateId, Integer adminId) {
         Certificate certificate = certificateRepository.findById(certificateId)
-                .orElseThrow(() -> new ResourceNotFoundException("??롮┷筌??醫롪퍕????곷뮸??덈뼄."));
+                .orElseThrow(() -> new ResourceNotFoundException("수료증 신청 정보를 찾을 수 없습니다."));
 
         if (certificate.getStatus() != CertificateStatus.REQUESTED) {
-            throw new IllegalArgumentException("?獄????띠럾??繞③뇡???⑤객臾뜻뤆?쎛 ?熬곣뫀六???덈펲.");
+            throw new IllegalArgumentException("신청 상태인 수료증만 승인할 수 있습니다.");
         }
 
         certificate.approve(adminId);
@@ -128,21 +128,21 @@ public class CertificateService {
 
     public CertificateViewDTO findCertificateForStudent(Integer memberId, Integer courseId) {
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new UnauthorizedStudentAccessException("??띿뺏 餓λ쵐???꾨뗄?ょ몴?筌≪뼚??????곷뮸??덈뼄."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("해당 코스를 수강 중인 학생만 수료증을 조회할 수 있습니다."));
 
         Certificate certificate = certificateRepository.findByEnrollmentId(enrollment.getEnrollmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("?????꾨뗄?????롮┷筌??類ｋ궖??筌≪뼚??????곷뮸??덈뼄."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 수강 정보에 대한 수료증을 찾을 수 없습니다."));
 
         if (certificate.getStatus() != CertificateStatus.APPROVED
                 && certificate.getStatus() != CertificateStatus.ISSUED) {
-            throw new IllegalArgumentException("?꾩룇裕???띠럾??繞③뇡???濡?뵹嶺뚯빘鍮???熬곣뫀六???덈펲.");
+            throw new IllegalArgumentException("승인 또는 발급 완료된 수료증만 조회할 수 있습니다.");
         }
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("??덇문 ?類ｋ궖??筌≪뼚??????곷뮸??덈뼄."));
+                .orElseThrow(() -> new ResourceNotFoundException("학생 정보를 찾을 수 없습니다."));
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("?꾨뗄???類ｋ궖??筌≪뼚??????곷뮸??덈뼄."));
+                .orElseThrow(() -> new ResourceNotFoundException("코스 정보를 찾을 수 없습니다."));
 
         return new CertificateViewDTO(
                 member.getName(),
@@ -156,9 +156,9 @@ public class CertificateService {
     @Transactional
     public byte[] generateCertificatePdf(Integer memberId, Integer courseId) {
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new UnauthorizedStudentAccessException("??띿뺏 餓λ쵐???꾨뗄?ょ몴?筌≪뼚??????곷뮸??덈뼄."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("해당 코스를 수강 중인 학생만 수료증을 조회할 수 있습니다."));
         Certificate issuedCertificate = certificateRepository.findByEnrollmentId(enrollment.getEnrollmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("?????꾨뗄?????롮┷筌??類ｋ궖??筌≪뼚??????곷뮸??덈뼄."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 수강 정보에 대한 수료증을 찾을 수 없습니다."));
         CertificateViewDTO certificate = findCertificateForStudent(memberId, courseId);
         Path fontPath = Path.of(System.getenv("WINDIR"), "Fonts", "malgun.ttf");
 
@@ -177,22 +177,22 @@ public class CertificateService {
                 writeCenteredText(contentStream, font, 28, pageWidth, currentY, "수료증");
                 currentY -= 50f;
                 writeCenteredText(contentStream, font, 14, pageWidth, currentY,
-                        "?熬곣뫁?????뉖Ц?? ??λ닔????繹먮끏堉????怨룸빢??????????嶺뚯빘鍮섋땻?⑤ご???琉우뿰??紐껊퉵??");
+                        "아래의 학생은 본 교육과정을 성실히 이수하였으므로 이 증서를 수여합니다.");
 
                 currentY -= 90f;
                 writeCenteredText(contentStream, font, 24, pageWidth, currentY, certificate.getStudentName());
 
                 currentY -= 70f;
                 writeText(contentStream, font, 14, 120f, currentY,
-                        "??λ닔??뗭춻? " + certificate.getCourseTitle());
+                        "교육과정명: " + certificate.getCourseTitle());
                 currentY -= 30f;
                 writeText(contentStream, font, 14, 120f, currentY,
                         "총점: " + certificate.getTotalScore() + "점");
                 currentY -= 30f;
-                writeText(contentStream, font, 14, 120f, currentY, "??濡?뵹 ???: ??濡?뵹");
+                writeText(contentStream, font, 14, 120f, currentY, "수료 여부: 수료");
                 currentY -= 30f;
                 writeText(contentStream, font, 14, 120f, currentY,
-                        "?獄???? " + formatDateTime(certificate.getApprovedAt()));
+                        "승인 일시: " + formatDateTime(certificate.getApprovedAt()));
             }
 
             document.save(outputStream);
@@ -203,7 +203,7 @@ public class CertificateService {
 
             return outputStream.toByteArray();
         } catch (IOException e) {
-            throw new IllegalStateException("??濡?뵹嶺?PDF ??諛댁뎽?????덉넮???곕????덈펲.", e);
+            throw new IllegalStateException("수료증 PDF 생성 중 오류가 발생했습니다.", e);
         }
     }
 
@@ -238,7 +238,7 @@ public class CertificateService {
         contentStream.endText();
     }
 
-    public Integer findFirstSectionId(Integer courseId){
+    public Integer findFirstSectionId(Integer courseId) {
         Section section = sectionRepository.findByCourseIdAndSectionOrder(courseId, 1)
                 .orElseGet(() -> {
                     List<Section> sectionList = sectionRepository.findByCourseIdOrderBySectionOrderAsc(courseId);
@@ -249,5 +249,4 @@ public class CertificateService {
                 });
         return section != null ? section.getSectionId() : null;
     }
-
 }

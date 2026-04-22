@@ -76,7 +76,7 @@ public class CommentController {
     private Integer requireCurrentMemberId(Long loginMemberId) {
         Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
         if (currentMemberId == null) {
-            throw new LoginRequiredException("濡쒓렇?명븳 ?ъ슜???뺣낫媛 ?꾩슂?⑸땲??");
+            throw new LoginRequiredException("로그인이 필요합니다.");
         }
         return currentMemberId;
     }
