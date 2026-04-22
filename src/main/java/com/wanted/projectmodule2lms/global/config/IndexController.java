@@ -1,11 +1,7 @@
 package com.wanted.projectmodule2lms.global.config;
 
 import com.wanted.projectmodule2lms.domain.auth.model.dto.AuthDetails;
-import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
-import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.member.model.dto.LoginMemberDTO;
-import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
-import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import com.wanted.projectmodule2lms.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,14 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
-
 @Controller
 @RequiredArgsConstructor
 public class IndexController {
-
-    private final EnrollmentRepository enrollmentRepository;
-    private final SectionRepository sectionRepository;
 
     @GetMapping(value = {"/", "/main"})
     public String mainPage(@AuthenticationPrincipal AuthDetails authDetails, Model model) {

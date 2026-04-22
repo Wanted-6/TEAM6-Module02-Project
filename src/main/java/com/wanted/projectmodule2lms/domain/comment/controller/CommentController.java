@@ -28,8 +28,8 @@ public class CommentController {
     public String registerComment(@LoginMemberId Long loginMemberId,
                                   @ModelAttribute CommentDTO commentDTO,
                                   RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = requireMemberId(loginMemberId);
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         try {
             commentService.registComment(commentDTO, currentMemberId, currentRole);
@@ -44,8 +44,8 @@ public class CommentController {
     public String modifyComment(@LoginMemberId Long loginMemberId,
                                 @ModelAttribute CommentDTO commentDTO,
                                 RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = requireMemberId(loginMemberId);
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         try {
             commentService.modifyComment(commentDTO, currentMemberId, currentRole);
@@ -61,8 +61,8 @@ public class CommentController {
                                 @RequestParam Integer commentId,
                                 @RequestParam Integer postId,
                                 RedirectAttributes redirectAttributes) {
-        Integer currentMemberId = requireMemberId(loginMemberId);
-        MemberRole currentRole = currentMemberService.getCurrentMemberRole(currentMemberId);
+        Integer currentMemberId = requireCurrentMemberId(loginMemberId);
+        MemberRole currentRole = resolveCurrentRole(currentMemberId);
 
         try {
             commentService.deleteComment(commentId, postId, currentMemberId, currentRole);
@@ -73,10 +73,15 @@ public class CommentController {
         }
     }
 
-    private Integer requireMemberId(Long loginMemberId) {
-        if (loginMemberId == null) {
-            throw new LoginRequiredException("로그인한 사용자 정보가 필요합니다.");
+    private Integer requireCurrentMemberId(Long loginMemberId) {
+        Integer currentMemberId = currentMemberService.toMemberId(loginMemberId);
+        if (currentMemberId == null) {
+            throw new LoginRequiredException("濡쒓렇?명븳 ?ъ슜???뺣낫媛 ?꾩슂?⑸땲??");
         }
-        return currentMemberService.toMemberId(loginMemberId);
+        return currentMemberId;
+    }
+
+    private MemberRole resolveCurrentRole(Integer currentMemberId) {
+        return currentMemberService.getCurrentMemberRole(currentMemberId);
     }
 }

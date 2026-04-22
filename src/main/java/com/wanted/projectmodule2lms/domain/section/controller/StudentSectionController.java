@@ -2,13 +2,14 @@ package com.wanted.projectmodule2lms.domain.section.controller;
 
 import com.wanted.projectmodule2lms.domain.section.service.SectionService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequiredArgsConstructor
@@ -19,26 +20,35 @@ public class StudentSectionController {
 
     @AuditLog
     @GetMapping
-    public ModelAndView findMySections(@PathVariable Integer courseId,
-                                       @RequestParam Integer memberId,
-                                       ModelAndView mv) {
-        mv.addObject("memberId", memberId);
-        mv.addObject("courseId", courseId);
-        mv.addObject("sectionList", sectionService.findMySections(memberId, courseId));
-        mv.setViewName("student/section/list");
-        return mv;
+    public String findMySections(@PathVariable Integer courseId,
+                                 @LoginMemberId Long memberId,
+                                 Model model) {
+        Integer studentId = requireMemberId(memberId);
+
+        model.addAttribute("memberId", memberId);
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("sectionList", sectionService.findMySections(studentId, courseId));
+        return "student/section/list";
     }
 
     @AuditLog
     @GetMapping("/{sectionId}")
-    public ModelAndView findMySectionDetail(@PathVariable Integer courseId,
-                                            @PathVariable Integer sectionId,
-                                            @RequestParam Integer memberId,
-                                            ModelAndView mv) {
-        mv.addObject("memberId", memberId);
-        mv.addObject("courseId", courseId);
-        mv.addObject("section", sectionService.findMySectionDetail(memberId, courseId, sectionId));
-        mv.setViewName("student/section/detail");
-        return mv;
+    public String findMySectionDetail(@PathVariable Integer courseId,
+                                      @PathVariable Integer sectionId,
+                                      @LoginMemberId Long memberId,
+                                      Model model) {
+        Integer studentId = requireMemberId(memberId);
+
+        model.addAttribute("memberId", memberId);
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("section", sectionService.findMySectionDetail(studentId, courseId, sectionId));
+        return "student/section/detail";
+    }
+
+    private Integer requireMemberId(Long memberId) {
+        if (memberId == null) {
+            throw new LoginRequiredException("로그인한 사용자 정보가 필요합니다.");
+        }
+        return Math.toIntExact(memberId);
     }
 }

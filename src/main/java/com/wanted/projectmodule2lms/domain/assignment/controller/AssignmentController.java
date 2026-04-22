@@ -11,6 +11,7 @@ import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -32,37 +32,35 @@ public class AssignmentController {
 
     @AuditLog
     @GetMapping("/courses/{courseId}/assignment")
-    public ModelAndView findAssignmentByCourse(@PathVariable Integer courseId,
-                                               @RequestParam(defaultValue = "STUDENT") String role,
-                                               ModelAndView mv) {
+    public String findAssignmentByCourse(@PathVariable Integer courseId,
+                                         @RequestParam(defaultValue = "STUDENT") String role,
+                                         Model model) {
         AssignmentDTO assignment = assignmentService.findAssignmentByCourseId(courseId);
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findCourseById(courseId));
-        mv.addObject("assignment", assignment);
-        mv.addObject("role", role);
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findCourseById(courseId));
+        model.addAttribute("assignment", assignment);
+        model.addAttribute("role", role);
 
         if ("INSTRUCTOR".equals(role)) {
-            mv.addObject(
+            model.addAttribute(
                     "submissionList",
                     submissionService.findSubmissionsByAssignmentId(courseId, assignment.getAssignmentId())
             );
         }
 
-        mv.setViewName("assignment/detail");
-        return mv;
+        return "assignment/detail";
     }
 
     @GetMapping("/courses/{courseId}/assignment/regist")
-    public ModelAndView registPage(@PathVariable Integer courseId,
-                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
-                                   ModelAndView mv) {
-        validateInstructorRole(role, "강사만 과제를 등록할 수 있습니다.");
+    public String registPage(@PathVariable Integer courseId,
+                             @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                             Model model) {
+        validateInstructorRole(role, "媛뺤궗留?怨쇱젣瑜??깅줉?????덉뒿?덈떎.");
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findCourseById(courseId));
-        mv.setViewName("assignment/regist");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findCourseById(courseId));
+        return "assignment/regist";
     }
 
     @PostMapping("/courses/{courseId}/assignment")
@@ -71,11 +69,11 @@ public class AssignmentController {
                                    @ModelAttribute AssignmentCreateDTO createDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
-        validateInstructorRole(role, "강사만 과제를 등록할 수 있습니다.");
+        validateInstructorRole(role, "媛뺤궗留?怨쇱젣瑜??깅줉?????덉뒿?덈떎.");
 
         try {
             assignmentService.registAssignment(courseId, createDTO, attachmentUpload);
-            rttr.addFlashAttribute("successMessage", "과제가 등록되었습니다.");
+            rttr.addFlashAttribute("successMessage", "怨쇱젣媛 ?깅줉?섏뿀?듬땲??");
             return "redirect:/courses/" + courseId + "/assignment?role=INSTRUCTOR";
         } catch (ResourceNotFoundException | UnauthorizedInstructorException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
@@ -84,22 +82,21 @@ public class AssignmentController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/assignment/regist?role=INSTRUCTOR";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "과제 등록 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "怨쇱젣 ?깅줉 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
             return "redirect:/courses/" + courseId + "/assignment/regist?role=INSTRUCTOR";
         }
     }
 
     @GetMapping("/courses/{courseId}/assignment/modify")
-    public ModelAndView modifyPage(@PathVariable Integer courseId,
-                                   @RequestParam(defaultValue = "INSTRUCTOR") String role,
-                                   ModelAndView mv) {
-        validateInstructorRole(role, "강사만 과제를 수정할 수 있습니다.");
+    public String modifyPage(@PathVariable Integer courseId,
+                             @RequestParam(defaultValue = "INSTRUCTOR") String role,
+                             Model model) {
+        validateInstructorRole(role, "媛뺤궗留?怨쇱젣瑜??섏젙?????덉뒿?덈떎.");
 
-        mv.addObject("courseId", courseId);
-        mv.addObject("course", courseService.findCourseById(courseId));
-        mv.addObject("assignment", assignmentService.findAssignmentByCourseId(courseId));
-        mv.setViewName("assignment/modify");
-        return mv;
+        model.addAttribute("courseId", courseId);
+        model.addAttribute("course", courseService.findCourseById(courseId));
+        model.addAttribute("assignment", assignmentService.findAssignmentByCourseId(courseId));
+        return "assignment/modify";
     }
 
     @PostMapping("/courses/{courseId}/assignment/modify")
@@ -108,11 +105,11 @@ public class AssignmentController {
                                    @ModelAttribute AssignmentUpdateDTO updateDTO,
                                    @RequestParam(value = "attachmentUpload", required = false) MultipartFile attachmentUpload,
                                    RedirectAttributes rttr) {
-        validateInstructorRole(role, "강사만 과제를 수정할 수 있습니다.");
+        validateInstructorRole(role, "媛뺤궗留?怨쇱젣瑜??섏젙?????덉뒿?덈떎.");
 
         try {
             assignmentService.modifyAssignmentByCourseId(courseId, updateDTO, attachmentUpload);
-            rttr.addFlashAttribute("successMessage", "과제가 수정되었습니다.");
+            rttr.addFlashAttribute("successMessage", "怨쇱젣媛 ?섏젙?섏뿀?듬땲??");
             return "redirect:/courses/" + courseId + "/assignment?role=INSTRUCTOR";
         } catch (ResourceNotFoundException | UnauthorizedInstructorException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
@@ -121,7 +118,7 @@ public class AssignmentController {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/assignment/modify?role=INSTRUCTOR";
         } catch (Exception e) {
-            rttr.addFlashAttribute("errorMessage", "과제 수정 중 오류가 발생했습니다.");
+            rttr.addFlashAttribute("errorMessage", "怨쇱젣 ?섏젙 以??ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.");
             return "redirect:/courses/" + courseId + "/assignment/modify?role=INSTRUCTOR";
         }
     }

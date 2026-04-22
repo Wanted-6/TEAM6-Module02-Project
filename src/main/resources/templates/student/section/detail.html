@@ -53,11 +53,11 @@
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     이전
                 </a>
-                <a th:href="@{/student/courses/{courseId}(courseId=${courseId}, memberId=${memberId})}"
+                <a th:href="@{/student/courses/{courseId}(courseId=${courseId})}"
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     코스 상세
                 </a>
-                <a th:href="@{/student/courses/{courseId}/sections(courseId=${courseId}, memberId=${memberId})}"
+                <a th:href="@{/student/courses/{courseId}/sections(courseId=${courseId})}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     섹션 목록
                 </a>

@@ -1,4 +1,4 @@
-package com.wanted.projectmodule2lms.domain.member.model.controller;
+package com.wanted.projectmodule2lms.domain.member.controller;
 
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
