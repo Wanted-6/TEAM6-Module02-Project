@@ -4,9 +4,9 @@ import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentCreate
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.dto.AssignmentUpdateDTO;
 import com.wanted.projectmodule2lms.domain.assignment.model.service.AssignmentService;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
-import com.wanted.projectmodule2lms.domain.submission.service.SubmissionService;
+import com.wanted.projectmodule2lms.domain.submission.model.service.SubmissionService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;

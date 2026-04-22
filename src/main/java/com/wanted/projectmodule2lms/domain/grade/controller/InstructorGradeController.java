@@ -1,6 +1,6 @@
 package com.wanted.projectmodule2lms.domain.grade.controller;
 
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.grade.model.dto.GradeUpdateDTO;
 import com.wanted.projectmodule2lms.domain.grade.model.service.GradeService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;

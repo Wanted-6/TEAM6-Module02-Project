@@ -1,6 +1,6 @@
 package com.wanted.projectmodule2lms.domain.section.controller;
 
-import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.domain.section.model.service.SectionService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
 import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;

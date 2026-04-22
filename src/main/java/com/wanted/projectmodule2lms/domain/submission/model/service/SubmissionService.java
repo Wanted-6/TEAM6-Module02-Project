@@ -1,9 +1,9 @@
-package com.wanted.projectmodule2lms.domain.submission.service;
+package com.wanted.projectmodule2lms.domain.submission.model.service;
 
 import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
 import com.wanted.projectmodule2lms.domain.assignment.model.entity.Assignment;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseStudentDTO;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;

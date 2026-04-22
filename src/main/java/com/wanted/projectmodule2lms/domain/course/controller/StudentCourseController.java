@@ -1,6 +1,6 @@
 package com.wanted.projectmodule2lms.domain.course.controller;
 
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
