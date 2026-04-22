@@ -15,6 +15,8 @@ import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionListDT
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionScoreDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.dto.SubmissionUpdateDTO;
 import com.wanted.projectmodule2lms.domain.submission.model.entity.Submission;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.Resource;
@@ -90,14 +92,14 @@ public class SubmissionService {
 
     public SubmissionDTO findSubmissionById(Integer submissionId) {
         Submission foundSubmission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 제출물이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 제출물이 존재하지 않습니다."));
 
         return convertToSubmissionDTO(foundSubmission);
     }
 
     public SubmissionDTO findMySubmission(Integer assignmentId, Integer enrollmentId) {
         Submission foundSubmission = submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("제출한 과제가 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("제출한 과제가 없습니다."));
 
         return convertToSubmissionDTO(foundSubmission);
     }
@@ -106,10 +108,10 @@ public class SubmissionService {
         SubmissionDTO dto = modelMapper.map(submission, SubmissionDTO.class);
 
         Enrollment enrollment = enrollmentRepository.findById(submission.getEnrollmentId())
-                .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수강 정보가 존재하지 않습니다."));
 
         Member member = memberRepository.findById(enrollment.getMemberId())
-                .orElseThrow(() -> new IllegalArgumentException("회원 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("회원 정보가 존재하지 않습니다."));
 
         dto.setStudentName(member.getName());
         dto.setStudentLoginId(member.getLoginId());
@@ -119,7 +121,7 @@ public class SubmissionService {
 
     public Integer findEnrollmentIdByMemberAndCourse(Integer memberId, Integer courseId) {
         Enrollment enrollment = enrollmentRepository.findByMemberIdAndCourseId(memberId, courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스의 수강 정보가 없습니다."));
+                .orElseThrow(() -> new UnauthorizedStudentAccessException("해당 코스의 수강 정보가 없습니다."));
 
         return enrollment.getEnrollmentId();
     }
@@ -131,14 +133,14 @@ public class SubmissionService {
                                     MultipartFile attachmentUpload) throws IOException {
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("과제가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("과제가 존재하지 않습니다."));
 
         if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
             throw new IllegalArgumentException("마감일이 지나 제출할 수 없습니다.");
         }
 
         enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("수강 정보가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수강 정보가 존재하지 않습니다."));
 
         if (submissionRepository.findByAssignmentIdAndEnrollmentId(assignmentId, enrollmentId).isPresent()) {
             throw new IllegalArgumentException("이미 제출한 과제입니다.");
@@ -168,10 +170,10 @@ public class SubmissionService {
                                  MultipartFile attachmentUpload) throws IOException {
 
         Submission foundSubmission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new IllegalArgumentException("수정할 제출물이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("수정할 제출물이 존재하지 않습니다."));
 
         Assignment assignment = assignmentRepository.findById(foundSubmission.getAssignmentId())
-                .orElseThrow(() -> new IllegalArgumentException("과제가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("과제가 존재하지 않습니다."));
 
         if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
             throw new IllegalArgumentException("마감일이 지나 제출물을 수정할 수 없습니다.");
@@ -195,7 +197,7 @@ public class SubmissionService {
     @Transactional
     public void scoreSubmission(Integer submissionId, SubmissionScoreDTO scoreDTO) {
         Submission foundSubmission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new IllegalArgumentException("채점할 제출물이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("채점할 제출물이 존재하지 않습니다."));
 
         foundSubmission.changeScoreAndFeedback(
                 scoreDTO.getScore(),

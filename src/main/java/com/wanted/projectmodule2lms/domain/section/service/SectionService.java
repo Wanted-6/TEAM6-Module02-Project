@@ -43,6 +43,7 @@ public class SectionService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 섹션이 존재하지 않습니다."));
 
         return modelMapper.map(foundSection, SectionDTO.class);
+
     }
 
     public Integer findCourseIdBySectionId(Integer sectionId) {

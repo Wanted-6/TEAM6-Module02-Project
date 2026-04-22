@@ -4,9 +4,16 @@ import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
 import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
+import com.wanted.projectmodule2lms.global.exception.UnauthorizedInstructorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -28,7 +35,7 @@ public class CourseController {
                                        Principal principal,
                                        ModelAndView mv) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 코스 목록을 조회할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스 목록을 조회할 수 있습니다.");
         }
 
         String loginId = principal.getName();
@@ -47,7 +54,7 @@ public class CourseController {
                                        @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                        ModelAndView mv) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 코스 상세를 조회할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스 상세를 조회할 수 있습니다.");
         }
 
         mv.addObject("course", courseService.findCourseById(courseId));
@@ -60,7 +67,7 @@ public class CourseController {
     @GetMapping("/regist")
     public String registPage(@RequestParam(defaultValue = "INSTRUCTOR") String role) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스를 등록할 수 있습니다.");
         }
         return "instructor/course/regist";
     }
@@ -72,7 +79,7 @@ public class CourseController {
                                RedirectAttributes rttr,
                                Principal principal) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 코스를 등록할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스를 등록할 수 있습니다.");
         }
 
         try {
@@ -81,7 +88,7 @@ public class CourseController {
             Integer courseId = courseService.registCourse(createDTO, thumbnailFile);
             rttr.addFlashAttribute("successMessage", "코스가 등록되었습니다.");
             return "redirect:/courses/" + courseId + "?role=INSTRUCTOR";
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | UnauthorizedInstructorException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/regist?role=INSTRUCTOR";
         } catch (Exception e) {
@@ -95,7 +102,7 @@ public class CourseController {
                                    @RequestParam(defaultValue = "INSTRUCTOR") String role,
                                    ModelAndView mv) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스를 수정할 수 있습니다.");
         }
 
         mv.addObject("course", courseService.findCourseById(courseId));
@@ -112,14 +119,14 @@ public class CourseController {
                                RedirectAttributes rttr,
                                Principal principal) {
         if (!"INSTRUCTOR".equals(role)) {
-            throw new IllegalArgumentException("강사만 코스를 수정할 수 있습니다.");
+            throw new UnauthorizedInstructorException("강사만 코스를 수정할 수 있습니다.");
         }
 
         try {
             courseService.modifyCourse(courseId, principal.getName(), updateDTO, thumbnailFile);
             rttr.addFlashAttribute("successMessage", "코스가 수정되었습니다.");
             return "redirect:/courses/" + courseId + "?role=INSTRUCTOR";
-        } catch (IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | UnauthorizedInstructorException | IllegalArgumentException e) {
             rttr.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/courses/" + courseId + "/modify?role=INSTRUCTOR";
         } catch (Exception e) {

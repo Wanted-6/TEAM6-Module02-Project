@@ -14,6 +14,7 @@ import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
 import com.wanted.projectmodule2lms.domain.member.model.entity.Member;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +73,6 @@ public class CommentService {
         );
     }
 
-
     @Transactional
     public void registComment(CommentDTO commentDTO, Integer currentMemberId, MemberRole currentRole) {
         BoardViewDTO board = boardService.findBoardById(commentDTO.getPostId());
@@ -88,7 +88,7 @@ public class CommentService {
                 commentDTO.getContent()
         );
         commentRepository.save(comment);
-        if(board.getPostType() == BoardType.SECTION_QNA && currentRole == MemberRole.INSTRUCTOR) {
+        if (board.getPostType() == BoardType.SECTION_QNA && currentRole == MemberRole.INSTRUCTOR) {
             boardService.changeAnswerStatusToAnswered(commentDTO.getPostId());
         }
     }
@@ -96,7 +96,7 @@ public class CommentService {
     @Transactional
     public void modifyComment(CommentDTO commentDTO, Integer currentMemberId, MemberRole currentRole) {
         Comment comment = commentRepository.findById(commentDTO.getCommentId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 댓글이 존재하지 않습니다."));
         BoardViewDTO board = boardService.findBoardById(comment.getPostId());
 
         if (!canModifyOrDeleteComment(currentMemberId, currentRole, comment, board)) {
@@ -109,7 +109,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Integer commentId, Integer postId, Integer currentMemberId, MemberRole currentRole) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 댓글이 존재하지 않습니다."));
         BoardViewDTO board = boardService.findBoardById(comment.getPostId());
 
         if (!canModifyOrDeleteComment(currentMemberId, currentRole, comment, board)) {
@@ -200,6 +200,4 @@ public class CommentService {
                 ))
                 .toList();
     }
-
-
 }

@@ -2,7 +2,6 @@ package com.wanted.projectmodule2lms.domain.member.model.controller;
 
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;
 import com.wanted.projectmodule2lms.domain.course.model.entity.Course;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.enrollment.model.service.EnrollmentService;
 import com.wanted.projectmodule2lms.domain.member.model.dao.MemberRepository;
@@ -12,22 +11,27 @@ import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.domain.member.model.service.MemberService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
+import com.wanted.projectmodule2lms.global.exception.LoginRequiredException;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
@@ -51,22 +55,20 @@ public class MemberController {
                          Model model, RedirectAttributes rttr) {
         try {
             memberService.regist(signupDTO, gradCert, careerCert);
-            rttr.addFlashAttribute("message", "회원가입이 완료되었습니다. 로그인해 주세요.");
+            rttr.addFlashAttribute("message", "????싨뤆?쎛???곷턄 ?熬곣뫁???琉????鍮?? ?β돦裕??筌뤿굝???낅슣?섋땻??");
             return "redirect:/auth/login";
         } catch (IllegalArgumentException | IllegalStateException e) {
             model.addAttribute("message", e.getMessage());
             return "member/signup";
         } catch (Exception e) {
-            model.addAttribute("message", "서버에서 오류가 발생하였습니다.");
+            model.addAttribute("message", "??類ㅼ뮅????????댁쾼?띠럾? ?꾩룇裕뉑틦??????鍮??");
             return "member/signup";
         }
     }
 
     @GetMapping("/edit-password")
     public String editPasswordForm(@LoginMemberId Long memberId, Model model) {
-        if (memberId == null) {
-            return "redirect:/auth/login";
-        }
+        requireMemberId(memberId);
         return "member/edit-password";
     }
 
@@ -75,37 +77,36 @@ public class MemberController {
                                  @RequestParam("newPassword") String newPassword,
                                  HttpSession session,
                                  RedirectAttributes rttr) {
-
-        if (memberId == null) {
-            return "redirect:/auth/login";
-        }
-
         try {
-            memberService.changeRegularPassword(memberId, newPassword);
+            memberService.changeRegularPassword(requireMemberId(memberId), newPassword);
             session.invalidate();
 
-            rttr.addFlashAttribute("message", "비밀번호가 성공적으로 변경되었습니다. 새로운 비밀번호로 다시 로그인해주세요.");
+            rttr.addFlashAttribute("message", "?????뺢퀡???먯쾸? ?繹먭퍓沅??⑤챷紐드슖??곌떠??롪퍔?η뵳???곕????덈펲. ???됱Ŧ???????뺢퀡???묒뿉????곕뻣 ?β돦裕??筌뤿굝???낅슣?섋땻??");
             return "redirect:/auth/login";
-
+        } catch (ResourceNotFoundException e) {
+            rttr.addFlashAttribute("error", e.getMessage());
+            return "redirect:/member/edit-password";
         } catch (Exception e) {
-            rttr.addFlashAttribute("error", "비밀번호 변경에 실패했습니다.");
+            rttr.addFlashAttribute("error", "?????뺢퀡????곌떠??롪퍔?⑵굢????덉넮???곕????덈펲.");
             return "redirect:/member/edit-password";
         }
     }
 
     @GetMapping("verify-code")
     public String verifyCodeForm(@LoginMemberId Long memberId) {
-        if (memberId == null) return "redirect:/auth/login";
+        requireMemberId(memberId);
         return "member/verify-code";
     }
 
     @PostMapping("/verify-code")
-    public String processVerifyCode(@LoginMemberId Long memberId, @RequestParam("code") String inputCode, RedirectAttributes rttr) {
-        if (memberService.verifyInstructorCode(memberId, inputCode)) {
-            rttr.addFlashAttribute("message", "강사 인증이 완료되었습니다.");
+    public String processVerifyCode(@LoginMemberId Long memberId,
+                                    @RequestParam("code") String inputCode,
+                                    RedirectAttributes rttr) {
+        if (memberService.verifyInstructorCode(requireMemberId(memberId), inputCode)) {
+            rttr.addFlashAttribute("message", "?띠룆踰→쾮??筌뤾쑴理???熬곣뫁???琉????鍮??");
             return "redirect:/";
         } else {
-            rttr.addFlashAttribute("error", "승인 코드가 올바르지 않습니다.");
+            rttr.addFlashAttribute("error", "?獄????袁⑤?獄?쑚泥? ????紐?? ???용????덈펲.");
             return "redirect:/member/verify-code";
         }
     }
@@ -113,23 +114,17 @@ public class MemberController {
     @AuditLog
     @GetMapping("/mypage")
     public String myPage(@LoginMemberId Long memberId, Model model) {
-        if (memberId == null) {
-            return "redirect:/auth/login";
-        }
+        Long currentMemberId = requireMemberId(memberId);
 
-        Member member = memberRepository.findById(Math.toIntExact(memberId)).orElseThrow();
+        Member member = memberRepository.findById(currentMemberId.intValue())
+                .orElseThrow(() -> new ResourceNotFoundException("??????嶺뚢돦堉??????怨룸????덈펲."));
 
         if (member.getRole() == MemberRole.STUDENT) {
+
+
+
             List<Enrollment> enrollments = enrollmentService.getMyEnrollments(memberId.intValue());
 
-            //코드 최적화 전.
-//            List<Map<String, Object>> courseList = enrollments.stream().map(enroll -> {
-//                Map<String, Object> map = new HashMap<>();
-//                map.put("enrollmentId", enroll.getEnrollmentId());
-//                String cName = courseService.getCourseNameById(enroll.getCourseId());
-//                map.put("courseName", cName != null ? cName : "알 수 없는 과목");
-//                return map;
-//            }).collect(Collectors.toList());
 
             List<Integer> courseIds = enrollments.stream()
                     .map(Enrollment::getCourseId)
@@ -159,26 +154,28 @@ public class MemberController {
                                 @RequestParam(value = "useDefaultImage", defaultValue = "false") boolean useDefaultImage,
                                 @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
                                 RedirectAttributes rttr) throws IOException {
+        Long currentMemberId = requireMemberId(memberId);
 
         if (useDefaultImage) {
-            memberService.updateToDefaultProfile(memberId, bio);
+            memberService.updateToDefaultProfile(currentMemberId, bio);
         } else {
-            memberService.updateProfile(memberId, bio, profileImage);
+            memberService.updateProfile(currentMemberId, bio, profileImage);
         }
 
-        rttr.addFlashAttribute("message", "프로필이 수정되었습니다.");
+        rttr.addFlashAttribute("message", "?熬곣뫁夷?熬곣뫗逾???瑜곸젧??琉????鍮??");
         return "redirect:/member/mypage";
     }
 
     @PostMapping("/phone/update")
     @ResponseBody
     public ResponseEntity<String> updatePhone(@LoginMemberId Long memberId, @RequestParam("phone") String phone) {
-        if (memberId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
         try {
-            memberService.updatePhone(memberId, phone);
+            memberService.updatePhone(requireMemberId(memberId), phone);
             return ResponseEntity.ok("success");
+        } catch (LoginRequiredException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -188,16 +185,23 @@ public class MemberController {
 
     @PostMapping("/delete")
     public String deleteMember(@LoginMemberId Long memberId, HttpSession session, RedirectAttributes rttr) {
-        if (memberId == null) return "redirect:/auth/login";
-
         try {
-            memberService.deleteMember(memberId);
+            memberService.deleteMember(requireMemberId(memberId));
             session.invalidate();
             return "redirect:/";
+        } catch (ResourceNotFoundException e) {
+            rttr.addFlashAttribute("error", e.getMessage());
+            return "redirect:/member/mypage";
         } catch (IllegalStateException e) {
             rttr.addFlashAttribute("error", e.getMessage());
             return "redirect:/member/mypage";
         }
     }
 
+    private Long requireMemberId(Long memberId) {
+        if (memberId == null) {
+            throw new LoginRequiredException("?β돦裕??筌뤿굝由???????筌먲퐢沅뽪뤆?쎛 ?熬곣뫗???紐껊퉵??");
+        }
+        return memberId;
+    }
 }

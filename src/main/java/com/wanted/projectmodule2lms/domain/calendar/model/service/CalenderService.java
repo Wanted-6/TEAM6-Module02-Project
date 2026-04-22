@@ -13,6 +13,7 @@ import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentReposi
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
+import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -237,7 +238,7 @@ public class CalenderService {
 
     public void updateMemo(Integer memberId, Integer memoId, CalendarMemoCreateDTO dto) {
         CalendarMemo memo = calendarMemoRepository.findById(memoId)
-                .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("메모를 찾을 수 없습니다."));
 
         if (!memo.getMemberId().equals(memberId)) {
             throw new IllegalArgumentException("본인 메모만 수정할 수 있습니다.");
@@ -248,7 +249,7 @@ public class CalenderService {
 
     public void deleteMemo(Integer memberId, Integer memoId) {
         CalendarMemo memo = calendarMemoRepository.findById(memoId)
-                .orElseThrow(() -> new IllegalArgumentException("메모를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("메모를 찾을 수 없습니다."));
 
         if (!memo.getMemberId().equals(memberId)) {
             throw new IllegalArgumentException("본인 메모만 삭제할 수 있습니다.");
