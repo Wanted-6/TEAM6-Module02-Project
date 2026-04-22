@@ -271,7 +271,6 @@
                 }
             });
         }
-
         const passwordForm = document.getElementById('passwordForm');
         if (passwordForm) {
             passwordForm.addEventListener('submit', async function (e) {
@@ -302,11 +301,11 @@
                 const formData = new FormData(this);
                 try {
                     const response = await fetch(this.getAttribute('data-action'), { method: 'POST', body: formData });
-                    if (response.ok) {
-                        alert('비밀번호가 성공적으로 변경되었습니다.');
-                        document.getElementById('newPassword').value = '';
-                        document.getElementById('confirmPassword').value = '';
-                        currentVerifiedPassword = newPassword;
+
+                    // 수정된 부분: 비밀번호 변경 완료 시 억지로 화면에 남아있지 않고 메인/로그인 화면으로 이동시킵니다.
+                    if (response.ok || response.redirected) {
+                        alert('비밀번호가 성공적으로 변경되었습니다.\n안전한 이용을 위해 다시 로그인해 주세요.');
+                        window.location.href = '/'; // 메인으로 이동하면 권한 없음으로 자연스럽게 로그인 화면으로 갑니다.
                     } else {
                         alert('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
                     }
@@ -319,3 +318,4 @@
 </script>
 </body>
 </html>
+

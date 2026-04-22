@@ -73,7 +73,7 @@
                     </a>
                 </td>
                 <td th:text="${board.isSecret} ? 'Y' : 'N'">Y</td>
-                <td th:text="${board.answerStatus == T(com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus).PENDING ? '답변대기' : (board.answerStatus == T(com.wanted.projectmodule2lms.domain.board.model.entity.AnswerStatus).ANSWERED ? '답변완료' : '-')}">답변대기</td>
+                <td th:text="${board.answerStatus != null and board.answerStatus.name() == 'PENDING' ? '답변대기' : (board.answerStatus != null and board.answerStatus.name() == 'ANSWERED' ? '답변완료' : '-')}">답변대기</td>
                 <td th:text="${board.memberName != null ? board.memberName : board.memberId}">학생1</td>
             </tr>
             <tr th:if="${boardList == null or #lists.isEmpty(boardList)}">
