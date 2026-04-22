@@ -83,7 +83,7 @@
                     이전
                 </a>
                 <a th:if="${role == 'INSTRUCTOR'}"
-                   th:href="@{/courses/regist(role='INSTRUCTOR')}"
+                   th:href="@{/courses/regist}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     코스 등록
                 </a>
@@ -123,7 +123,7 @@
                         class="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     검색
                 </button>
-                <a th:href="@{/courses(role='INSTRUCTOR')}"
+                <a th:href="@{/courses}"
                    class="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     초기화
                 </a>
@@ -132,43 +132,43 @@
     </form>
 
     <div class="mb-8 flex flex-wrap gap-3">
-        <a th:href="@{/courses(role='INSTRUCTOR')}"
+                <a th:href="@{/courses}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == null or category == ''} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             전체
         </a>
 
-        <a th:href="@{/courses(role='INSTRUCTOR', category='Backend')}"
+                <a th:href="@{/courses(category='Backend')}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == 'Backend'} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             Backend
         </a>
 
-        <a th:href="@{/courses(role='INSTRUCTOR', category='Database')}"
+                <a th:href="@{/courses(category='Database')}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == 'Database'} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             Database
         </a>
 
-        <a th:href="@{/courses(role='INSTRUCTOR', category='AI')}"
+                <a th:href="@{/courses(category='AI')}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == 'AI'} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             AI
         </a>
 
-        <a th:href="@{/courses(role='INSTRUCTOR', category='Infra')}"
+                <a th:href="@{/courses(category='Infra')}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == 'Infra'} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             Infra
         </a>
 
-        <a th:href="@{/courses(role='INSTRUCTOR', category='DevOps')}"
+                <a th:href="@{/courses(category='DevOps')}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == 'DevOps'} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             DevOps
         </a>
 
-        <a th:href="@{/courses(role='INSTRUCTOR', category='Data')}"
+                <a th:href="@{/courses(category='Data')}"
            class="rounded-full border px-5 py-2 text-sm font-semibold transition"
            th:classappend="${category == 'Data'} ? ' border-brand bg-brand text-white' : ' border-slate-300 bg-white text-slate-700 hover:border-brand hover:text-brand'">
             Data
@@ -185,7 +185,7 @@
 
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         <a th:each="course : ${courseList}"
-           th:href="@{/courses/{courseId}(courseId=${course.courseId}, role='INSTRUCTOR')}"
+                       th:href="@{/courses/{courseId}(courseId=${course.courseId})}"
            class="block overflow-hidden rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brand hover:shadow-lg">
 
             <div class="mb-4 flex items-start justify-end">

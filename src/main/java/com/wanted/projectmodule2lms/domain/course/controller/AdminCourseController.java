@@ -1,6 +1,6 @@
 package com.wanted.projectmodule2lms.domain.course.controller;
 
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;

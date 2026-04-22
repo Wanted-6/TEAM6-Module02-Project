@@ -81,7 +81,7 @@
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     이전
                 </a>
-                <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId}, role='INSTRUCTOR')}"
+                <a th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     과제 상세
                 </a>
@@ -136,7 +136,7 @@
                     </td>
                     <td class="px-6 py-4">
                         <a th:if="${submission.submissionId != null}"
-                           th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId}, role='INSTRUCTOR')}"
+                           th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId})}"
                            class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                             상세
                         </a>

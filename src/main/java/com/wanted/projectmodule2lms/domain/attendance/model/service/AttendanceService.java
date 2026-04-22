@@ -11,7 +11,7 @@ import com.wanted.projectmodule2lms.domain.attendance.model.entity.AttendanceSta
 import com.wanted.projectmodule2lms.domain.certificate.model.dao.CertificateRepository;
 import com.wanted.projectmodule2lms.domain.certificate.model.entity.Certificate;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseDTO;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.enrollment.model.dao.EnrollmentRepository;
 import com.wanted.projectmodule2lms.domain.enrollment.model.entity.Enrollment;
 import com.wanted.projectmodule2lms.domain.grade.model.dao.GradeRepository;
@@ -19,7 +19,7 @@ import com.wanted.projectmodule2lms.domain.grade.model.entity.Grade;
 import com.wanted.projectmodule2lms.domain.section.model.dao.SectionRepository;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionDTO;
 import com.wanted.projectmodule2lms.domain.section.model.entity.Section;
-import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.domain.section.model.service.SectionService;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;

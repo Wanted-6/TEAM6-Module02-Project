@@ -2,10 +2,9 @@ package com.wanted.projectmodule2lms.domain.section.controller;
 
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionCreateDTO;
 import com.wanted.projectmodule2lms.domain.section.model.dto.SectionUpdateDTO;
-import com.wanted.projectmodule2lms.domain.section.service.SectionService;
+import com.wanted.projectmodule2lms.domain.section.model.service.SectionService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
-import com.wanted.projectmodule2lms.global.exception.UnauthorizedStudentAccessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

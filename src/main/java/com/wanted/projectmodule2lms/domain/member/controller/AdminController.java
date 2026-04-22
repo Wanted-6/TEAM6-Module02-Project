@@ -11,7 +11,6 @@ import com.wanted.projectmodule2lms.global.aop.dao.AuditLogRepository;
 import com.wanted.projectmodule2lms.global.aop.dto.LogStatDto;
 import com.wanted.projectmodule2lms.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
