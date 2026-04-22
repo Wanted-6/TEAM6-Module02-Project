@@ -126,6 +126,12 @@ public class SubmissionService {
         return enrollment.getEnrollmentId();
     }
 
+    private void validateSubmissionContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("제출 내용은 필수입니다.");
+        }
+    }
+
     @Transactional
     public Integer registSubmission(Integer assignmentId,
                                     Integer enrollmentId,
@@ -134,6 +140,8 @@ public class SubmissionService {
 
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("과제가 존재하지 않습니다."));
+
+        validateSubmissionContent(createDTO.getContent());
 
         if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
             throw new IllegalArgumentException("마감일이 지나 제출할 수 없습니다.");
@@ -174,6 +182,8 @@ public class SubmissionService {
 
         Assignment assignment = assignmentRepository.findById(foundSubmission.getAssignmentId())
                 .orElseThrow(() -> new ResourceNotFoundException("과제가 존재하지 않습니다."));
+
+        validateSubmissionContent(updateDTO.getContent());
 
         if (assignment.getDueDate() != null && LocalDateTime.now().isAfter(assignment.getDueDate())) {
             throw new IllegalArgumentException("마감일이 지나 제출물을 수정할 수 없습니다.");
