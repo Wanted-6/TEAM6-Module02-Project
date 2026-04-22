@@ -597,3 +597,36 @@ INSERT INTO Memo VALUES
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 2. member_id에 AUTO_INCREMENT 추가하기
+ALTER TABLE member MODIFY COLUMN member_id INT AUTO_INCREMENT;
+
+ALTER TABLE Course MODIFY course_id INT AUTO_INCREMENT;
+ALTER TABLE Section MODIFY section_id INT AUTO_INCREMENT;
+ALTER TABLE Assignment MODIFY assignment_id INT AUTO_INCREMENT;
+ALTER TABLE Submission MODIFY submission_id INT AUTO_INCREMENT;
+
+-- 3. 외래키(연결) 검사 다시 켜기 (이거 꼭 다시 켜야 해!)
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 1. 로그인 실패 횟수가 NULL인 데이터를 모두 0으로 초기화
+UPDATE member 
+SET login_fail_count = 0 
+WHERE login_fail_count IS NULL;
+
+-- 2. password 모두 1234로 수정
+UPDATE member 
+SET password = '$2a$10$9wLL/4itaUnVpSCaoETS9uqvBwqpZMRnWCVXqYbBFxeJuuNk6G1fe', -- 1234의 암호화 값
+    login_fail_count = 0,    -- 실패 횟수 리셋
+    is_account_locked = 0;    -- 계정 잠금 해제
+
+ALTER TABLE member 
+ADD COLUMN approval_status VARCHAR(20) DEFAULT 'APPROVED',
+ADD COLUMN approval_code VARCHAR(10),
+ADD COLUMN is_verified TINYINT(1) DEFAULT 1,
+ADD COLUMN reject_reason TEXT,
+ADD COLUMN grad_cert_path VARCHAR(255),
+ADD COLUMN career_cert_path VARCHAR(255);
+
+SHOW TABLES; 
