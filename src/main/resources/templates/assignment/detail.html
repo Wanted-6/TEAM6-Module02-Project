@@ -81,7 +81,7 @@
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     이전
                 </a>
-                <a th:href="@{/courses/{courseId}(courseId=${courseId}, role=${role})}"
+                <a th:href="@{/courses/{courseId}(courseId=${courseId})}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     코스 상세
                 </a>
@@ -121,13 +121,13 @@
 
             <div class="flex flex-wrap gap-2">
                 <a th:if="${role == 'INSTRUCTOR'}"
-                   th:href="@{/courses/{courseId}/assignment/modify(courseId=${courseId}, role='INSTRUCTOR')}"
+                   th:href="@{/courses/{courseId}/assignment/modify(courseId=${courseId})}"
                    class="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     과제 수정
                 </a>
 
                 <a th:if="${role == 'INSTRUCTOR'}"
-                   th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId}, role='INSTRUCTOR')}"
+                   th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId})}"
                    class="rounded-full border border-[#cdd8f6] bg-brandSoft px-5 py-2 text-sm font-semibold text-brand transition hover:bg-[#dfe8ff]">
                     제출 현황 페이지
                 </a>
@@ -227,7 +227,7 @@
                     </td>
                     <td class="px-4 py-3">
                         <a th:if="${submission.submissionId != null}"
-                           th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId}, role='INSTRUCTOR')}"
+                           th:href="@{/submissions/{submissionId}(submissionId=${submission.submissionId})}"
                            class="rounded-full border border-slate-300 bg-white px-3 py-1 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                             보기
                         </a>

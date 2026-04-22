@@ -83,13 +83,13 @@
                 </a>
 
                 <a th:if="${role == 'INSTRUCTOR'}"
-                   th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId}, role='INSTRUCTOR')}"
+                   th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId})}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     제출 현황
                 </a>
 
                 <a th:if="${role == 'STUDENT'}"
-                   th:href="@{/courses/{courseId}/assignment(courseId=${courseId}, role='STUDENT')}"
+                   th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     과제 상세
                 </a>
@@ -114,7 +114,7 @@
             </div>
 
             <a th:if="${role == 'STUDENT'}"
-               th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId}, role='STUDENT')}"
+               th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId})}"
                class="rounded-full border border-[#cdd8f6] bg-brandSoft px-5 py-2 text-sm font-semibold text-brand transition hover:bg-[#dfe8ff]">
                 제출 수정
             </a>
@@ -163,19 +163,19 @@
 
         <div class="flex flex-wrap justify-end gap-3 pt-2">
             <a th:if="${role == 'INSTRUCTOR'}"
-               th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId}, role='INSTRUCTOR')}"
+               th:href="@{/courses/{courseId}/assignment/submissions(courseId=${courseId})}"
                class="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                 목록
             </a>
 
             <a th:if="${role == 'STUDENT'}"
-               th:href="@{/courses/{courseId}/assignment(courseId=${courseId}, role='STUDENT')}"
+               th:href="@{/courses/{courseId}/assignment(courseId=${courseId})}"
                class="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                 과제 상세
             </a>
 
             <a th:if="${role == 'STUDENT'}"
-               th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId}, role='STUDENT')}"
+               th:href="@{/submissions/{submissionId}/modify(submissionId=${submission.submissionId})}"
                class="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                 제출 수정
             </a>

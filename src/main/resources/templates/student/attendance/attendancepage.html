@@ -395,7 +395,7 @@
                     </div>
 
                     <form th:if="${attendancePage.assignment != null}"
-                          th:action="@{/courses/{courseId}/assignment/submissions(courseId=${attendancePage.courseId}, role='STUDENT')}"
+                            th:action="@{/courses/{courseId}/assignment/submissions(courseId=${attendancePage.courseId})}"
                           method="post"
                           enctype="multipart/form-data"
                           class="space-y-4">

@@ -566,7 +566,7 @@
         </section>
 
         <section th:if="${dashboardRole == 'INSTRUCTOR'}" class="mb-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            <a th:href="@{/courses(role='INSTRUCTOR')}" class="menu-card rounded-[26px] border border-line bg-white p-6">
+                        <a th:href="@{/courses}" class="menu-card rounded-[26px] border border-line bg-white p-6">
                 <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brandSoft text-brand">
                     <span class="material-symbols-outlined text-3xl">menu_book</span>
                 </div>
@@ -875,7 +875,7 @@
         }
 
         if (isInstructorDashboard) {
-            return `/courses/${courseId}?role=INSTRUCTOR`;
+                                    return `/courses/${courseId}`;
         }
 
         return null;
