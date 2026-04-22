@@ -27,7 +27,6 @@ public class StudentCourseController {
                                 Model model) {
         Integer studentId = requireMemberId(memberId);
 
-        model.addAttribute("memberId", memberId);
         model.addAttribute("courseList", courseService.findMyCourses(studentId));
         return "student/course/my-classroom";
     }

@@ -81,7 +81,7 @@
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     이전
                 </a>
-                <a th:href="@{/courses/{courseId}(courseId=${course.courseId}, role='INSTRUCTOR')}"
+                <a th:href="@{/courses/{courseId}(courseId=${course.courseId})}"
                    class="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#223374]">
                     코스 상세
                 </a>
@@ -97,7 +97,7 @@
          class="mb-6 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-green-700"
          th:text="${successMessage}"></div>
 
-    <form th:action="@{/courses/{courseId}/modify(courseId=${course.courseId}, role='INSTRUCTOR')}"
+            <form th:action="@{/courses/{courseId}/modify(courseId=${course.courseId})}"
           method="post"
           enctype="multipart/form-data"
           class="rounded-[28px] border border-slate-200 bg-white p-8 shadow-sm space-y-6">
@@ -177,7 +177,7 @@
         </div>
 
         <div class="flex flex-wrap justify-end gap-3 pt-2">
-            <a th:href="@{/courses/{courseId}(courseId=${course.courseId}, role='INSTRUCTOR')}"
+                <a th:href="@{/courses/{courseId}(courseId=${course.courseId})}"
                class="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                 취소
             </a>

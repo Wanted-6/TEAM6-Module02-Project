@@ -1,6 +1,5 @@
 package com.wanted.projectmodule2lms.domain.calendar.controller;
 
-import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarEventDTO;
 import com.wanted.projectmodule2lms.domain.calendar.model.dto.CalendarMemoCreateDTO;
 import com.wanted.projectmodule2lms.domain.calendar.model.service.CalenderService;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+
 
 @Controller
 @RequiredArgsConstructor

@@ -25,7 +25,6 @@ public class StudentSectionController {
                                  Model model) {
         Integer studentId = requireMemberId(memberId);
 
-        model.addAttribute("memberId", memberId);
         model.addAttribute("courseId", courseId);
         model.addAttribute("sectionList", sectionService.findMySections(studentId, courseId));
         return "student/section/list";
@@ -39,7 +38,6 @@ public class StudentSectionController {
                                       Model model) {
         Integer studentId = requireMemberId(memberId);
 
-        model.addAttribute("memberId", memberId);
         model.addAttribute("courseId", courseId);
         model.addAttribute("section", sectionService.findMySectionDetail(studentId, courseId, sectionId));
         return "student/section/detail";

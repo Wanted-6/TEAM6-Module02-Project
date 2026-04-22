@@ -81,7 +81,7 @@
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     이전
                 </a>
-                <a th:href="@{/courses/{courseId}(courseId=${courseId}, role='INSTRUCTOR')}"
+                <a th:href="@{/courses/{courseId}(courseId=${courseId})}"
                    class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                     코스 상세
                 </a>
@@ -137,7 +137,7 @@
         </div>
 
         <div class="flex flex-wrap justify-end gap-3 pt-2">
-            <a th:href="@{/courses/{courseId}(courseId=${courseId}, role='INSTRUCTOR')}"
+                <a th:href="@{/courses/{courseId}(courseId=${courseId})}"
                class="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-brand hover:text-brand">
                 취소
             </a>
