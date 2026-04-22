@@ -1,4 +1,4 @@
-package com.wanted.projectmodule2lms.domain.course.service;
+package com.wanted.projectmodule2lms.domain.course.model.service;
 
 import com.wanted.projectmodule2lms.domain.assignment.model.dao.AssignmentRepository;
 import com.wanted.projectmodule2lms.domain.course.model.dao.CourseRepository;

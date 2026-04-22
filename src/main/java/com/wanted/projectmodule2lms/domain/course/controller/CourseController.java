@@ -2,7 +2,7 @@ package com.wanted.projectmodule2lms.domain.course.controller;
 
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseCreateDTO;
 import com.wanted.projectmodule2lms.domain.course.model.dto.CourseUpdateDTO;
-import com.wanted.projectmodule2lms.domain.course.service.CourseService;
+import com.wanted.projectmodule2lms.domain.course.model.service.CourseService;
 import com.wanted.projectmodule2lms.domain.member.model.entity.MemberRole;
 import com.wanted.projectmodule2lms.global.annotation.AuditLog;
 import com.wanted.projectmodule2lms.global.annotation.LoginMemberId;
